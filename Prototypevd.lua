@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.1: Minimalist BD 🎸 ]] --
--- Update: Compact Main Frame + Scrolling System (Fixed UI)
+-- [[ BoDcChii Project - v4.2: Elite Survival 🎸 ]] --
+-- Update: New [ SURVIVAL SKILLS ] + Scrolling System Optimized
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -27,7 +27,7 @@ local function ShowWelcome()
 end
 ShowWelcome()
 
--- Bersihkan versi sebelumnya
+-- Clean up
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then
     CoreGui.BoDcChii_Minimalist:Destroy()
 end
@@ -60,9 +60,9 @@ Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(OpenButton)
 
--- --- 2. MAIN FRAME (COMPACT VERSION) ---
+-- --- 2. MAIN FRAME ---
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 240, 0, 200) -- DIKECILIN BIAR JADI PERSEGI PANJANG
+MainFrame.Size = UDim2.new(0, 240, 0, 220) -- Tetap Minimalis Persegi Panjang
 MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
@@ -75,18 +75,13 @@ Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Heade
 
 -- --- 3. SCROLLING CONTAINER ---
 local ScrollFrame = Instance.new("ScrollingFrame", MainFrame)
-ScrollFrame.Size = UDim2.new(1, -10, 1, -45)
-ScrollFrame.Position = UDim2.new(0, 5, 0, 40)
-ScrollFrame.BackgroundTransparency = 1
-ScrollFrame.ScrollBarThickness = 3
-ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 400) -- Bisa geser ke bawah
-ScrollFrame.BorderSizePixel = 0
+ScrollFrame.Size = UDim2.new(1, -10, 1, -45); ScrollFrame.Position = UDim2.new(0, 5, 0, 40)
+ScrollFrame.BackgroundTransparency = 1; ScrollFrame.ScrollBarThickness = 3
+ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180); ScrollFrame.BorderSizePixel = 0
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0) -- Auto adjust nanti
 
 local UIList = Instance.new("UIListLayout", ScrollFrame)
-UIList.SortOrder = Enum.SortOrder.LayoutOrder
-UIList.Padding = UDim.new(0, 5)
-UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIList.SortOrder = Enum.SortOrder.LayoutOrder; UIList.Padding = UDim.new(0, 5); UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 -- --- FUNGSI CREATE BUTTON ---
 local function CreateBtn(parent, text)
@@ -98,11 +93,9 @@ local function CreateBtn(parent, text)
     return btn
 end
 
--- --- 4. CATEGORY 1 ---
+-- --- 4. CATEGORY 1: [ PLAYER & OBJECTIVE ] ---
 local Cat1Btn = Instance.new("TextButton", ScrollFrame)
-Cat1Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat1Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Cat1Btn.Text = "[ PLAYER & OBJECTIVE ]  +"; Cat1Btn.TextColor3 = Color3.new(1, 1, 1)
-Cat1Btn.Font = Enum.Font.SourceSansBold; Cat1Btn.TextSize = 14; Instance.new("UICorner", Cat1Btn)
+Cat1Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat1Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Cat1Btn.Text = "[ PLAYER & OBJECTIVE ]  +"; Cat1Btn.TextColor3 = Color3.new(1, 1, 1); Cat1Btn.Font = Enum.Font.SourceSansBold; Cat1Btn.TextSize = 14; Instance.new("UICorner", Cat1Btn)
 
 local Feature1Frame = Instance.new("Frame", ScrollFrame)
 Feature1Frame.Size = UDim2.new(0.95, 0, 0, 120); Feature1Frame.BackgroundTransparency = 1; Feature1Frame.Visible = false
@@ -113,11 +106,21 @@ local SurvBtn = CreateBtn(Feature1Frame, "ESP SURVIVAL")
 local KillBtn = CreateBtn(Feature1Frame, "ESP KILLER")
 local GenBtn = CreateBtn(Feature1Frame, "ESP GENERATOR")
 
--- --- 5. CATEGORY 2 ---
+-- --- 5. CATEGORY 2: [ SURVIVAL SKILLS ] (NEW!) ---
+local Cat3Btn = Instance.new("TextButton", ScrollFrame)
+Cat3Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat3Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Cat3Btn.Text = "[ SURVIVAL SKILLS ]  +"; Cat3Btn.TextColor3 = Color3.new(1, 1, 1); Cat3Btn.Font = Enum.Font.SourceSansBold; Cat3Btn.TextSize = 14; Instance.new("UICorner", Cat3Btn)
+
+local Feature3Frame = Instance.new("Frame", ScrollFrame)
+Feature3Frame.Size = UDim2.new(0.95, 0, 0, 80); Feature3Frame.BackgroundTransparency = 1; Feature3Frame.Visible = false
+Instance.new("UIListLayout", Feature3Frame).Padding = UDim.new(0, 5)
+
+local _AutoSkill, _FastInteract = false, false
+local SkillBtn = CreateBtn(Feature3Frame, "PERFECT SKILLCHECK")
+local FastBtn = CreateBtn(Feature3Frame, "FAST INTERACT (30%)")
+
+-- --- 6. CATEGORY 3: [ SMOOTH MAPS ] ---
 local Cat2Btn = Instance.new("TextButton", ScrollFrame)
-Cat2Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat2Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Cat2Btn.Text = "[ SMOOTH MAPS ]  +"; Cat2Btn.TextColor3 = Color3.new(1, 1, 1)
-Cat2Btn.Font = Enum.Font.SourceSansBold; Cat2Btn.TextSize = 14; Instance.new("UICorner", Cat2Btn)
+Cat2Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat2Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Cat2Btn.Text = "[ SMOOTH MAPS ]  +"; Cat2Btn.TextColor3 = Color3.new(1, 1, 1); Cat2Btn.Font = Enum.Font.SourceSansBold; Cat2Btn.TextSize = 14; Instance.new("UICorner", Cat2Btn)
 
 local Feature2Frame = Instance.new("Frame", ScrollFrame)
 Feature2Frame.Size = UDim2.new(0.95, 0, 0, 80); Feature2Frame.BackgroundTransparency = 1; Feature2Frame.Visible = false
@@ -128,31 +131,23 @@ local BrightBtn = CreateBtn(Feature2Frame, "FULL BRIGHT")
 local FogBtn = CreateBtn(Feature2Frame, "NO FOG / MIST")
 
 -- --- LOGIKA DROPDOWN ---
-Cat1Btn.MouseButton1Click:Connect(function()
-    Feature1Frame.Visible = not Feature1Frame.Visible
-    Cat1Btn.Text = Feature1Frame.Visible and "[ PLAYER & OBJECTIVE ]  -" or "[ PLAYER & OBJECTIVE ]  +"
+local function RefreshScroll()
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y + 20)
-end)
-
-Cat2Btn.MouseButton1Click:Connect(function()
-    Feature2Frame.Visible = not Feature2Frame.Visible
-    Cat2Btn.Text = Feature2Frame.Visible and "[ SMOOTH MAPS ]  -" or "[ SMOOTH MAPS ]  +"
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y + 20)
-end)
-
--- --- 6. LOGIKA FITUR (CORE LOCKED) ---
-local function IsKiller(p)
-    local char = p.Character; if not char then return false end
-    if p.Team and (p.Team.Name:lower():find("killer") or p.Team.Name:lower():find("murder")) then return true end
-    local hum = char:FindFirstChild("Humanoid"); return hum and hum.MaxHealth > 100
 end
 
+Cat1Btn.MouseButton1Click:Connect(function() Feature1Frame.Visible = not Feature1Frame.Visible Cat1Btn.Text = Feature1Frame.Visible and "[ PLAYER & OBJECTIVE ]  -" or "[ PLAYER & OBJECTIVE ]  +" RefreshScroll() end)
+Cat3Btn.MouseButton1Click:Connect(function() Feature3Frame.Visible = not Feature3Frame.Visible Cat3Btn.Text = Feature3Frame.Visible and "[ SURVIVAL SKILLS ]  -" or "[ SURVIVAL SKILLS ]  +" RefreshScroll() end)
+Cat2Btn.MouseButton1Click:Connect(function() Feature2Frame.Visible = not Feature2Frame.Visible Cat2Btn.Text = Feature2Frame.Visible and "[ SMOOTH MAPS ]  -" or "[ SMOOTH MAPS ]  +" RefreshScroll() end)
+
+-- --- 7. LOGIKA FITUR (CORE LOCKED & ELITE) ---
 RunService.RenderStepped:Connect(function()
+    -- ESP & Visuals (Locked)
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
             hl.Name = "BDEsp"
-            if IsKiller(p) then hl.FillColor = Color3.fromRGB(255, 0, 0); hl.Enabled = _KillOn
+            local isKiller = (p.Team and (p.Team.Name:lower():find("killer") or p.Team.Name:lower():find("murder"))) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
+            if isKiller then hl.FillColor = Color3.fromRGB(255, 0, 0); hl.Enabled = _KillOn
             else hl.FillColor = Color3.fromRGB(0, 255, 0); hl.Enabled = _SurvOn end
         end
     end
@@ -164,9 +159,39 @@ RunService.RenderStepped:Connect(function()
     end
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.OutdoorAmbient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999; Lighting.FogStart = 999999 end
+
+    -- ELITE SKILLS: Perfect Skill Check (Bypass)
+    if _AutoSkill then
+        local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
+        if PlayerGui then
+            -- Deteksi UI Skillcheck (Mencari elemen bertema 'Bar' atau 'Indicator')
+            for _, v in pairs(PlayerGui:GetDescendants()) do
+                if v:IsA("Frame") and (v.Name:lower():find("skillcheck") or v.Name:lower():find("indicator")) then
+                    -- Trigger otomatis Perfect Success (Simulasi Klik)
+                    task.wait(0.05)
+                    UIS:SetInput(Enum.UserInputType.Keyboard, Enum.KeyCode.Space, true)
+                    task.wait()
+                    UIS:SetInput(Enum.UserInputType.Keyboard, Enum.KeyCode.Space, false)
+                end
+            end
+        end
+    end
+    
+    -- ELITE SKILLS: Fast Interact (30% Speed Boost)
+    if _FastInteract then
+        local hum = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+        if hum then
+            -- Mencari ProximityPrompt atau Bar Interaksi
+            for _, prompt in pairs(game.Workspace:GetDescendants()) do
+                if prompt:IsA("ProximityPrompt") then
+                    prompt.HoldDuration = prompt.HoldDuration * 0.7 -- Mengurangi waktu tunggu 30%
+                end
+            end
+        end
+    end
 end)
 
--- --- 7. INTERAKSI TOMBOL ---
+-- --- 8. INTERAKSI TOMBOL ---
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
     btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
@@ -175,8 +200,12 @@ end
 SurvBtn.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(SurvBtn, _SurvOn, "ESP SURVIVAL") end)
 KillBtn.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(KillBtn, _KillOn, "ESP KILLER") end)
 GenBtn.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(GenBtn, _GenOn, "ESP GENERATOR") end)
+
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
+
+SkillBtn.MouseButton1Click:Connect(function() _AutoSkill = not _AutoSkill Toggle(SkillBtn, _AutoSkill, "PERFECT SKILLCHECK") end)
+FastBtn.MouseButton1Click:Connect(function() _FastInteract = not _FastInteract Toggle(FastBtn, _FastInteract, "FAST INTERACT (30%)") end)
 
 OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 local Exit = Instance.new("TextButton", MainFrame)
