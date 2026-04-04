@@ -1,10 +1,28 @@
 -- [[ BoDcChii Project - v4.1: Minimalist BD 🎸 ]] --
--- Update: Dropdown Category (Player & Objective) + UI Refined
+-- Update: Added Welcome Notification (1.5s) + Locked v4.1 Core
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+
+-- --- 0. NOTIFIKASI WELCOME (Muncul 1.5 Detik) ---
+local WelcomeGui = Instance.new("ScreenGui", CoreGui)
+local WelcomeLabel = Instance.new("TextLabel", WelcomeGui)
+WelcomeLabel.Size = UDim2.new(0, 300, 0, 50)
+WelcomeLabel.Position = UDim2.new(0.5, -150, 0.2, 0)
+WelcomeLabel.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+WelcomeLabel.Text = "Welcome To Script BoDcChii"
+WelcomeLabel.TextColor3 = Color3.fromRGB(255, 105, 180)
+WelcomeLabel.TextSize = 20
+WelcomeLabel.Font = Enum.Font.SourceSansBold
+Instance.new("UICorner", WelcomeLabel)
+Instance.new("UIStroke", WelcomeLabel).Color = Color3.fromRGB(255, 105, 180)
+
+-- Hilangkan notif setelah 1.5 detik
+task.delay(1.5, function()
+    WelcomeGui:Destroy()
+end)
 
 -- Bersihkan versi sebelumnya
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then
@@ -55,7 +73,7 @@ EnableDrag(OpenButton)
 
 -- --- 2. MAIN FRAME ---
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 240, 0, 300) -- Ukuran default
+MainFrame.Size = UDim2.new(0, 240, 0, 300)
 MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.Visible = false
@@ -88,7 +106,7 @@ local FeatureFrame = Instance.new("Frame", MainFrame)
 FeatureFrame.Size = UDim2.new(0.9, 0, 0, 140)
 FeatureFrame.Position = UDim2.new(0.05, 0, 0, 85)
 FeatureFrame.BackgroundTransparency = 1
-FeatureFrame.Visible = false -- Tertutup secara default
+FeatureFrame.Visible = false 
 
 -- --- 4. ISI FITUR (ESP) ---
 local _SurvOn, _KillOn, _GenOn = false, false, false
@@ -111,7 +129,7 @@ local SurvBtn = CreateBtn(UDim2.new(0, 0, 0, 5), "ESP SURVIVAL")
 local KillBtn = CreateBtn(UDim2.new(0, 0, 0, 45), "ESP KILLER")
 local GenBtn = CreateBtn(UDim2.new(0, 0, 0, 85), "ESP GENERATOR")
 
--- --- 5. LOGIKA DROPDOWN (BUKA/TUTUP TABEL) ---
+-- --- 5. LOGIKA DROPDOWN ---
 local isOpen = false
 CategoryBtn.MouseButton1Click:Connect(function()
     isOpen = not isOpen
@@ -159,7 +177,7 @@ SurvBtn.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(SurvBt
 KillBtn.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(KillBtn, _KillOn, "ESP KILLER") end)
 GenBtn.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(GenBtn, _GenOn, "ESP GENERATOR") end)
 
--- Tombol Utama Buka/Tutup Seluruh Menu
+-- Buka/Tutup Seluruh Menu
 OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 local Exit = Instance.new("TextButton", MainFrame)
 Exit.Size = UDim2.new(0, 25, 0, 25); Exit.Position = UDim2.new(1, -30, 0, 7); Exit.Text = "X"
