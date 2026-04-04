@@ -1,39 +1,47 @@
 -- [[ BoDcChii Project - v4.1: Minimalist BD 🎸 ]] --
--- Update: Fixed Welcome Notification + Core Locked
+-- Update: Ultra-Clear Welcome Notif + Locked Core
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
--- --- 0. FIX NOTIFIKASI WELCOME (Muncul Paling Depan) ---
+-- --- 0. NOTIFIKASI WELCOME (Highlight Text Edition) ---
 local function ShowWelcome()
     local WelcomeGui = Instance.new("ScreenGui", CoreGui)
     WelcomeGui.Name = "BoDcChii_Welcome"
-    WelcomeGui.DisplayOrder = 999 -- Pastikan di atas segalanya
+    WelcomeGui.DisplayOrder = 999
     
     local WelcomeLabel = Instance.new("TextLabel", WelcomeGui)
-    WelcomeLabel.Size = UDim2.new(0, 280, 0, 45)
-    WelcomeLabel.Position = UDim2.new(0.5, -140, 0.15, 0) -- Agak ke atas dikit
-    WelcomeLabel.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    WelcomeLabel.Size = UDim2.new(0, 300, 0, 50)
+    WelcomeLabel.Position = UDim2.new(0.5, -150, 0.15, 0)
+    WelcomeLabel.BackgroundColor3 = Color3.fromRGB(10, 10, 10) -- Background Gelap Total
+    WelcomeLabel.BackgroundTransparency = 0.2 -- Sedikit Transparan agar elegan
     WelcomeLabel.Text = "Welcome To Script BoDcChii"
-    WelcomeLabel.TextColor3 = Color3.fromRGB(255, 105, 180)
-    WelcomeLabel.TextSize = 18
+    WelcomeLabel.TextColor3 = Color3.fromRGB(255, 105, 180) -- PINK CERAH
+    WelcomeLabel.TextSize = 20
     WelcomeLabel.Font = Enum.Font.SourceSansBold
     WelcomeLabel.ZIndex = 1000
     
-    Instance.new("UICorner", WelcomeLabel).CornerRadius = UDim.new(0, 8)
-    local Stroke = Instance.new("UIStroke", WelcomeLabel)
-    Stroke.Color = Color3.fromRGB(255, 105, 180)
-    Stroke.Thickness = 2
+    -- EFEK HIGHLIGHT (Black Outline agar teks Pink terlihat jelas)
+    local TextStroke = Instance.new("UIStroke", WelcomeLabel)
+    TextStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+    TextStroke.Color = Color3.fromRGB(0, 0, 0)
+    TextStroke.Thickness = 2.5 -- Garis tepi hitam tebal
+    
+    -- Border Label Pink
+    local BorderStroke = Instance.new("UIStroke", WelcomeLabel)
+    BorderStroke.Color = Color3.fromRGB(255, 105, 180)
+    BorderStroke.Thickness = 2
+    
+    Instance.new("UICorner", WelcomeLabel).CornerRadius = UDim.new(0, 10)
 
-    -- Hapus otomatis setelah 1.5 detik
     task.delay(1.5, function()
         WelcomeGui:Destroy()
     end)
 end
 
-ShowWelcome() -- Panggil notifikasi segera
+ShowWelcome()
 
 -- --- BERSIHKAN VERSI LAMA ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then
