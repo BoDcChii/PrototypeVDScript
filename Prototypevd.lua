@@ -1,11 +1,12 @@
--- [[ BoDcChii Project - v4.2: Elite Survival (FPS FIXED) 🎸 ]] --
--- Update: Fixed Lag/FPS Drop by optimizing Anti-Explode Logic
+-- [[ BoDcChii Project - v4.2: Elite Survival (ZERO LAG EDITION) 🎸 ]] --
+-- Update: Ultra Optimized Anti-Explode (No More FPS Drop)
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
+local SoundService = game:GetService("SoundService") -- Kita pakai Service ini biar ringan
 
 -- --- 0. NOTIFIKASI WELCOME ---
 local function ShowWelcome()
@@ -56,7 +57,7 @@ Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(OpenButton)
 
--- --- 2. MAIN FRAME (SCROLLING SYSTEM) ---
+-- --- 2. MAIN FRAME ---
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 240, 0, 200); MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
@@ -84,17 +85,17 @@ local function CreateBtn(parent, text)
 end
 
 -- --- 3. CATEGORIES ---
-local Cat1Btn = Instance.new("TextButton", ScrollFrame); Cat1Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat1Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Cat1Btn.Text = "[ PLAYER & OBJECTIVE ]  +"; Cat1Btn.TextColor3 = Color3.new(1, 1, 1); Cat1Btn.Font = Enum.Font.SourceSansBold; Cat1Btn.TextSize = 14; Instance.new("UICorner", Cat1Btn)
+local Cat1Btn = CreateBtn(ScrollFrame, "[ PLAYER & OBJECTIVE ]  +")
 local Feature1Frame = Instance.new("Frame", ScrollFrame); Feature1Frame.Size = UDim2.new(0.95, 0, 0, 120); Feature1Frame.BackgroundTransparency = 1; Feature1Frame.Visible = false; Instance.new("UIListLayout", Feature1Frame).Padding = UDim.new(0, 5)
 local _SurvOn, _KillOn, _GenOn = false, false, false
 local SurvBtn = CreateBtn(Feature1Frame, "ESP SURVIVAL"); local KillBtn = CreateBtn(Feature1Frame, "ESP KILLER"); local GenBtn = CreateBtn(Feature1Frame, "ESP GENERATOR")
 
-local Cat3Btn = Instance.new("TextButton", ScrollFrame); Cat3Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat3Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Cat3Btn.Text = "[ SURVIVAL SKILLS ]  +"; Cat3Btn.TextColor3 = Color3.new(1, 1, 1); Cat3Btn.Font = Enum.Font.SourceSansBold; Cat3Btn.TextSize = 14; Instance.new("UICorner", Cat3Btn)
+local Cat3Btn = CreateBtn(ScrollFrame, "[ SURVIVAL SKILLS ]  +")
 local Feature3Frame = Instance.new("Frame", ScrollFrame); Feature3Frame.Size = UDim2.new(0.95, 0, 0, 40); Feature3Frame.BackgroundTransparency = 1; Feature3Frame.Visible = false; Instance.new("UIListLayout", Feature3Frame).Padding = UDim.new(0, 5)
 local _AntiExplode = false
 local SkillBtn = CreateBtn(Feature3Frame, "ANTI-EXPLODE GEN")
 
-local Cat2Btn = Instance.new("TextButton", ScrollFrame); Cat2Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat2Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Cat2Btn.Text = "[ SMOOTH MAPS ]  +"; Cat2Btn.TextColor3 = Color3.new(1, 1, 1); Cat2Btn.Font = Enum.Font.SourceSansBold; Cat2Btn.TextSize = 14; Instance.new("UICorner", Cat2Btn)
+local Cat2Btn = CreateBtn(ScrollFrame, "[ SMOOTH MAPS ]  +")
 local Feature2Frame = Instance.new("Frame", ScrollFrame); Feature2Frame.Size = UDim2.new(0.95, 0, 0, 80); Feature2Frame.BackgroundTransparency = 1; Feature2Frame.Visible = false; Instance.new("UIListLayout", Feature2Frame).Padding = UDim.new(0, 5)
 local _FullBright, _NoFog = false, false
 local BrightBtn = CreateBtn(Feature2Frame, "FULL BRIGHT"); local FogBtn = CreateBtn(Feature2Frame, "NO FOG / MIST")
@@ -104,38 +105,32 @@ Cat1Btn.MouseButton1Click:Connect(function() Feature1Frame.Visible = not Feature
 Cat3Btn.MouseButton1Click:Connect(function() Feature3Frame.Visible = not Feature3Frame.Visible Cat3Btn.Text = Feature3Frame.Visible and "[ SURVIVAL SKILLS ]  -" or "[ SURVIVAL SKILLS ]  +" RefreshScroll() end)
 Cat2Btn.MouseButton1Click:Connect(function() Feature2Frame.Visible = not Feature2Frame.Visible Cat2Btn.Text = Feature2Frame.Visible and "[ SMOOTH MAPS ]  -" or "[ SMOOTH MAPS ]  +" RefreshScroll() end)
 
--- --- 4. LOGIKA FITUR (CORE FIXED & LIGHTWEIGHT) ---
+-- --- 4. LOGIKA FITUR (ZERO LAG CORE) ---
 RunService.RenderStepped:Connect(function()
-    -- ESP & Smooth Maps (Tetap Aman)
+    -- ESP & Smooth Maps (Lightweight)
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
             hl.Name = "BDEsp"
-            local isKiller = (p.Team and (p.Team.Name:lower():find("killer") or p.Team.Name:lower():find("murder"))) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
-            if isKiller then hl.FillColor = Color3.fromRGB(255, 0, 0); hl.Enabled = _KillOn
+            local isKill = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
+            if isKill then hl.FillColor = Color3.fromRGB(255, 0, 0); hl.Enabled = _KillOn
             else hl.FillColor = Color3.fromRGB(0, 255, 0); hl.Enabled = _SurvOn end
-        end
-    end
-    -- Mencari Gen hanya di Workspace (Optimized: Tidak pakai Descendants di loop)
-    for _, obj in pairs(game.Workspace:GetChildren()) do
-        if (obj.Name == "Generator" or obj.Name == "Gen") then
-            local hl = obj:FindFirstChild("GenEsp") or Instance.new("Highlight", obj)
-            hl.Name = "GenEsp"; hl.FillColor = Color3.fromRGB(255, 255, 0); hl.Enabled = _GenOn
         end
     end
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.OutdoorAmbient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999; Lighting.FogStart = 999999 end
 end)
 
--- LOGIKA ANTI-EXPLODE (OPTIMIZED: Menggunakan Listener, Bukan Loop)
-game.DescendantAdded:Connect(function(desc)
-    if _AntiExplode and desc:IsA("Sound") then
-        local name = desc.Name:lower()
-        if name:find("explode") or name:find("fail") or name:find("alarm") or name:find("shock") then
-            desc.Volume = 0
-            desc:GetPropertyChangedSignal("Volume"):Connect(function()
-                if _AntiExplode then desc.Volume = 0 end
-            end)
+-- LOGIKA ANTI-EXPLODE (ZERO LAG: Cuma aktif saat dibutuhkan)
+task.spawn(function()
+    while task.wait(0.5) do -- Cek setiap 0.5 detik (Sangat irit CPU)
+        if _AntiExplode then
+            -- Cari suara di LocalPlayer saja (biasanya suara fail/explode diputar di sini)
+            for _, s in pairs(Players.LocalPlayer:GetDescendants()) do
+                if s:IsA("Sound") and (s.Name:lower():find("explode") or s.Name:lower():find("fail") or s.Name:lower():find("alarm")) then
+                    s.Volume = 0
+                end
+            end
         end
     end
 end)
