@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.2: TRUE SURVIVAL FIX 🎸 ]] --
--- Update: Moved Gen ESP to Survival Category (Fixed) + Scrollable
+-- [[ BoDcChii Project - v4.9: THE LOCKED MASTER 🎸 ]] --
+-- Update: Restored 2-Second Welcome UI + All Features Locked
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -9,6 +9,28 @@ local Lighting = game:GetService("Lighting")
 
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
+if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
+
+-- --- 1. WELCOME NOTIFICATION (2 DETIK) ---
+local function ShowWelcome()
+    local WelcomeGui = Instance.new("ScreenGui", CoreGui)
+    WelcomeGui.Name = "BoDcChii_Welcome"
+    local WelcomeFrame = Instance.new("Frame", WelcomeGui)
+    WelcomeFrame.Size = UDim2.new(0, 220, 0, 45)
+    WelcomeFrame.Position = UDim2.new(0.5, -110, 0.1, 0) -- Muncul di tengah atas
+    WelcomeFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    Instance.new("UICorner", WelcomeFrame).CornerRadius = UDim.new(0, 10)
+    local Stroke = Instance.new("UIStroke", WelcomeFrame)
+    Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
+    
+    local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
+    WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
+    WelcomeLabel.Text = "Welcome To BoDcChii Project"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
+    
+    task.delay(2, function() WelcomeGui:Destroy() end)
+end
+pcall(ShowWelcome)
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
@@ -30,7 +52,7 @@ local function EnableDrag(gui)
     UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end end)
 end
 
--- --- 1. ICON "BD" ---
+-- --- 2. ICON "BD" ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 50, 0, 50); OpenButton.Position = UDim2.new(0, 20, 0.5, -25)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD" 
@@ -40,7 +62,7 @@ Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(OpenButton)
 
--- --- 2. MAIN FRAME ---
+-- --- 3. MAIN FRAME ---
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 240, 0, 240); MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
@@ -82,16 +104,16 @@ local function CreateFrame(size)
     return f
 end
 
--- --- 3. CATEGORIES & FEATURES (FIXED POSITION) ---
+-- --- 4. CATEGORIES & FEATURES (FIXED) ---
 
--- Cat 1: PLAYER ESP (Hanya Survival & Killer)
+-- Cat 1: PLAYER ESP
 local Cat1 = CreateCat("PLAYER ESP")
 local Frame1 = CreateFrame(80)
 local _SurvOn, _KillOn = false, false
 local SurvBtn = CreateBtn(Frame1, "ESP SURVIVAL")
 local KillBtn = CreateBtn(Frame1, "ESP KILLER")
 
--- Cat 2: SURVIVAL SKILLS (ESP Generator Pindah Sini!)
+-- Cat 2: SURVIVAL SKILLS (Isi: Gen & No Skill)
 local Cat2 = CreateCat("SURVIVAL SKILLS")
 local Frame2 = CreateFrame(80)
 local _GenOn, _NoSkillGen = false, false
@@ -110,7 +132,7 @@ Cat1.MouseButton1Click:Connect(function() Frame1.Visible = not Frame1.Visible Ca
 Cat2.MouseButton1Click:Connect(function() Frame2.Visible = not Frame2.Visible Cat2.Text = Frame2.Visible and "[ SURVIVAL SKILLS ]  -" or "[ SURVIVAL SKILLS ]  +" Refresh() end)
 Cat3.MouseButton1Click:Connect(function() Frame3.Visible = not Frame3.Visible Cat3.Text = Frame3.Visible and "[ SMOOTH MAPS ]  -" or "[ SMOOTH MAPS ]  +" Refresh() end)
 
--- --- 4. LOGIKA FITUR ---
+-- --- 5. LOGIKA FITUR ---
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
     btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
@@ -146,7 +168,6 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- METATABLE HOOK
 local mt = getrawmetatable(game)
 if mt then
     local old = mt.__namecall
