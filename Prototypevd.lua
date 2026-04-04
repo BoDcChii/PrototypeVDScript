@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.4: Official Edition 🎸 ]] --
--- Update: Renamed Feature to "No Skill Check Generator" + Optimization
+-- [[ BoDcChii Project - v4.3: Ghost Repair (ULTRA SAFE) 🎸 ]] --
+-- Update: Remote Shield (Blocking Skillcheck Fail Events)
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -90,4 +90,74 @@ local _SurvOn, _KillOn, _GenOn = false, false, false
 local SurvBtn = CreateBtn(Feature1Frame, "ESP SURVIVAL"); local KillBtn = CreateBtn(Feature1Frame, "ESP KILLER"); local GenBtn = CreateBtn(Feature1Frame, "ESP GENERATOR")
 
 local Cat3Btn = CreateBtn(ScrollFrame, "[ SURVIVAL SKILLS ]  +")
-local Feature3Frame = Instance.new("Frame", ScrollFrame); Feature3Frame.Size = UDim2.new(0.95, 0, 0, 40); Feature3Frame.BackgroundTransparency = 1; Feature3Frame
+local Feature3Frame = Instance.new("Frame", ScrollFrame); Feature3Frame.Size = UDim2.new(0.95, 0, 0, 40); Feature3Frame.BackgroundTransparency = 1; Feature3Frame.Visible = false; Instance.new("UIListLayout", Feature3Frame).Padding = UDim.new(0, 5)
+local _GhostRepair = false
+local SkillBtn = CreateBtn(Feature3Frame, "GHOST REPAIR (ANTI-FAIL)")
+
+local Cat2Btn = CreateBtn(ScrollFrame, "[ SMOOTH MAPS ]  +")
+local Feature2Frame = Instance.new("Frame", ScrollFrame); Feature2Frame.Size = UDim2.new(0.95, 0, 0, 80); Feature2Frame.BackgroundTransparency = 1; Feature2Frame.Visible = false; Instance.new("UIListLayout", Feature2Frame).Padding = UDim.new(0, 5)
+local _FullBright, _NoFog = false, false
+local BrightBtn = CreateBtn(Feature2Frame, "FULL BRIGHT"); local FogBtn = CreateBtn(Feature2Frame, "NO FOG / MIST")
+
+local function RefreshScroll() ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y + 20) end
+Cat1Btn.MouseButton1Click:Connect(function() Feature1Frame.Visible = not Feature1Frame.Visible RefreshScroll() end)
+Cat3Btn.MouseButton1Click:Connect(function() Feature3Frame.Visible = not Feature3Frame.Visible RefreshScroll() end)
+Cat2Btn.MouseButton1Click:Connect(function() Feature2Frame.Visible = not Feature2Frame.Visible RefreshScroll() end)
+
+-- --- 4. LOGIKA FITUR (GHOST CORE) ---
+RunService.RenderStepped:Connect(function()
+    -- ESP & Smooth Maps (Locked)
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= Players.LocalPlayer and p.Character then
+            local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
+            hl.Name = "BDEsp"
+            local isKill = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
+            if isKill then hl.FillColor = Color3.fromRGB(255, 0, 0); hl.Enabled = _KillOn
+            else hl.FillColor = Color3.fromRGB(0, 255, 0); hl.Enabled = _SurvOn end
+        end
+    end
+    for _, obj in pairs(game.Workspace:GetChildren()) do
+        if obj.Name == "Generator" or obj.Name == "Gen" then
+            local hl = obj:FindFirstChild("GenEsp") or Instance.new("Highlight", obj)
+            hl.Name = "GenEsp"; hl.FillColor = Color3.fromRGB(255, 255, 0); hl.Enabled = _GenOn
+        end
+    end
+    if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.OutdoorAmbient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
+    if _NoFog then Lighting.FogEnd = 999999; Lighting.FogStart = 999999 end
+end)
+
+-- LOGIKA REMOTE SHIELD (BLOCKING FAIL EVENTS)
+local mt = getrawmetatable(game)
+local oldNamecall = mt.__namecall
+setreadonly(mt, false)
+
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+    
+    if _GhostRepair and (method == "FireServer" or method == "InvokeServer") then
+        local remoteName = tostring(self):lower()
+        -- Memblokir Remote yang berisi kata kunci 'Gagal' atau 'SkillCheck'
+        if remoteName:find("fail") or remoteName:find("skillcheck") or remoteName:find("explode") then
+            return -- Abaikan sinyal, Server tidak akan tahu kalau kamu gagal
+        end
+    end
+    return oldNamecall(self, unpack(args))
+end)
+setreadonly(mt, true)
+
+-- --- 5. INTERAKSI TOMBOL ---
+local function Toggle(btn, state, txt)
+    btn.Text = txt .. (state and ": ON" or ": OFF")
+    btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
+end
+
+SurvBtn.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(SurvBtn, _SurvOn, "ESP SURVIVAL") end)
+KillBtn.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(KillBtn, _KillOn, "ESP KILLER") end)
+GenBtn.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(GenBtn, _GenOn, "ESP GENERATOR") end)
+BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
+FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
+SkillBtn.MouseButton1Click:Connect(function() _GhostRepair = not _GhostRepair Toggle(SkillBtn, _GhostRepair, "GHOST REPAIR (ANTI-FAIL)") end)
+
+OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+local Exit = Instance.new("TextButton", MainFrame); Exit.Size = UDim2.new(0, 25, 0, 25); Exit.Position = UDim2.new(1, -30, 0, 5); Exit.Text = "X"; Exit.BackgroundColor3 = Color3.fromRGB(200, 50, 50); Exit.TextColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", Exit).CornerRadius = UDim.new(1, 0); Exit.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
