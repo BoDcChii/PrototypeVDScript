@@ -1,5 +1,5 @@
 -- [[ BoDcChii Project - v4.1: Minimalist BD 🎸 ]] --
--- Update: Fixed Smooth Maps Button Visibility + Auto Layout
+-- Update: Compact Main Frame + Scrolling System (Fixed UI)
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -60,9 +60,9 @@ Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(OpenButton)
 
--- --- 2. MAIN FRAME ---
+-- --- 2. MAIN FRAME (COMPACT VERSION) ---
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 240, 0, 380) -- Ukuran Frame Utama
+MainFrame.Size = UDim2.new(0, 240, 0, 200) -- DIKECILIN BIAR JADI PERSEGI PANJANG
 MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
@@ -70,80 +70,77 @@ Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(MainFrame)
 
 local Header = Instance.new("TextLabel", MainFrame)
-Header.Size = UDim2.new(1, 0, 0, 40); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
+Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 18
 
+-- --- 3. SCROLLING CONTAINER ---
+local ScrollFrame = Instance.new("ScrollingFrame", MainFrame)
+ScrollFrame.Size = UDim2.new(1, -10, 1, -45)
+ScrollFrame.Position = UDim2.new(0, 5, 0, 40)
+ScrollFrame.BackgroundTransparency = 1
+ScrollFrame.ScrollBarThickness = 3
+ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 400) -- Bisa geser ke bawah
+ScrollFrame.BorderSizePixel = 0
+
+local UIList = Instance.new("UIListLayout", ScrollFrame)
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+UIList.Padding = UDim.new(0, 5)
+UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
 -- --- FUNGSI CREATE BUTTON ---
-local function CreateBtn(parent, pos, text)
+local function CreateBtn(parent, text)
     local btn = Instance.new("TextButton", parent)
-    btn.Size = UDim2.new(1, 0, 0, 35); btn.Position = pos
+    btn.Size = UDim2.new(0.95, 0, 0, 35)
     btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); btn.Text = text .. ": OFF"; btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.SourceSansBold; Instance.new("UICorner", btn)
     local s = Instance.new("UIStroke", btn); s.Color = Color3.fromRGB(200, 50, 50)
     return btn
 end
 
--- --- 3. TABEL 1: [ PLAYER & OBJECTIVE ] ---
-local Category1Btn = Instance.new("TextButton", MainFrame)
-Category1Btn.Size = UDim2.new(0.9, 0, 0, 35); Category1Btn.Position = UDim2.new(0.05, 0, 0, 45)
-Category1Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Category1Btn.Text = "[ PLAYER & OBJECTIVE ]  +"
-Category1Btn.TextColor3 = Color3.new(1, 1, 1); Category1Btn.Font = Enum.Font.SourceSansBold; Category1Btn.TextSize = 14
-Instance.new("UICorner", Category1Btn)
+-- --- 4. CATEGORY 1 ---
+local Cat1Btn = Instance.new("TextButton", ScrollFrame)
+Cat1Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat1Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Cat1Btn.Text = "[ PLAYER & OBJECTIVE ]  +"; Cat1Btn.TextColor3 = Color3.new(1, 1, 1)
+Cat1Btn.Font = Enum.Font.SourceSansBold; Cat1Btn.TextSize = 14; Instance.new("UICorner", Cat1Btn)
 
-local Feature1Frame = Instance.new("Frame", MainFrame)
-Feature1Frame.Size = UDim2.new(0.9, 0, 0, 130); Feature1Frame.Position = UDim2.new(0.05, 0, 0, 85)
-Feature1Frame.BackgroundTransparency = 1; Feature1Frame.Visible = false 
+local Feature1Frame = Instance.new("Frame", ScrollFrame)
+Feature1Frame.Size = UDim2.new(0.95, 0, 0, 120); Feature1Frame.BackgroundTransparency = 1; Feature1Frame.Visible = false
+Instance.new("UIListLayout", Feature1Frame).Padding = UDim.new(0, 5)
 
 local _SurvOn, _KillOn, _GenOn = false, false, false
-local SurvBtn = CreateBtn(Feature1Frame, UDim2.new(0, 0, 0, 5), "ESP SURVIVAL")
-local KillBtn = CreateBtn(Feature1Frame, UDim2.new(0, 0, 0, 45), "ESP KILLER")
-local GenBtn = CreateBtn(Feature1Frame, UDim2.new(0, 0, 0, 85), "ESP GENERATOR")
+local SurvBtn = CreateBtn(Feature1Frame, "ESP SURVIVAL")
+local KillBtn = CreateBtn(Feature1Frame, "ESP KILLER")
+local GenBtn = CreateBtn(Feature1Frame, "ESP GENERATOR")
 
--- --- 4. TABEL 2: [ SMOOTH MAPS ] ---
-local Category2Btn = Instance.new("TextButton", MainFrame)
-Category2Btn.Size = UDim2.new(0.9, 0, 0, 35); Category2Btn.Position = UDim2.new(0.05, 0, 0, 85) -- POSISI SAAT CAT 1 TERTUTUP
-Category2Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Category2Btn.Text = "[ SMOOTH MAPS ]  +"
-Category2Btn.TextColor3 = Color3.new(1, 1, 1); Category2Btn.Font = Enum.Font.SourceSansBold; Category2Btn.TextSize = 14
-Instance.new("UICorner", Category2Btn)
+-- --- 5. CATEGORY 2 ---
+local Cat2Btn = Instance.new("TextButton", ScrollFrame)
+Cat2Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat2Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Cat2Btn.Text = "[ SMOOTH MAPS ]  +"; Cat2Btn.TextColor3 = Color3.new(1, 1, 1)
+Cat2Btn.Font = Enum.Font.SourceSansBold; Cat2Btn.TextSize = 14; Instance.new("UICorner", Cat2Btn)
 
-local Feature2Frame = Instance.new("Frame", MainFrame)
-Feature2Frame.Size = UDim2.new(0.9, 0, 0, 90); Feature2Frame.Position = UDim2.new(0.05, 0, 0, 125)
-Feature2Frame.BackgroundTransparency = 1; Feature2Frame.Visible = false
+local Feature2Frame = Instance.new("Frame", ScrollFrame)
+Feature2Frame.Size = UDim2.new(0.95, 0, 0, 80); Feature2Frame.BackgroundTransparency = 1; Feature2Frame.Visible = false
+Instance.new("UIListLayout", Feature2Frame).Padding = UDim.new(0, 5)
 
 local _FullBright, _NoFog = false, false
-local BrightBtn = CreateBtn(Feature2Frame, UDim2.new(0, 0, 0, 5), "FULL BRIGHT")
-local FogBtn = CreateBtn(Feature2Frame, UDim2.new(0, 0, 0, 45), "NO FOG / MIST")
+local BrightBtn = CreateBtn(Feature2Frame, "FULL BRIGHT")
+local FogBtn = CreateBtn(Feature2Frame, "NO FOG / MIST")
 
--- --- 5. LOGIKA DROPDOWN (AUTO ADJUST POSITION) ---
-local is1Open, is2Open = false, false
+-- --- LOGIKA DROPDOWN ---
+Cat1Btn.MouseButton1Click:Connect(function()
+    Feature1Frame.Visible = not Feature1Frame.Visible
+    Cat1Btn.Text = Feature1Frame.Visible and "[ PLAYER & OBJECTIVE ]  -" or "[ PLAYER & OBJECTIVE ]  +"
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y + 20)
+end)
 
-local function UpdateMenu()
-    if is1Open then
-        Category1Btn.Text = "[ PLAYER & OBJECTIVE ]  -"
-        Feature1Frame.Visible = true
-        Category2Btn.Position = UDim2.new(0.05, 0, 0, 220) -- Geser tombol kedua ke bawah fitur pertama
-    else
-        Category1Btn.Text = "[ PLAYER & OBJECTIVE ]  +"
-        Feature1Frame.Visible = false
-        Category2Btn.Position = UDim2.new(0.05, 0, 0, 85) -- Balik ke posisi awal
-    end
-    
-    -- Update Posisi Frame Fitur Kedua mengikuti Tombolnya
-    Feature2Frame.Position = UDim2.new(0.05, 0, 0, Category2Btn.Position.Y.Offset + 40)
-    
-    if is2Open then
-        Category2Btn.Text = "[ SMOOTH MAPS ]  -"
-        Feature2Frame.Visible = true
-    else
-        Category2Btn.Text = "[ SMOOTH MAPS ]  +"
-        Feature2Frame.Visible = false
-    end
-end
+Cat2Btn.MouseButton1Click:Connect(function()
+    Feature2Frame.Visible = not Feature2Frame.Visible
+    Cat2Btn.Text = Feature2Frame.Visible and "[ SMOOTH MAPS ]  -" or "[ SMOOTH MAPS ]  +"
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y + 20)
+end)
 
-Category1Btn.MouseButton1Click:Connect(function() is1Open = not is1Open UpdateMenu() end)
-Category2Btn.MouseButton1Click:Connect(function() is2Open = not is2Open UpdateMenu() end)
-
--- --- 6. LOGIKA FITUR (CORE) ---
+-- --- 6. LOGIKA FITUR (CORE LOCKED) ---
 local function IsKiller(p)
     local char = p.Character; if not char then return false end
     if p.Team and (p.Team.Name:lower():find("killer") or p.Team.Name:lower():find("murder")) then return true end
@@ -183,7 +180,7 @@ FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _
 
 OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 local Exit = Instance.new("TextButton", MainFrame)
-Exit.Size = UDim2.new(0, 25, 0, 25); Exit.Position = UDim2.new(1, -30, 0, 7); Exit.Text = "X"
+Exit.Size = UDim2.new(0, 25, 0, 25); Exit.Position = UDim2.new(1, -30, 0, 5); Exit.Text = "X"
 Exit.BackgroundColor3 = Color3.fromRGB(200, 50, 50); Exit.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", Exit).CornerRadius = UDim.new(1, 0)
 Exit.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
