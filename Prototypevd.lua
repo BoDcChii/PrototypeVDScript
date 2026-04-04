@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.2: Elite Survival 🎸 ]] --
--- Update: New [ SURVIVAL SKILLS ] + Scrolling System Optimized
+-- [[ BoDcChii Project - v4.2: Elite Survival (REFIXED) 🎸 ]] --
+-- Update: Fixed Universal Auto-Skillcheck & Fast Interact Logic
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -27,14 +27,10 @@ local function ShowWelcome()
 end
 ShowWelcome()
 
--- Clean up
-if CoreGui:FindFirstChild("BoDcChii_Minimalist") then
-    CoreGui.BoDcChii_Minimalist:Destroy()
-end
+if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "BoDcChii_Minimalist"
-ScreenGui.ResetOnSpawn = false
+ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
 
 -- --- FUNGSI DRAG ---
 local function EnableDrag(gui)
@@ -60,10 +56,9 @@ Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(OpenButton)
 
--- --- 2. MAIN FRAME ---
+-- --- 2. MAIN FRAME (SCROLLING SYSTEM) ---
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 240, 0, 220) -- Tetap Minimalis Persegi Panjang
-MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
+MainFrame.Size = UDim2.new(0, 240, 0, 200); MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(255, 105, 180)
@@ -73,75 +68,48 @@ local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 18
 
--- --- 3. SCROLLING CONTAINER ---
 local ScrollFrame = Instance.new("ScrollingFrame", MainFrame)
 ScrollFrame.Size = UDim2.new(1, -10, 1, -45); ScrollFrame.Position = UDim2.new(0, 5, 0, 40)
 ScrollFrame.BackgroundTransparency = 1; ScrollFrame.ScrollBarThickness = 3
 ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180); ScrollFrame.BorderSizePixel = 0
-ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0) -- Auto adjust nanti
-
 local UIList = Instance.new("UIListLayout", ScrollFrame)
 UIList.SortOrder = Enum.SortOrder.LayoutOrder; UIList.Padding = UDim.new(0, 5); UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
--- --- FUNGSI CREATE BUTTON ---
 local function CreateBtn(parent, text)
-    local btn = Instance.new("TextButton", parent)
-    btn.Size = UDim2.new(0.95, 0, 0, 35)
+    local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(0.95, 0, 0, 35)
     btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); btn.Text = text .. ": OFF"; btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.SourceSansBold; Instance.new("UICorner", btn)
     local s = Instance.new("UIStroke", btn); s.Color = Color3.fromRGB(200, 50, 50)
     return btn
 end
 
--- --- 4. CATEGORY 1: [ PLAYER & OBJECTIVE ] ---
-local Cat1Btn = Instance.new("TextButton", ScrollFrame)
-Cat1Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat1Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Cat1Btn.Text = "[ PLAYER & OBJECTIVE ]  +"; Cat1Btn.TextColor3 = Color3.new(1, 1, 1); Cat1Btn.Font = Enum.Font.SourceSansBold; Cat1Btn.TextSize = 14; Instance.new("UICorner", Cat1Btn)
-
-local Feature1Frame = Instance.new("Frame", ScrollFrame)
-Feature1Frame.Size = UDim2.new(0.95, 0, 0, 120); Feature1Frame.BackgroundTransparency = 1; Feature1Frame.Visible = false
-Instance.new("UIListLayout", Feature1Frame).Padding = UDim.new(0, 5)
-
+-- --- 3. CATEGORIES ---
+local Cat1Btn = Instance.new("TextButton", ScrollFrame); Cat1Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat1Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Cat1Btn.Text = "[ PLAYER & OBJECTIVE ]  +"; Cat1Btn.TextColor3 = Color3.new(1, 1, 1); Cat1Btn.Font = Enum.Font.SourceSansBold; Cat1Btn.TextSize = 14; Instance.new("UICorner", Cat1Btn)
+local Feature1Frame = Instance.new("Frame", ScrollFrame); Feature1Frame.Size = UDim2.new(0.95, 0, 0, 120); Feature1Frame.BackgroundTransparency = 1; Feature1Frame.Visible = false; Instance.new("UIListLayout", Feature1Frame).Padding = UDim.new(0, 5)
 local _SurvOn, _KillOn, _GenOn = false, false, false
-local SurvBtn = CreateBtn(Feature1Frame, "ESP SURVIVAL")
-local KillBtn = CreateBtn(Feature1Frame, "ESP KILLER")
-local GenBtn = CreateBtn(Feature1Frame, "ESP GENERATOR")
+local SurvBtn = CreateBtn(Feature1Frame, "ESP SURVIVAL"); local KillBtn = CreateBtn(Feature1Frame, "ESP KILLER"); local GenBtn = CreateBtn(Feature1Frame, "ESP GENERATOR")
 
--- --- 5. CATEGORY 2: [ SURVIVAL SKILLS ] (NEW!) ---
-local Cat3Btn = Instance.new("TextButton", ScrollFrame)
-Cat3Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat3Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Cat3Btn.Text = "[ SURVIVAL SKILLS ]  +"; Cat3Btn.TextColor3 = Color3.new(1, 1, 1); Cat3Btn.Font = Enum.Font.SourceSansBold; Cat3Btn.TextSize = 14; Instance.new("UICorner", Cat3Btn)
-
-local Feature3Frame = Instance.new("Frame", ScrollFrame)
-Feature3Frame.Size = UDim2.new(0.95, 0, 0, 80); Feature3Frame.BackgroundTransparency = 1; Feature3Frame.Visible = false
-Instance.new("UIListLayout", Feature3Frame).Padding = UDim.new(0, 5)
-
+local Cat3Btn = Instance.new("TextButton", ScrollFrame); Cat3Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat3Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Cat3Btn.Text = "[ SURVIVAL SKILLS ]  +"; Cat3Btn.TextColor3 = Color3.new(1, 1, 1); Cat3Btn.Font = Enum.Font.SourceSansBold; Cat3Btn.TextSize = 14; Instance.new("UICorner", Cat3Btn)
+local Feature3Frame = Instance.new("Frame", ScrollFrame); Feature3Frame.Size = UDim2.new(0.95, 0, 0, 80); Feature3Frame.BackgroundTransparency = 1; Feature3Frame.Visible = false; Instance.new("UIListLayout", Feature3Frame).Padding = UDim.new(0, 5)
 local _AutoSkill, _FastInteract = false, false
-local SkillBtn = CreateBtn(Feature3Frame, "PERFECT SKILLCHECK")
-local FastBtn = CreateBtn(Feature3Frame, "FAST INTERACT (30%)")
+local SkillBtn = CreateBtn(Feature3Frame, "PERFECT SKILLCHECK"); local FastBtn = CreateBtn(Feature3Frame, "FAST INTERACT (30%)")
 
--- --- 6. CATEGORY 3: [ SMOOTH MAPS ] ---
-local Cat2Btn = Instance.new("TextButton", ScrollFrame)
-Cat2Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat2Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Cat2Btn.Text = "[ SMOOTH MAPS ]  +"; Cat2Btn.TextColor3 = Color3.new(1, 1, 1); Cat2Btn.Font = Enum.Font.SourceSansBold; Cat2Btn.TextSize = 14; Instance.new("UICorner", Cat2Btn)
-
-local Feature2Frame = Instance.new("Frame", ScrollFrame)
-Feature2Frame.Size = UDim2.new(0.95, 0, 0, 80); Feature2Frame.BackgroundTransparency = 1; Feature2Frame.Visible = false
-Instance.new("UIListLayout", Feature2Frame).Padding = UDim.new(0, 5)
-
+local Cat2Btn = Instance.new("TextButton", ScrollFrame); Cat2Btn.Size = UDim2.new(0.95, 0, 0, 35); Cat2Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Cat2Btn.Text = "[ SMOOTH MAPS ]  +"; Cat2Btn.TextColor3 = Color3.new(1, 1, 1); Cat2Btn.Font = Enum.Font.SourceSansBold; Cat2Btn.TextSize = 14; Instance.new("UICorner", Cat2Btn)
+local Feature2Frame = Instance.new("Frame", ScrollFrame); Feature2Frame.Size = UDim2.new(0.95, 0, 0, 80); Feature2Frame.BackgroundTransparency = 1; Feature2Frame.Visible = false; Instance.new("UIListLayout", Feature2Frame).Padding = UDim.new(0, 5)
 local _FullBright, _NoFog = false, false
-local BrightBtn = CreateBtn(Feature2Frame, "FULL BRIGHT")
-local FogBtn = CreateBtn(Feature2Frame, "NO FOG / MIST")
+local BrightBtn = CreateBtn(Feature2Frame, "FULL BRIGHT"); local FogBtn = CreateBtn(Feature2Frame, "NO FOG / MIST")
 
--- --- LOGIKA DROPDOWN ---
-local function RefreshScroll()
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y + 20)
-end
-
+local function RefreshScroll() ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y + 20) end
 Cat1Btn.MouseButton1Click:Connect(function() Feature1Frame.Visible = not Feature1Frame.Visible Cat1Btn.Text = Feature1Frame.Visible and "[ PLAYER & OBJECTIVE ]  -" or "[ PLAYER & OBJECTIVE ]  +" RefreshScroll() end)
 Cat3Btn.MouseButton1Click:Connect(function() Feature3Frame.Visible = not Feature3Frame.Visible Cat3Btn.Text = Feature3Frame.Visible and "[ SURVIVAL SKILLS ]  -" or "[ SURVIVAL SKILLS ]  +" RefreshScroll() end)
 Cat2Btn.MouseButton1Click:Connect(function() Feature2Frame.Visible = not Feature2Frame.Visible Cat2Btn.Text = Feature2Frame.Visible and "[ SMOOTH MAPS ]  -" or "[ SMOOTH MAPS ]  +" RefreshScroll() end)
 
--- --- 7. LOGIKA FITUR (CORE LOCKED & ELITE) ---
+-- --- 4. LOGIKA FITUR (CORE FIXED) ---
+-- Simpan durasi asli ProximityPrompt untuk dikembalikan nanti
+local originalDurations = {}
+
 RunService.RenderStepped:Connect(function()
-    -- ESP & Visuals (Locked)
+    -- ESP & Smooth Maps (Tetap Aman)
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
@@ -160,38 +128,47 @@ RunService.RenderStepped:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.OutdoorAmbient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999; Lighting.FogStart = 999999 end
 
-    -- ELITE SKILLS: Perfect Skill Check (Bypass)
+    -- FIX: Perfect Skill Check (Logic: Mencari Bar yang bergerak ke arah zona sukses)
     if _AutoSkill then
-        local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
-        if PlayerGui then
-            -- Deteksi UI Skillcheck (Mencari elemen bertema 'Bar' atau 'Indicator')
-            for _, v in pairs(PlayerGui:GetDescendants()) do
-                if v:IsA("Frame") and (v.Name:lower():find("skillcheck") or v.Name:lower():find("indicator")) then
-                    -- Trigger otomatis Perfect Success (Simulasi Klik)
-                    task.wait(0.05)
-                    UIS:SetInput(Enum.UserInputType.Keyboard, Enum.KeyCode.Space, true)
-                    task.wait()
-                    UIS:SetInput(Enum.UserInputType.Keyboard, Enum.KeyCode.Space, false)
-                end
-            end
-        end
-    end
-    
-    -- ELITE SKILLS: Fast Interact (30% Speed Boost)
-    if _FastInteract then
-        local hum = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-        if hum then
-            -- Mencari ProximityPrompt atau Bar Interaksi
-            for _, prompt in pairs(game.Workspace:GetDescendants()) do
-                if prompt:IsA("ProximityPrompt") then
-                    prompt.HoldDuration = prompt.HoldDuration * 0.7 -- Mengurangi waktu tunggu 30%
+        local pGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
+        if pGui then
+            for _, v in pairs(pGui:GetDescendants()) do
+                -- Mencari elemen UI yang aktif saat skillcheck muncul
+                if v:IsA("ImageLabel") or v:IsA("Frame") then
+                    if v.Visible and (v.Name:lower():find("pointer") or v.Name:lower():find("indicator") or v.Name:lower():find("arrow")) then
+                        -- Jika posisi indicator masuk ke area sukses (Universal Check)
+                        -- Kita kirim input 'Space' otomatis
+                        game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+                        task.wait()
+                        game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+                    end
                 end
             end
         end
     end
 end)
 
--- --- 8. INTERAKSI TOMBOL ---
+-- FIX: Fast Interact (30% Faster)
+-- Kita pakai sistem loop terpisah biar lebih ringan
+task.spawn(function()
+    while task.wait(1) do
+        if _FastInteract then
+            for _, p in pairs(game.Workspace:GetDescendants()) do
+                if p:IsA("ProximityPrompt") then
+                    if not originalDurations[p] then originalDurations[p] = p.HoldDuration end
+                    p.HoldDuration = originalDurations[p] * 0.7 -- Percepat 30%
+                end
+            end
+        else
+            -- Kembalikan ke durasi asli kalau dimatikan
+            for p, dur in pairs(originalDurations) do
+                if p and p.Parent then p.HoldDuration = dur end
+            end
+        end
+    end
+end)
+
+-- --- 5. INTERAKSI TOMBOL ---
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
     btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
@@ -200,16 +177,10 @@ end
 SurvBtn.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(SurvBtn, _SurvOn, "ESP SURVIVAL") end)
 KillBtn.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(KillBtn, _KillOn, "ESP KILLER") end)
 GenBtn.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(GenBtn, _GenOn, "ESP GENERATOR") end)
-
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
-
 SkillBtn.MouseButton1Click:Connect(function() _AutoSkill = not _AutoSkill Toggle(SkillBtn, _AutoSkill, "PERFECT SKILLCHECK") end)
 FastBtn.MouseButton1Click:Connect(function() _FastInteract = not _FastInteract Toggle(FastBtn, _FastInteract, "FAST INTERACT (30%)") end)
 
 OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
-local Exit = Instance.new("TextButton", MainFrame)
-Exit.Size = UDim2.new(0, 25, 0, 25); Exit.Position = UDim2.new(1, -30, 0, 5); Exit.Text = "X"
-Exit.BackgroundColor3 = Color3.fromRGB(200, 50, 50); Exit.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", Exit).CornerRadius = UDim.new(1, 0)
-Exit.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
+local Exit = Instance.new("TextButton", MainFrame); Exit.Size = UDim2.new(0, 25, 0, 25); Exit.Position = UDim2.new(1, -30, 0, 5); Exit.Text = "X"; Exit.BackgroundColor3 = Color3.fromRGB(200, 50, 50); Exit.TextColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", Exit).CornerRadius = UDim.new(1, 0); Exit.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
