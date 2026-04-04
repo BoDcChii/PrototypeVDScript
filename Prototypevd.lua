@@ -1,41 +1,39 @@
 -- [[ BoDcChii Project - v4.1: Minimalist BD 🎸 ]] --
--- Update: Minimalist Corner Welcome Notif + LuckiestGuy Font
+-- Update: Uniform Welcome Notif (Match UI Style) + Core Locked
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
--- --- 0. NOTIFIKASI WELCOME (Minimalist Corner Edition) ---
+-- --- 0. NOTIFIKASI WELCOME (Seragam dengan Style UI) ---
 local function ShowWelcome()
     local WelcomeGui = Instance.new("ScreenGui", CoreGui)
     WelcomeGui.Name = "BoDcChii_Welcome"
     WelcomeGui.DisplayOrder = 999
     
-    local WelcomeLabel = Instance.new("TextLabel", WelcomeGui)
-    WelcomeLabel.Size = UDim2.new(0, 220, 0, 35)
-    WelcomeLabel.Position = UDim2.new(0, 20, 0, 20) -- POJOK KIRI ATAS
-    WelcomeLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    WelcomeLabel.BackgroundTransparency = 0.5 -- Transparan agar tidak menutupi
+    local WelcomeFrame = Instance.new("Frame", WelcomeGui)
+    WelcomeFrame.Size = UDim2.new(0, 220, 0, 40)
+    WelcomeFrame.Position = UDim2.new(0, 20, 0, 20) -- Pojok Kiri Atas
+    WelcomeFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    WelcomeFrame.BorderSizePixel = 0
+    
+    local Corner = Instance.new("UICorner", WelcomeFrame)
+    Corner.CornerRadius = UDim.new(0, 8)
+    
+    local Stroke = Instance.new("UIStroke", WelcomeFrame)
+    Stroke.Color = Color3.fromRGB(255, 105, 180) -- Outline Pink Seragam
+    Stroke.Thickness = 2
+    
+    local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
+    WelcomeLabel.Size = UDim2.new(1, 0, 1, 0)
+    WelcomeLabel.BackgroundTransparency = 1
     WelcomeLabel.Text = "Welcome To BoDcChii"
-    WelcomeLabel.TextColor3 = Color3.fromRGB(255, 105, 180) -- PINK
+    WelcomeLabel.TextColor3 = Color3.new(1, 1, 1) -- Teks Putih Bersih
     WelcomeLabel.TextSize = 16
-    WelcomeLabel.Font = Enum.Font.LuckiestGuy -- FONT LEBIH JELAS & KEREN
-    WelcomeLabel.ZIndex = 1000
+    WelcomeLabel.Font = Enum.Font.SourceSansBold -- FONT SERAGAM DENGAN UI
     
-    -- Outline Teks Hitam agar kontras
-    local TextStroke = Instance.new("UIStroke", WelcomeLabel)
-    TextStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
-    TextStroke.Color = Color3.fromRGB(0, 0, 0)
-    TextStroke.Thickness = 2
-    
-    -- Border Tipis Pink
-    local BorderStroke = Instance.new("UIStroke", WelcomeLabel)
-    BorderStroke.Color = Color3.fromRGB(255, 105, 180)
-    BorderStroke.Thickness = 1.5
-    
-    Instance.new("UICorner", WelcomeLabel).CornerRadius = UDim.new(0, 6)
-
+    -- Hapus otomatis setelah 1.5 detik
     task.delay(1.5, function()
         WelcomeGui:Destroy()
     end)
