@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.3: Ghost Repair (ULTRA SAFE) 🎸 ]] --
--- Update: Remote Shield (Blocking Skillcheck Fail Events)
+-- [[ BoDcChii Project - v4.4: Official Edition 🎸 ]] --
+-- Update: Renamed Feature to "No Skill Check Generator" + Optimization
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -91,8 +91,8 @@ local SurvBtn = CreateBtn(Feature1Frame, "ESP SURVIVAL"); local KillBtn = Create
 
 local Cat3Btn = CreateBtn(ScrollFrame, "[ SURVIVAL SKILLS ]  +")
 local Feature3Frame = Instance.new("Frame", ScrollFrame); Feature3Frame.Size = UDim2.new(0.95, 0, 0, 40); Feature3Frame.BackgroundTransparency = 1; Feature3Frame.Visible = false; Instance.new("UIListLayout", Feature3Frame).Padding = UDim.new(0, 5)
-local _GhostRepair = false
-local SkillBtn = CreateBtn(Feature3Frame, "GHOST REPAIR (ANTI-FAIL)")
+local _NoSkillGen = false
+local SkillBtn = CreateBtn(Feature3Frame, "NO SKILL CHECK GENERATOR")
 
 local Cat2Btn = CreateBtn(ScrollFrame, "[ SMOOTH MAPS ]  +")
 local Feature2Frame = Instance.new("Frame", ScrollFrame); Feature2Frame.Size = UDim2.new(0.95, 0, 0, 80); Feature2Frame.BackgroundTransparency = 1; Feature2Frame.Visible = false; Instance.new("UIListLayout", Feature2Frame).Padding = UDim.new(0, 5)
@@ -126,7 +126,7 @@ RunService.RenderStepped:Connect(function()
     if _NoFog then Lighting.FogEnd = 999999; Lighting.FogStart = 999999 end
 end)
 
--- LOGIKA REMOTE SHIELD (BLOCKING FAIL EVENTS)
+-- METATABLE HOOK: NO SKILL CHECK GENERATOR
 local mt = getrawmetatable(game)
 local oldNamecall = mt.__namecall
 setreadonly(mt, false)
@@ -135,11 +135,11 @@ mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
     
-    if _GhostRepair and (method == "FireServer" or method == "InvokeServer") then
+    if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
         local remoteName = tostring(self):lower()
-        -- Memblokir Remote yang berisi kata kunci 'Gagal' atau 'SkillCheck'
+        -- Memblokir sinyal gagal agar generator tetap jalan normal
         if remoteName:find("fail") or remoteName:find("skillcheck") or remoteName:find("explode") then
-            return -- Abaikan sinyal, Server tidak akan tahu kalau kamu gagal
+            return nil
         end
     end
     return oldNamecall(self, unpack(args))
@@ -157,7 +157,7 @@ KillBtn.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(KillBt
 GenBtn.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(GenBtn, _GenOn, "ESP GENERATOR") end)
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
-SkillBtn.MouseButton1Click:Connect(function() _GhostRepair = not _GhostRepair Toggle(SkillBtn, _GhostRepair, "GHOST REPAIR (ANTI-FAIL)") end)
+SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(SkillBtn, _NoSkillGen, "NO SKILL CHECK GENERATOR") end)
 
 OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 local Exit = Instance.new("TextButton", MainFrame); Exit.Size = UDim2.new(0, 25, 0, 25); Exit.Position = UDim2.new(1, -30, 0, 5); Exit.Text = "X"; Exit.BackgroundColor3 = Color3.fromRGB(200, 50, 50); Exit.TextColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", Exit).CornerRadius = UDim.new(1, 0); Exit.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
