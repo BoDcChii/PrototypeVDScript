@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.6: Category Edition 🎸 ]] --
--- Update: Fixed UI Categories + No Skill Check Generator
+-- [[ BoDcChii Project - v4.7: Final Polish 🎸 ]] --
+-- Update: Moved Gen ESP to Survival + Full Scroll Enabled
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -15,16 +15,19 @@ ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
 
 -- --- FUNGSI DRAG ---
 local function EnableDrag(gui)
-    local dragging, dragInput, dragStart, startPos
+    local dragging, dragStart, startPos
     gui.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true; dragStart = input.Position; startPos = gui.Position
-            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
         end
     end)
-    gui.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
-    UIS.InputChanged:Connect(function(input) if input == dragInput and dragging then local delta = input.Position - dragStart
-        gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
+    UIS.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end end)
 end
 
 -- --- 1. ICON "BD" ---
@@ -37,9 +40,9 @@ Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(OpenButton)
 
--- --- 2. MAIN FRAME (KATEGORI SYSTEM) ---
+-- --- 2. MAIN FRAME ---
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 240, 0, 220); MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
+MainFrame.Size = UDim2.new(0, 240, 0, 240); MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(255, 105, 180)
@@ -49,17 +52,19 @@ local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 18
 
+-- SCROLLING SYSTEM (Geser Atas Bawah)
 local ScrollFrame = Instance.new("ScrollingFrame", MainFrame)
 ScrollFrame.Size = UDim2.new(1, -10, 1, -45); ScrollFrame.Position = UDim2.new(0, 5, 0, 40)
 ScrollFrame.BackgroundTransparency = 1; ScrollFrame.ScrollBarThickness = 3
 ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180); ScrollFrame.BorderSizePixel = 0
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0) -- Auto-adjust via UIList
 local UIList = Instance.new("UIListLayout", ScrollFrame)
 UIList.SortOrder = Enum.SortOrder.LayoutOrder; UIList.Padding = UDim.new(0, 5); UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 local function CreateBtn(parent, text)
     local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(0.95, 0, 0, 35)
     btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); btn.Text = text .. ": OFF"; btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.SourceSansBold; Instance.new("UICorner", btn)
+    btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 12; Instance.new("UICorner", btn)
     local s = Instance.new("UIStroke", btn); s.Color = Color3.fromRGB(200, 50, 50)
     return btn
 end
@@ -78,32 +83,35 @@ local function CreateFrame(size)
     return f
 end
 
--- --- 3. CATEGORIES & FEATURES ---
-local Cat1 = CreateCat("PLAYER & OBJECTIVE")
-local Frame1 = CreateFrame(120)
-local _SurvOn, _KillOn, _GenOn = false, false, false
+-- --- 3. CATEGORIES & FEATURES (REARRANGED) ---
+
+-- Cat 1: Player Only
+local Cat1 = CreateCat("PLAYER ESP")
+local Frame1 = CreateFrame(80)
+local _SurvOn, _KillOn = false, false
 local SurvBtn = CreateBtn(Frame1, "ESP SURVIVAL")
 local KillBtn = CreateBtn(Frame1, "ESP KILLER")
-local GenBtn = CreateBtn(Frame1, "ESP GENERATOR")
 
+-- Cat 2: Survival (Included Generator)
 local Cat2 = CreateCat("SURVIVAL SKILLS")
-local Frame2 = CreateFrame(40)
-local _NoSkillGen = false
+local Frame2 = CreateFrame(80)
+local _GenOn, _NoSkillGen = false, false
+local GenBtn = CreateBtn(Frame2, "ESP GENERATOR")
 local SkillBtn = CreateBtn(Frame2, "NO SKILL CHECK GENERATOR")
 
+-- Cat 3: Smooth
 local Cat3 = CreateCat("SMOOTH MAPS")
 local Frame3 = CreateFrame(80)
 local _FullBright, _NoFog = false, false
 local BrightBtn = CreateBtn(Frame3, "FULL BRIGHT")
 local FogBtn = CreateBtn(Frame3, "NO FOG / MIST")
 
--- Logic Buka Tutup Kategori
-local function Refresh() ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y + 20) end
-Cat1.MouseButton1Click:Connect(function() Frame1.Visible = not Frame1.Visible Cat1.Text = Frame1.Visible and "[ PLAYER & OBJECTIVE ]  -" or "[ PLAYER & OBJECTIVE ]  +" Refresh() end)
+local function Refresh() ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y + 10) end
+Cat1.MouseButton1Click:Connect(function() Frame1.Visible = not Frame1.Visible Cat1.Text = Frame1.Visible and "[ PLAYER ESP ]  -" or "[ PLAYER ESP ]  +" Refresh() end)
 Cat2.MouseButton1Click:Connect(function() Frame2.Visible = not Frame2.Visible Cat2.Text = Frame2.Visible and "[ SURVIVAL SKILLS ]  -" or "[ SURVIVAL SKILLS ]  +" Refresh() end)
 Cat3.MouseButton1Click:Connect(function() Frame3.Visible = not Frame3.Visible Cat3.Text = Frame3.Visible and "[ SMOOTH MAPS ]  -" or "[ SMOOTH MAPS ]  +" Refresh() end)
 
--- --- 4. LOGIKA FITUR (HYBRID) ---
+-- --- 4. LOGIKA FITUR ---
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
     btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
@@ -139,7 +147,6 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- METATABLE HOOK (NO SKILL CHECK)
 local mt = getrawmetatable(game)
 if mt then
     local old = mt.__namecall
