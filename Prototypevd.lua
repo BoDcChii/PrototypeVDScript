@@ -1,5 +1,5 @@
 -- [[ BoDcChii Project - v4.9: THE LOCKED MASTER 🎸 ]] --
--- Update: Restored 2-Second Welcome UI + All Features Locked
+-- Update: Fixed ESP Generator (Deep Search) + Locked Features
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -17,7 +17,7 @@ local function ShowWelcome()
     WelcomeGui.Name = "BoDcChii_Welcome"
     local WelcomeFrame = Instance.new("Frame", WelcomeGui)
     WelcomeFrame.Size = UDim2.new(0, 220, 0, 45)
-    WelcomeFrame.Position = UDim2.new(0.5, -110, 0.1, 0) -- Muncul di tengah atas
+    WelcomeFrame.Position = UDim2.new(0.5, -110, 0.1, 0)
     WelcomeFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     Instance.new("UICorner", WelcomeFrame).CornerRadius = UDim.new(0, 10)
     local Stroke = Instance.new("UIStroke", WelcomeFrame)
@@ -74,7 +74,6 @@ local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 18
 
--- SCROLLING SYSTEM
 local ScrollFrame = Instance.new("ScrollingFrame", MainFrame)
 ScrollFrame.Size = UDim2.new(1, -10, 1, -45); ScrollFrame.Position = UDim2.new(0, 5, 0, 40)
 ScrollFrame.BackgroundTransparency = 1; ScrollFrame.ScrollBarThickness = 3
@@ -104,23 +103,19 @@ local function CreateFrame(size)
     return f
 end
 
--- --- 4. CATEGORIES & FEATURES (FIXED) ---
-
--- Cat 1: PLAYER ESP
+-- --- 4. CATEGORIES & FEATURES ---
 local Cat1 = CreateCat("PLAYER ESP")
 local Frame1 = CreateFrame(80)
 local _SurvOn, _KillOn = false, false
 local SurvBtn = CreateBtn(Frame1, "ESP SURVIVAL")
 local KillBtn = CreateBtn(Frame1, "ESP KILLER")
 
--- Cat 2: SURVIVAL SKILLS (Isi: Gen & No Skill)
 local Cat2 = CreateCat("SURVIVAL SKILLS")
 local Frame2 = CreateFrame(80)
 local _GenOn, _NoSkillGen = false, false
 local GenBtn = CreateBtn(Frame2, "ESP GENERATOR")
 local SkillBtn = CreateBtn(Frame2, "NO SKILL CHECK GENERATOR")
 
--- Cat 3: SMOOTH MAPS
 local Cat3 = CreateCat("SMOOTH MAPS")
 local Frame3 = CreateFrame(80)
 local _FullBright, _NoFog = false, false
@@ -158,12 +153,27 @@ RunService.Heartbeat:Connect(function()
             hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
         end
     end
+
+    -- --- FIX KHUSUS ESP GENERATOR ---
     if _GenOn then
-        for _, v in pairs(game.Workspace:GetChildren()) do
-            if v.Name:find("Gen") or v.Name:find("Generator") then
-                local h = v:FindFirstChild("GenEsp") or Instance.new("Highlight", v)
-                h.Name = "GenEsp"; h.FillColor = Color3.new(1, 1, 0); h.Enabled = true
+        for _, v in pairs(game.Workspace:GetDescendants()) do
+            if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
+                local h = v:FindFirstChild("GenEsp")
+                if not h then
+                    h = Instance.new("Highlight")
+                    h.Name = "GenEsp"
+                    h.Parent = v
+                    h.FillColor = Color3.fromRGB(255, 255, 0)
+                    h.OutlineColor = Color3.new(1, 1, 1)
+                    h.FillTransparency = 0.5
+                end
+                h.Enabled = true
             end
+        end
+    else
+        for _, v in pairs(game.Workspace:GetDescendants()) do
+            local h = v:FindFirstChild("GenEsp")
+            if h then h.Enabled = false end
         end
     end
 end)
