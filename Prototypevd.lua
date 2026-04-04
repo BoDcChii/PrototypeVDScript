@@ -1,5 +1,5 @@
 -- [[ BoDcChii Project - v4.1: Minimalist BD 🎸 ]] --
--- Update: Page System (Tab Player & Object) + Clean UI
+-- Update: Dropdown Category (Player & Objective) + UI Refined
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -15,7 +15,7 @@ local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BoDcChii_Minimalist"
 ScreenGui.ResetOnSpawn = false
 
--- --- FUNGSI DRAG (Terkunci & Aman) ---
+-- --- FUNGSI DRAG (Kunci Aman) ---
 local function EnableDrag(gui)
     local dragging, dragInput, dragStart, startPos
     gui.InputBegan:Connect(function(input)
@@ -55,7 +55,7 @@ EnableDrag(OpenButton)
 
 -- --- 2. MAIN FRAME ---
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 240, 0, 230)
+MainFrame.Size = UDim2.new(0, 240, 0, 300) -- Ukuran default
 MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.Visible = false
@@ -65,7 +65,6 @@ local Stroke = Instance.new("UIStroke", MainFrame)
 Stroke.Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(MainFrame)
 
--- Header Title
 local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 40)
 Header.Text = "BoDcChii Project"
@@ -74,45 +73,29 @@ Header.BackgroundTransparency = 1
 Header.Font = Enum.Font.SourceSansBold
 Header.TextSize = 18
 
--- --- 3. SISTEM HALAMAN (PAGES) ---
-local HomeFrame = Instance.new("Frame", MainFrame)
-HomeFrame.Size = UDim2.new(1, 0, 1, -40)
-HomeFrame.Position = UDim2.new(0, 0, 0, 40)
-HomeFrame.BackgroundTransparency = 1
+-- --- 3. TABEL / DROPDOWN MENU ---
+local CategoryBtn = Instance.new("TextButton", MainFrame)
+CategoryBtn.Size = UDim2.new(0.9, 0, 0, 35)
+CategoryBtn.Position = UDim2.new(0.05, 0, 0, 45)
+CategoryBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+CategoryBtn.Text = "[ PLAYER & OBJECTIVE ]  +"
+CategoryBtn.TextColor3 = Color3.new(1, 1, 1)
+CategoryBtn.Font = Enum.Font.SourceSansBold
+CategoryBtn.TextSize = 14
+Instance.new("UICorner", CategoryBtn)
 
-local PlayerPage = Instance.new("Frame", MainFrame)
-PlayerPage.Size = UDim2.new(1, 0, 1, -40)
-PlayerPage.Position = UDim2.new(0, 0, 0, 40)
-PlayerPage.BackgroundTransparency = 1
-PlayerPage.Visible = false
+local FeatureFrame = Instance.new("Frame", MainFrame)
+FeatureFrame.Size = UDim2.new(0.9, 0, 0, 140)
+FeatureFrame.Position = UDim2.new(0.05, 0, 0, 85)
+FeatureFrame.BackgroundTransparency = 1
+FeatureFrame.Visible = false -- Tertutup secara default
 
--- Tombol Utama di Home untuk buka Player Page
-local OpenPlayerBtn = Instance.new("TextButton", HomeFrame)
-OpenPlayerBtn.Size = UDim2.new(0.85, 0, 0, 40)
-OpenPlayerBtn.Position = UDim2.new(0.075, 0, 0, 20)
-OpenPlayerBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-OpenPlayerBtn.Text = "PLAYER & OBJECT >"
-OpenPlayerBtn.TextColor3 = Color3.new(1, 1, 1)
-OpenPlayerBtn.Font = Enum.Font.SourceSansBold
-Instance.new("UICorner", OpenPlayerBtn)
-Instance.new("UIStroke", OpenPlayerBtn).Color = Color3.fromRGB(255, 105, 180)
-
--- Tombol Kembali ke Home
-local BackBtn = Instance.new("TextButton", PlayerPage)
-BackBtn.Size = UDim2.new(0, 30, 0, 20)
-BackBtn.Position = UDim2.new(0.05, 0, 0, 0)
-BackBtn.Text = "< Back"
-BackBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
-BackBtn.BackgroundTransparency = 1
-BackBtn.Font = Enum.Font.SourceSansBold
-BackBtn.TextSize = 12
-
--- --- 4. ISI FITUR DALAM HALAMAN PLAYER ---
+-- --- 4. ISI FITUR (ESP) ---
 local _SurvOn, _KillOn, _GenOn = false, false, false
 
-local function CreateBtn(name, pos, text, parent)
-    local btn = Instance.new("TextButton", parent)
-    btn.Size = UDim2.new(0.85, 0, 0, 35)
+local function CreateBtn(pos, text)
+    local btn = Instance.new("TextButton", FeatureFrame)
+    btn.Size = UDim2.new(1, 0, 0, 35)
     btn.Position = pos
     btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.Text = text .. ": OFF"
@@ -124,11 +107,19 @@ local function CreateBtn(name, pos, text, parent)
     return btn
 end
 
-local SurvBtn = CreateBtn("SurvBtn", UDim2.new(0.075, 0, 0, 30), "ESP SURVIVAL", PlayerPage)
-local KillBtn = CreateBtn("KillBtn", UDim2.new(0.075, 0, 0, 75), "ESP KILLER", PlayerPage)
-local GenBtn = CreateBtn("GenBtn", UDim2.new(0.075, 0, 0, 120), "ESP GENERATOR", PlayerPage)
+local SurvBtn = CreateBtn(UDim2.new(0, 0, 0, 5), "ESP SURVIVAL")
+local KillBtn = CreateBtn(UDim2.new(0, 0, 0, 45), "ESP KILLER")
+local GenBtn = CreateBtn(UDim2.new(0, 0, 0, 85), "ESP GENERATOR")
 
--- --- 5. LOGIKA ESP (Kunci v4.1) ---
+-- --- 5. LOGIKA DROPDOWN (BUKA/TUTUP TABEL) ---
+local isOpen = false
+CategoryBtn.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    FeatureFrame.Visible = isOpen
+    CategoryBtn.Text = isOpen and "[ PLAYER & OBJECTIVE ]  -" or "[ PLAYER & OBJECTIVE ]  +"
+end)
+
+-- --- 6. LOGIKA ESP (Kunci v4.1) ---
 local function IsKiller(p)
     local char = p.Character
     if not char then return false end
@@ -158,10 +149,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- --- 6. INTERAKSI TOMBOL ---
-OpenPlayerBtn.MouseButton1Click:Connect(function() HomeFrame.Visible = false; PlayerPage.Visible = true end)
-BackBtn.MouseButton1Click:Connect(function() HomeFrame.Visible = true; PlayerPage.Visible = false end)
-
+-- --- 7. INTERAKSI TOMBOL ESP ---
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
     btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
@@ -171,7 +159,7 @@ SurvBtn.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(SurvBt
 KillBtn.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(KillBtn, _KillOn, "ESP KILLER") end)
 GenBtn.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(GenBtn, _GenOn, "ESP GENERATOR") end)
 
--- Buka/Tutup & Exit
+-- Tombol Utama Buka/Tutup Seluruh Menu
 OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 local Exit = Instance.new("TextButton", MainFrame)
 Exit.Size = UDim2.new(0, 25, 0, 25); Exit.Position = UDim2.new(1, -30, 0, 7); Exit.Text = "X"
