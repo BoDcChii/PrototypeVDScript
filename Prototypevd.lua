@@ -1,12 +1,11 @@
--- [[ BoDcChii Project - v4.2: Elite Survival (ZERO LAG EDITION) 🎸 ]] --
--- Update: Ultra Optimized Anti-Explode (No More FPS Drop)
+-- [[ BoDcChii Project - v4.2: Elite Survival (SILENT FIXED) 🎸 ]] --
+-- Update: Fixed Anti-Explode (Silent) + Ultra-Low CPU Usage
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
-local SoundService = game:GetService("SoundService") -- Kita pakai Service ini biar ringan
 
 -- --- 0. NOTIFIKASI WELCOME ---
 local function ShowWelcome()
@@ -57,7 +56,7 @@ Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(OpenButton)
 
--- --- 2. MAIN FRAME ---
+-- --- 2. MAIN FRAME (SCROLLING) ---
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 240, 0, 200); MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
@@ -74,7 +73,7 @@ ScrollFrame.Size = UDim2.new(1, -10, 1, -45); ScrollFrame.Position = UDim2.new(0
 ScrollFrame.BackgroundTransparency = 1; ScrollFrame.ScrollBarThickness = 3
 ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180); ScrollFrame.BorderSizePixel = 0
 local UIList = Instance.new("UIListLayout", ScrollFrame)
-UIList.SortOrder = Enum.SortOrder.LayoutOrder; UIList.Padding = UDim.new(0, 5); UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIList.SortOrder = Enum.SortOrder.LayoutOrder; UIList.Padding = UDim.new(0, 5)
 
 local function CreateBtn(parent, text)
     local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(0.95, 0, 0, 35)
@@ -101,13 +100,13 @@ local _FullBright, _NoFog = false, false
 local BrightBtn = CreateBtn(Feature2Frame, "FULL BRIGHT"); local FogBtn = CreateBtn(Feature2Frame, "NO FOG / MIST")
 
 local function RefreshScroll() ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y + 20) end
-Cat1Btn.MouseButton1Click:Connect(function() Feature1Frame.Visible = not Feature1Frame.Visible Cat1Btn.Text = Feature1Frame.Visible and "[ PLAYER & OBJECTIVE ]  -" or "[ PLAYER & OBJECTIVE ]  +" RefreshScroll() end)
-Cat3Btn.MouseButton1Click:Connect(function() Feature3Frame.Visible = not Feature3Frame.Visible Cat3Btn.Text = Feature3Frame.Visible and "[ SURVIVAL SKILLS ]  -" or "[ SURVIVAL SKILLS ]  +" RefreshScroll() end)
-Cat2Btn.MouseButton1Click:Connect(function() Feature2Frame.Visible = not Feature2Frame.Visible Cat2Btn.Text = Feature2Frame.Visible and "[ SMOOTH MAPS ]  -" or "[ SMOOTH MAPS ]  +" RefreshScroll() end)
+Cat1Btn.MouseButton1Click:Connect(function() Feature1Frame.Visible = not Feature1Frame.Visible RefreshScroll() end)
+Cat3Btn.MouseButton1Click:Connect(function() Feature3Frame.Visible = not Feature3Frame.Visible RefreshScroll() end)
+Cat2Btn.MouseButton1Click:Connect(function() Feature2Frame.Visible = not Feature2Frame.Visible RefreshScroll() end)
 
--- --- 4. LOGIKA FITUR (ZERO LAG CORE) ---
+-- --- 4. LOGIKA FITUR (ULTRA LIGHTWEIGHT) ---
 RunService.RenderStepped:Connect(function()
-    -- ESP & Smooth Maps (Lightweight)
+    -- ESP & Smooth Maps (Tetap Aman & Locked)
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
@@ -119,17 +118,12 @@ RunService.RenderStepped:Connect(function()
     end
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.OutdoorAmbient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999; Lighting.FogStart = 999999 end
-end)
 
--- LOGIKA ANTI-EXPLODE (ZERO LAG: Cuma aktif saat dibutuhkan)
-task.spawn(function()
-    while task.wait(0.5) do -- Cek setiap 0.5 detik (Sangat irit CPU)
-        if _AntiExplode then
-            -- Cari suara di LocalPlayer saja (biasanya suara fail/explode diputar di sini)
-            for _, s in pairs(Players.LocalPlayer:GetDescendants()) do
-                if s:IsA("Sound") and (s.Name:lower():find("explode") or s.Name:lower():find("fail") or s.Name:lower():find("alarm")) then
-                    s.Volume = 0
-                end
+    -- FIX: Anti-Explode (Hanya mencari suara yang baru saja AKTIF)
+    if _AntiExplode then
+        for _, s in pairs(game:GetService("SoundService"):GetDescendants()) do
+            if s:IsA("Sound") and s.Playing and (s.Name:lower():find("explode") or s.Name:lower():find("fail") or s.Name:lower():find("alarm")) then
+                s:Stop() -- Langsung matikan suaranya
             end
         end
     end
