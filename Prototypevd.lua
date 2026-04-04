@@ -1,5 +1,5 @@
 -- [[ BoDcChii Project - v4.1: Minimalist BD 🎸 ]] --
--- Update: UI Refined (Player & Object Table) + Full Draggable
+-- Update: Page System (Tab Player & Object) + Clean UI
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -15,14 +15,12 @@ local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BoDcChii_Minimalist"
 ScreenGui.ResetOnSpawn = false
 
--- --- FUNGSI DRAG (Tetap Terkunci & Aman) ---
+-- --- FUNGSI DRAG (Terkunci & Aman) ---
 local function EnableDrag(gui)
     local dragging, dragInput, dragStart, startPos
     gui.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = gui.Position
+            dragging = true; dragStart = input.Position; startPos = gui.Position
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then dragging = false end
             end)
@@ -53,22 +51,18 @@ OpenButton.Font = Enum.Font.SourceSansBold
 OpenButton.ZIndex = 500
 Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(255, 105, 180)
-
 EnableDrag(OpenButton)
 
--- --- 2. HALAMAN MENU (UI Refined) ---
+-- --- 2. MAIN FRAME ---
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 240, 0, 250)
+MainFrame.Size = UDim2.new(0, 240, 0, 230)
 MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.Visible = false
 MainFrame.Active = true
-
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 local Stroke = Instance.new("UIStroke", MainFrame)
 Stroke.Color = Color3.fromRGB(255, 105, 180)
-Stroke.Thickness = 2
-
 EnableDrag(MainFrame)
 
 -- Header Title
@@ -78,21 +72,63 @@ Header.Text = "BoDcChii Project"
 Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1
 Header.Font = Enum.Font.SourceSansBold
-Header.TextSize = 20
+Header.TextSize = 18
 
--- Tabel / Label Kategori Player
-local TableLabel = Instance.new("TextLabel", MainFrame)
-TableLabel.Size = UDim2.new(0.9, 0, 0, 25)
-TableLabel.Position = UDim2.new(0.05, 0, 0, 45)
-TableLabel.Text = "[ PLAYER & OBJECT ]"
-TableLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-TableLabel.BackgroundTransparency = 1
-TableLabel.Font = Enum.Font.SourceSansBold
-TableLabel.TextSize = 14
+-- --- 3. SISTEM HALAMAN (PAGES) ---
+local HomeFrame = Instance.new("Frame", MainFrame)
+HomeFrame.Size = UDim2.new(1, 0, 1, -40)
+HomeFrame.Position = UDim2.new(0, 0, 0, 40)
+HomeFrame.BackgroundTransparency = 1
 
--- --- 3. LOGIKA & TOMBOL ESP ---
+local PlayerPage = Instance.new("Frame", MainFrame)
+PlayerPage.Size = UDim2.new(1, 0, 1, -40)
+PlayerPage.Position = UDim2.new(0, 0, 0, 40)
+PlayerPage.BackgroundTransparency = 1
+PlayerPage.Visible = false
+
+-- Tombol Utama di Home untuk buka Player Page
+local OpenPlayerBtn = Instance.new("TextButton", HomeFrame)
+OpenPlayerBtn.Size = UDim2.new(0.85, 0, 0, 40)
+OpenPlayerBtn.Position = UDim2.new(0.075, 0, 0, 20)
+OpenPlayerBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+OpenPlayerBtn.Text = "PLAYER & OBJECT >"
+OpenPlayerBtn.TextColor3 = Color3.new(1, 1, 1)
+OpenPlayerBtn.Font = Enum.Font.SourceSansBold
+Instance.new("UICorner", OpenPlayerBtn)
+Instance.new("UIStroke", OpenPlayerBtn).Color = Color3.fromRGB(255, 105, 180)
+
+-- Tombol Kembali ke Home
+local BackBtn = Instance.new("TextButton", PlayerPage)
+BackBtn.Size = UDim2.new(0, 30, 0, 20)
+BackBtn.Position = UDim2.new(0.05, 0, 0, 0)
+BackBtn.Text = "< Back"
+BackBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
+BackBtn.BackgroundTransparency = 1
+BackBtn.Font = Enum.Font.SourceSansBold
+BackBtn.TextSize = 12
+
+-- --- 4. ISI FITUR DALAM HALAMAN PLAYER ---
 local _SurvOn, _KillOn, _GenOn = false, false, false
 
+local function CreateBtn(name, pos, text, parent)
+    local btn = Instance.new("TextButton", parent)
+    btn.Size = UDim2.new(0.85, 0, 0, 35)
+    btn.Position = pos
+    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    btn.Text = text .. ": OFF"
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.SourceSansBold
+    Instance.new("UICorner", btn)
+    local s = Instance.new("UIStroke", btn)
+    s.Color = Color3.fromRGB(200, 50, 50)
+    return btn
+end
+
+local SurvBtn = CreateBtn("SurvBtn", UDim2.new(0.075, 0, 0, 30), "ESP SURVIVAL", PlayerPage)
+local KillBtn = CreateBtn("KillBtn", UDim2.new(0.075, 0, 0, 75), "ESP KILLER", PlayerPage)
+local GenBtn = CreateBtn("GenBtn", UDim2.new(0.075, 0, 0, 120), "ESP GENERATOR", PlayerPage)
+
+-- --- 5. LOGIKA ESP (Kunci v4.1) ---
 local function IsKiller(p)
     local char = p.Character
     if not char then return false end
@@ -101,56 +137,31 @@ local function IsKiller(p)
     return hum and hum.MaxHealth > 100
 end
 
-local function CreateBtn(name, pos, text)
-    local btn = Instance.new("TextButton", MainFrame)
-    btn.Name = name
-    btn.Size = UDim2.new(0.85, 0, 0, 38)
-    btn.Position = pos
-    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    btn.Text = text .. ": OFF"
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 14
-    Instance.new("UICorner", btn)
-    local s = Instance.new("UIStroke", btn)
-    s.Color = Color3.fromRGB(200, 50, 50)
-    s.Thickness = 1
-    return btn
-end
-
-local SurvBtn = CreateBtn("SurvBtn", UDim2.new(0.075, 0, 0, 80), "ESP SURVIVAL")
-local KillBtn = CreateBtn("KillBtn", UDim2.new(0.075, 0, 0, 125), "ESP KILLER")
-local GenBtn = CreateBtn("GenBtn", UDim2.new(0.075, 0, 0, 170), "ESP GENERATOR")
-
--- Loop Render (Fitur Inti)
 RunService.RenderStepped:Connect(function()
-    -- Player ESP
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
             hl.Name = "BDEsp"
-            hl.OutlineColor = Color3.new(1, 1, 1)
             if IsKiller(p) then
-                hl.FillColor = Color3.fromRGB(255, 0, 0)
-                hl.Enabled = _KillOn
+                hl.FillColor = Color3.fromRGB(255, 0, 0); hl.Enabled = _KillOn
             else
-                hl.FillColor = Color3.fromRGB(0, 255, 0)
-                hl.Enabled = _SurvOn
+                hl.FillColor = Color3.fromRGB(0, 255, 0); hl.Enabled = _SurvOn
             end
         end
     end
-    -- Generator ESP
     for _, obj in pairs(game.Workspace:GetDescendants()) do
         if obj.Name == "Generator" or obj.Name == "Gen" then
             local hl = obj:FindFirstChild("GenEsp") or Instance.new("Highlight", obj)
             hl.Name = "GenEsp"
-            hl.FillColor = Color3.fromRGB(255, 255, 0)
-            hl.Enabled = _GenOn
+            hl.FillColor = Color3.fromRGB(255, 255, 0); hl.Enabled = _GenOn
         end
     end
 end)
 
--- Tombol Events
+-- --- 6. INTERAKSI TOMBOL ---
+OpenPlayerBtn.MouseButton1Click:Connect(function() HomeFrame.Visible = false; PlayerPage.Visible = true end)
+BackBtn.MouseButton1Click:Connect(function() HomeFrame.Visible = true; PlayerPage.Visible = false end)
+
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
     btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
@@ -160,13 +171,10 @@ SurvBtn.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(SurvBt
 KillBtn.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(KillBtn, _KillOn, "ESP KILLER") end)
 GenBtn.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(GenBtn, _GenOn, "ESP GENERATOR") end)
 
--- --- 4. SISTEM EXIT & BUKA/TUTUP ---
+-- Buka/Tutup & Exit
 OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 local Exit = Instance.new("TextButton", MainFrame)
-Exit.Size = UDim2.new(0, 25, 0, 25)
-Exit.Position = UDim2.new(1, -30, 0, 7)
-Exit.Text = "X"
-Exit.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-Exit.TextColor3 = Color3.new(1, 1, 1)
+Exit.Size = UDim2.new(0, 25, 0, 25); Exit.Position = UDim2.new(1, -30, 0, 7); Exit.Text = "X"
+Exit.BackgroundColor3 = Color3.fromRGB(200, 50, 50); Exit.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", Exit).CornerRadius = UDim.new(1, 0)
 Exit.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
