@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.2: Elite Survival (ANTI-EXPLODE) 🎸 ]] --
--- Update: Removed Fast Interact + Added Anti-Explode Generator Logic
+-- [[ BoDcChii Project - v4.2: Elite Survival (FPS FIXED) 🎸 ]] --
+-- Update: Fixed Lag/FPS Drop by optimizing Anti-Explode Logic
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -104,7 +104,7 @@ Cat1Btn.MouseButton1Click:Connect(function() Feature1Frame.Visible = not Feature
 Cat3Btn.MouseButton1Click:Connect(function() Feature3Frame.Visible = not Feature3Frame.Visible Cat3Btn.Text = Feature3Frame.Visible and "[ SURVIVAL SKILLS ]  -" or "[ SURVIVAL SKILLS ]  +" RefreshScroll() end)
 Cat2Btn.MouseButton1Click:Connect(function() Feature2Frame.Visible = not Feature2Frame.Visible Cat2Btn.Text = Feature2Frame.Visible and "[ SMOOTH MAPS ]  -" or "[ SMOOTH MAPS ]  +" RefreshScroll() end)
 
--- --- 4. LOGIKA FITUR (CORE FIXED) ---
+-- --- 4. LOGIKA FITUR (CORE FIXED & LIGHTWEIGHT) ---
 RunService.RenderStepped:Connect(function()
     -- ESP & Smooth Maps (Tetap Aman)
     for _, p in pairs(Players:GetPlayers()) do
@@ -116,29 +116,26 @@ RunService.RenderStepped:Connect(function()
             else hl.FillColor = Color3.fromRGB(0, 255, 0); hl.Enabled = _SurvOn end
         end
     end
-    for _, obj in pairs(game.Workspace:GetDescendants()) do
-        if obj.Name == "Generator" or obj.Name == "Gen" then
+    -- Mencari Gen hanya di Workspace (Optimized: Tidak pakai Descendants di loop)
+    for _, obj in pairs(game.Workspace:GetChildren()) do
+        if (obj.Name == "Generator" or obj.Name == "Gen") then
             local hl = obj:FindFirstChild("GenEsp") or Instance.new("Highlight", obj)
             hl.Name = "GenEsp"; hl.FillColor = Color3.fromRGB(255, 255, 0); hl.Enabled = _GenOn
         end
     end
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.OutdoorAmbient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999; Lighting.FogStart = 999999 end
+end)
 
-    -- NEW: Anti-Explode Generator Logic (Universal)
-    if _AntiExplode then
-        for _, s in pairs(game.Workspace:GetDescendants()) do
-            -- Mencari suara ledakan atau efek gagal
-            if s:IsA("Sound") and (s.Name:lower():find("explode") or s.Name:lower():find("fail") or s.Name:lower():find("alarm")) then
-                s.Volume = 0 -- Bikin sunyi biar Killer nggak tahu kalau gagal
-            end
-        end
-        -- Mencari Remote yang dikirim saat gagal skillcheck (Seringkali bernama 'SkillCheck' atau 'Failed')
-        for _, r in pairs(game:GetDescendants()) do
-            if r:IsA("RemoteEvent") and (r.Name:lower():find("fail") or r.Name:lower():find("skillcheck")) then
-                -- Script ini mencegah event "Gagal" dikirim ke server (Jika memungkinkan di game tersebut)
-                -- Namun untuk amannya kita fokus ke visual/sound agar tetap rahasia
-            end
+-- LOGIKA ANTI-EXPLODE (OPTIMIZED: Menggunakan Listener, Bukan Loop)
+game.DescendantAdded:Connect(function(desc)
+    if _AntiExplode and desc:IsA("Sound") then
+        local name = desc.Name:lower()
+        if name:find("explode") or name:find("fail") or name:find("alarm") or name:find("shock") then
+            desc.Volume = 0
+            desc:GetPropertyChangedSignal("Volume"):Connect(function()
+                if _AntiExplode then desc.Volume = 0 end
+            end)
         end
     end
 end)
