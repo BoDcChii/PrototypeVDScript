@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v5.1.4: FIXED DUAL SCROLLING 🎸 ]] --
+-- [[ BoDcChii Project - v5.1.5: FORCED SCROLLING FIX 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -72,14 +72,15 @@ Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Heade
 local LineH = Instance.new("Frame", MainFrame)
 LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 36); LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
 
--- --- 4. SIDEBAR SCROLLING (KIRI) ---
+-- --- 4. SIDEBAR SCROLLING (KIRI) - FIXED ---
 local SidebarScroll = Instance.new("ScrollingFrame", MainFrame)
 SidebarScroll.Size = UDim2.new(0, 115, 1, -45); SidebarScroll.Position = UDim2.new(0, 5, 0, 42)
-SidebarScroll.BackgroundTransparency = 1; SidebarScroll.ScrollBarThickness = 2
+SidebarScroll.BackgroundTransparency = 1; SidebarScroll.ScrollBarThickness = 3
 SidebarScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180); SidebarScroll.BorderSizePixel = 0
-SidebarScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y -- Perbaikan Fitur Geser
-SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+SidebarScroll.Active = true; SidebarScroll.Selectable = true
+SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, 0); SidebarScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 SidebarScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+SidebarScroll.ClipsDescendants = true
 
 local SideLayout = Instance.new("UIListLayout", SidebarScroll)
 SideLayout.Padding = UDim.new(0, 5)
@@ -87,17 +88,18 @@ SideLayout.Padding = UDim.new(0, 5)
 local LineV = Instance.new("Frame", MainFrame)
 LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(0, 122, 0, 42); LineV.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineV.BorderSizePixel = 0
 
--- --- 5. CONTENT SCROLLING (KANAN) ---
+-- --- 5. CONTENT SCROLLING (KANAN) - FIXED ---
 local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
 ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.new(0, 130, 0, 45)
-ContentScroll.BackgroundTransparency = 1; ContentScroll.ScrollBarThickness = 2
+ContentScroll.BackgroundTransparency = 1; ContentScroll.ScrollBarThickness = 3
 ContentScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180); ContentScroll.BorderSizePixel = 0
-ContentScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y -- Perbaikan Fitur Geser
-ContentScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+ContentScroll.Active = true; ContentScroll.Selectable = true
+ContentScroll.CanvasSize = UDim2.new(0, 0, 0, 0); ContentScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 ContentScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+ContentScroll.ClipsDescendants = true
 
 local function CreateTabBtn(text)
-    local btn = Instance.new("TextButton", SidebarScroll); btn.Size = UDim2.new(1, -5, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    local btn = Instance.new("TextButton", SidebarScroll); btn.Size = UDim2.new(1, -8, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.Text = text; btn.TextColor3 = Color3.new(1, 1, 1); btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 10
     Instance.new("UICorner", btn); Instance.new("UIStroke", btn).Color = Color3.fromRGB(255, 105, 180)
     return btn
@@ -106,9 +108,9 @@ end
 local T1, T2, T3 = CreateTabBtn("1. PLAYER ESP"), CreateTabBtn("2. SURVIVAL"), CreateTabBtn("3. SMOOTH MAPS")
 
 local function CreatePage()
-    local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -5, 0, 0); f.BackgroundTransparency = 1; f.Visible = false
+    local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -8, 0, 0); f.BackgroundTransparency = 1; f.Visible = false
     local l = Instance.new("UIListLayout", f); l.Padding = UDim.new(0, 5)
-    f.AutomaticSize = Enum.AutomaticSize.Y -- Supaya frame mengikuti isi
+    f.AutomaticSize = Enum.AutomaticSize.Y
     return f
 end
 
@@ -130,7 +132,7 @@ local function CreateBtn(parent, text)
     return btn
 end
 
--- --- 6. LOGIKA FITUR (TETAP SAMA) ---
+-- --- 6. LOGIKA FITUR ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode = false, false, false, false, false, false, false
 local SurvBtn = CreateBtn(P1, "ESP SURVIVAL"); local KillBtn = CreateBtn(P1, "ESP KILLER")
 local GenBtn = CreateBtn(P2, "ESP GENERATOR"); local SkillBtn = CreateBtn(P2, "NO SKILL CHECK")
