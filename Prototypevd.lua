@@ -1,5 +1,5 @@
 -- [[ BoDcChii Project - v4.9.8: THE LOCKED MASTER 🎸 ]] --
--- Update: Cleaned Survival Skills (Removed Aim Assist)
+-- Status: Fix Execution Error & Clean Survival
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -142,7 +142,6 @@ SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Togg
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
 
--- POTATO MODE LOGIC
 PotatoBtn.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(PotatoBtn, _PotatoMode, "POTATO MODE (ANTI LAG)")
@@ -160,7 +159,7 @@ PotatoBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Background Task (ESP Gen & Player)
+-- Background Task
 task.spawn(function()
     while true do
         if _GenOn then
@@ -180,7 +179,4 @@ task.spawn(function()
 end)
 
 RunService.Heartbeat:Connect(function()
-    if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
-    if _NoFog then Lighting.FogEnd = 999999 end
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= Players.LocalPlayer and p.Character then
+    if _FullBright then Lighting.Ambient = Color3.new(1,
