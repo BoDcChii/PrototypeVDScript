@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.9.8: THE LOCKED MASTER 🎸 ]] --
--- Status: Fix Execution Error & Clean Survival
+-- [[ BoDcChii Project - v4.9.4: THE LOCKED MASTER 🎸 ]] --
+-- Update: Smart Potato Mode + Re-run Instruction Description
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -114,14 +114,16 @@ local GenBtn = CreateBtn(Frame2, "ESP GENERATOR")
 local SkillBtn = CreateBtn(Frame2, "NO SKILL CHECK GENERATOR")
 
 local Cat3 = CreateCat("SMOOTH MAPS")
-local Frame3 = CreateFrame(150)
+local Frame3 = CreateFrame(150) -- Ukuran ditambah untuk deskripsi
 local _FullBright, _NoFog, _PotatoMode = false, false, false
 local BrightBtn = CreateBtn(Frame3, "FULL BRIGHT")
 local FogBtn = CreateBtn(Frame3, "NO FOG / MIST")
 local PotatoBtn = CreateBtn(Frame3, "POTATO MODE (ANTI LAG)")
+
+-- Tambahkan Deskripsi Khusus Potato Mode
 local PotatoDesc = Instance.new("TextLabel", Frame3)
 PotatoDesc.Size = UDim2.new(0.9, 0, 0, 30); PotatoDesc.BackgroundTransparency = 1
-PotatoDesc.Text = "*Reload fitur ini setiap pindah map"; PotatoDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
+PotatoDesc.Text = "*Nyalakan ulang/Reload fitur ini setiap pindah map"; PotatoDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
 PotatoDesc.TextSize = 8; PotatoDesc.Font = Enum.Font.SourceSansItalic; PotatoDesc.TextWrapped = true
 
 local function Refresh() ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y + 15) end
@@ -142,41 +144,81 @@ SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Togg
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
 
+-- SMART POTATO MODE (PROTECTION + RE-RUN LOGIC)
 PotatoBtn.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(PotatoBtn, _PotatoMode, "POTATO MODE (ANTI LAG)")
+    
     if _PotatoMode then
         for _, v in pairs(game.Workspace:GetDescendants()) do
             local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
             local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
+
             if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
+                if v:IsA("BasePart") then
+                    v.Material = Enum.Material.SmoothPlastic
+                    if v:IsA("MeshPart") then v.TextureID = "" end
+                elseif v:IsA("Texture") or v:IsA("Decal") then
+                    v.Transparency = 1
+                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
+                elseif v:IsA("SpecialMesh") then
+                    v.TextureId = ""
+                end
             end
         end
     end
 end)
 
--- Background Task
+-- Generator ESP Polling (3 Detik)
 task.spawn(function()
     while true do
         if _GenOn then
             for _, v in pairs(game.Workspace:GetDescendants()) do
                 if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
                     if not v:FindFirstChild("GenEsp") then
-                        local h = Instance.new("Highlight", v); h.Name = "GenEsp"; h.FillColor = Color3.fromRGB(255, 255, 0); h.FillTransparency = 0.5
+                        local h = Instance.new("Highlight", v)
+                        h.Name = "GenEsp"; h.FillColor = Color3.fromRGB(255, 255, 0); h.FillTransparency = 0.5
                     end
                     v.GenEsp.Enabled = true
                 end
             end
         else
-            for _, v in pairs(game.Workspace:GetDescendants()) do if v:FindFirstChild("GenEsp") then v.GenEsp.Enabled = false end end
+            for _, v in pairs(game.Workspace:GetDescendants()) do
+                if v:FindFirstChild("GenEsp") then v.GenEsp.Enabled = false end
+            end
         end
         task.wait(3)
     end
 end)
 
 RunService.Heartbeat:Connect(function()
-    if _FullBright then Lighting.Ambient = Color3.new(1,
+    if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
+    if _NoFog then Lighting.FogEnd = 999999 end
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= Players.LocalPlayer and p.Character then
+            local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
+            hl.Name = "BDEsp"
+            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
+            hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn)
+            hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
+        end
+    end
+end)
+
+local mt = getrawmetatable(game)
+if mt then
+    local old = mt.__namecall
+    setreadonly(mt, false)
+    mt.__namecall = newcclosure(function(self, ...)
+        local method = getnamecallmethod()
+        if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
+            local n = tostring(self):lower()
+            if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
+        end
+        return old(self, ...)
+    end)
+    setreadonly(mt, true)
+end
+
+OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
