@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.9.2: THE LOCKED MASTER 🎸 ]] --
--- Update: Ultra Potato Mode (ID & Surface Stripping)
+-- [[ BoDcChii Project - v4.9.3: THE LOCKED MASTER 🎸 ]] --
+-- Update: Smart Potato Mode (Keep Players, Gens, & Pallets)
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -138,22 +138,30 @@ SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Togg
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
 
--- ULTRA POTATO MODE (ANTI DETAIL)
+-- SMART POTATO MODE (PROTECTION)
 PotatoBtn.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(PotatoBtn, _PotatoMode, "POTATO MODE (ANTI LAG)")
     
     if _PotatoMode then
         for _, v in pairs(game.Workspace:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.Material = Enum.Material.SmoothPlastic
-                if v:IsA("MeshPart") then v.TextureID = "" end -- Hapus tekstur Mesh
-            elseif v:IsA("Texture") or v:IsA("Decal") then
-                v.Transparency = 1
-            elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-            elseif v:IsA("SpecialMesh") then
-                v.TextureId = "" -- Hapus tekstur SpecialMesh
+            -- 1. CEK APAKAH OBJEK ADALAH PLAYER/KILLER
+            local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
+            
+            -- 2. CEK APAKAH OBJEK ADALAH GENERATOR ATAU PALLET
+            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
+
+            if not isPlayer and not isImportant then
+                if v:IsA("BasePart") then
+                    v.Material = Enum.Material.SmoothPlastic
+                    if v:IsA("MeshPart") then v.TextureID = "" end
+                elseif v:IsA("Texture") or v:IsA("Decal") then
+                    v.Transparency = 1
+                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
+                elseif v:IsA("SpecialMesh") then
+                    v.TextureId = ""
+                end
             end
         end
     end
