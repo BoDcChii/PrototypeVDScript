@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.9.4: THE LOCKED MASTER 🎸 ]] --
--- Update: Smart Potato Mode + Re-run Instruction Description
+-- [[ BoDcChii Project - v4.9.5: THE LOCKED MASTER 🎸 ]] --
+-- Update: Anti Self-Damage (Pistol) for Survival
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -108,19 +108,18 @@ local SurvBtn = CreateBtn(Frame1, "ESP SURVIVAL")
 local KillBtn = CreateBtn(Frame1, "ESP KILLER")
 
 local Cat2 = CreateCat("SURVIVAL SKILLS")
-local Frame2 = CreateFrame(80)
-local _GenOn, _NoSkillGen = false, false
+local Frame2 = CreateFrame(120) -- Ukuran ditambah untuk tombol baru
+local _GenOn, _NoSkillGen, _AntiBackfire = false, false, false
 local GenBtn = CreateBtn(Frame2, "ESP GENERATOR")
 local SkillBtn = CreateBtn(Frame2, "NO SKILL CHECK GENERATOR")
+local BackfireBtn = CreateBtn(Frame2, "ANTI SELF-DAMAGE (PISTOL)")
 
 local Cat3 = CreateCat("SMOOTH MAPS")
-local Frame3 = CreateFrame(150) -- Ukuran ditambah untuk deskripsi
+local Frame3 = CreateFrame(150)
 local _FullBright, _NoFog, _PotatoMode = false, false, false
 local BrightBtn = CreateBtn(Frame3, "FULL BRIGHT")
 local FogBtn = CreateBtn(Frame3, "NO FOG / MIST")
 local PotatoBtn = CreateBtn(Frame3, "POTATO MODE (ANTI LAG)")
-
--- Tambahkan Deskripsi Khusus Potato Mode
 local PotatoDesc = Instance.new("TextLabel", Frame3)
 PotatoDesc.Size = UDim2.new(0.9, 0, 0, 30); PotatoDesc.BackgroundTransparency = 1
 PotatoDesc.Text = "*Nyalakan ulang/Reload fitur ini setiap pindah map"; PotatoDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -143,42 +142,34 @@ GenBtn.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(GenBtn, _
 SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(SkillBtn, _NoSkillGen, "NO SKILL CHECK GENERATOR") end)
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
+BackfireBtn.MouseButton1Click:Connect(function() _AntiBackfire = not _AntiBackfire Toggle(BackfireBtn, _AntiBackfire, "ANTI SELF-DAMAGE (PISTOL)") end)
 
--- SMART POTATO MODE (PROTECTION + RE-RUN LOGIC)
+-- POTATO MODE LOGIC
 PotatoBtn.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(PotatoBtn, _PotatoMode, "POTATO MODE (ANTI LAG)")
-    
     if _PotatoMode then
         for _, v in pairs(game.Workspace:GetDescendants()) do
             local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
             local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
-
             if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then
-                    v.Material = Enum.Material.SmoothPlastic
-                    if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then
-                    v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then
-                    v.TextureId = ""
-                end
+                if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic if v:IsA("MeshPart") then v.TextureID = "" end
+                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
+                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
+                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
             end
         end
     end
 end)
 
--- Generator ESP Polling (3 Detik)
+-- Background Task (ESP Gen)
 task.spawn(function()
     while true do
         if _GenOn then
             for _, v in pairs(game.Workspace:GetDescendants()) do
                 if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
                     if not v:FindFirstChild("GenEsp") then
-                        local h = Instance.new("Highlight", v)
-                        h.Name = "GenEsp"; h.FillColor = Color3.fromRGB(255, 255, 0); h.FillTransparency = 0.5
+                        local h = Instance.new("Highlight", v); h.Name = "GenEsp"; h.FillColor = Color3.fromRGB(255, 255, 0); h.FillTransparency = 0.5
                     end
                     v.GenEsp.Enabled = true
                 end
@@ -192,13 +183,13 @@ task.spawn(function()
     end
 end)
 
+-- Real-time Task (ESP Player & Lighting)
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
-            local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
-            hl.Name = "BDEsp"
+            local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character); hl.Name = "BDEsp"
             local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
             hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn)
             hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
@@ -206,15 +197,23 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
+-- --- 6. METATABLE HOOKING (No Skill Check & Anti Self-Damage) ---
 local mt = getrawmetatable(game)
 if mt then
     local old = mt.__namecall
     setreadonly(mt, false)
     mt.__namecall = newcclosure(function(self, ...)
         local method = getnamecallmethod()
-        if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
+        local args = {...}
+        
+        if method == "FireServer" or method == "InvokeServer" then
             local n = tostring(self):lower()
-            if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
+            -- Anti Skill Check
+            if _NoSkillGen and (n:find("fail") or n:find("skillcheck") or n:find("explode")) then return nil end
+            -- Anti Self-Damage (Pistol Backfire)
+            if _AntiBackfire and (n:find("damage") or n:find("wound") or n:find("injury") or n:find("hitself") or n:find("backfire")) then
+                return nil
+            end
         end
         return old(self, ...)
     end)
