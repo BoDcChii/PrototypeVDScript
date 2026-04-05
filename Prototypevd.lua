@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.9: THE LOCKED MASTER 🎸 ]] --
--- Update: Optimization + Potato Mode (Anti-Lag) for Low-End
+-- [[ BoDcChii Project - v4.9.1: THE LOCKED MASTER 🎸 ]] --
+-- Update: Power Potato Mode (Material Stripping)
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -11,7 +11,7 @@ local Lighting = game:GetService("Lighting")
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
 if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
 
--- --- 1. WELCOME NOTIFICATION (2 DETIK) ---
+-- --- 1. WELCOME NOTIFICATION ---
 local function ShowWelcome()
     local WelcomeGui = Instance.new("ScreenGui", CoreGui)
     WelcomeGui.Name = "BoDcChii_Welcome"
@@ -22,12 +22,10 @@ local function ShowWelcome()
     Instance.new("UICorner", WelcomeFrame).CornerRadius = UDim.new(0, 10)
     local Stroke = Instance.new("UIStroke", WelcomeFrame)
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
-    
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
     WelcomeLabel.Text = "Welcome To BoDcChii Project"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
     WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
-    
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
 pcall(ShowWelcome)
@@ -35,7 +33,6 @@ pcall(ShowWelcome)
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
 
--- --- FUNGSI DRAG ---
 local function EnableDrag(gui)
     local dragging, dragStart, startPos
     gui.InputBegan:Connect(function(input)
@@ -84,7 +81,7 @@ UIList.SortOrder = Enum.SortOrder.LayoutOrder; UIList.Padding = UDim.new(0, 5); 
 local function CreateBtn(parent, text)
     local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(0.95, 0, 0, 35)
     btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); btn.Text = text .. ": OFF"; btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 10; Instance.new("UICorner", btn) -- Font diperkecil agar muat text panjang
+    btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 10; Instance.new("UICorner", btn)
     local s = Instance.new("UIStroke", btn); s.Color = Color3.fromRGB(200, 50, 50)
     return btn
 end
@@ -103,7 +100,7 @@ local function CreateFrame(size)
     return f
 end
 
--- --- 4. CATEGORIES & FEATURES ---
+-- --- 4. CATEGORIES ---
 local Cat1 = CreateCat("PLAYER ESP")
 local Frame1 = CreateFrame(80)
 local _SurvOn, _KillOn = false, false
@@ -117,7 +114,7 @@ local GenBtn = CreateBtn(Frame2, "ESP GENERATOR")
 local SkillBtn = CreateBtn(Frame2, "NO SKILL CHECK GENERATOR")
 
 local Cat3 = CreateCat("SMOOTH MAPS")
-local Frame3 = CreateFrame(120) -- Ukuran Frame ditambah agar muat tombol baru
+local Frame3 = CreateFrame(120)
 local _FullBright, _NoFog, _PotatoMode = false, false, false
 local BrightBtn = CreateBtn(Frame3, "FULL BRIGHT")
 local FogBtn = CreateBtn(Frame3, "NO FOG / MIST")
@@ -141,29 +138,27 @@ SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Togg
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
 
--- LOGIKA POTATO MODE
+-- FIXED POTATO MODE (FORCE SMOOTH PLASTIC)
 PotatoBtn.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(PotatoBtn, _PotatoMode, "POTATO MODE (ANTI LAG)")
     
-    if _PotatoMode then
-        for _, v in pairs(game.Workspace:GetDescendants()) do
-            if v:IsA("Texture") or v:IsA("Decal") then
-                v.Transparency = 1 -- Sembunyikan tekstur agar ringan
-            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                v.Enabled = false -- Matikan partikel asap/api
+    local function Clean(obj)
+        if _PotatoMode then
+            if obj:IsA("BasePart") then
+                obj.Material = Enum.Material.SmoothPlastic -- Force Burik
+            elseif obj:IsA("Texture") or obj:IsA("Decal") then
+                obj.Transparency = 1
+            elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+                obj.Enabled = false
             end
         end
-    else
-        -- Kembalikan tekstur (Opsional, tapi untuk kestabilan biasanya butuh relog server agar sempurna)
-        for _, v in pairs(game.Workspace:GetDescendants()) do
-            if v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 0 
-            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then v.Enabled = true end
-        end
     end
+
+    for _, v in pairs(game.Workspace:GetDescendants()) do Clean(v) end
 end)
 
--- Background Task untuk Generator (Setiap 3 Detik)
+-- Generator ESP Polling (3 Detik)
 task.spawn(function()
     while true do
         if _GenOn then
@@ -171,8 +166,7 @@ task.spawn(function()
                 if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
                     if not v:FindFirstChild("GenEsp") then
                         local h = Instance.new("Highlight", v)
-                        h.Name = "GenEsp"; h.FillColor = Color3.fromRGB(255, 255, 0)
-                        h.OutlineColor = Color3.new(1, 1, 1); h.FillTransparency = 0.5
+                        h.Name = "GenEsp"; h.FillColor = Color3.fromRGB(255, 255, 0); h.FillTransparency = 0.5
                     end
                     v.GenEsp.Enabled = true
                 end
@@ -186,11 +180,9 @@ task.spawn(function()
     end
 end)
 
--- Heartbeat untuk Fitur Real-time
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
-    
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
