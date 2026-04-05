@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.9.3: THE LOCKED MASTER 🎸 ]] --
--- Update: Smart Potato Mode (Keep Players, Gens, & Pallets)
+-- [[ BoDcChii Project - v4.9.4: THE LOCKED MASTER 🎸 ]] --
+-- Update: Smart Potato Mode + Re-run Instruction Description
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -114,11 +114,17 @@ local GenBtn = CreateBtn(Frame2, "ESP GENERATOR")
 local SkillBtn = CreateBtn(Frame2, "NO SKILL CHECK GENERATOR")
 
 local Cat3 = CreateCat("SMOOTH MAPS")
-local Frame3 = CreateFrame(120)
+local Frame3 = CreateFrame(150) -- Ukuran ditambah untuk deskripsi
 local _FullBright, _NoFog, _PotatoMode = false, false, false
 local BrightBtn = CreateBtn(Frame3, "FULL BRIGHT")
 local FogBtn = CreateBtn(Frame3, "NO FOG / MIST")
 local PotatoBtn = CreateBtn(Frame3, "POTATO MODE (ANTI LAG)")
+
+-- Tambahkan Deskripsi Khusus Potato Mode
+local PotatoDesc = Instance.new("TextLabel", Frame3)
+PotatoDesc.Size = UDim2.new(0.9, 0, 0, 30); PotatoDesc.BackgroundTransparency = 1
+PotatoDesc.Text = "*Nyalakan ulang/Reload fitur ini setiap pindah map"; PotatoDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
+PotatoDesc.TextSize = 8; PotatoDesc.Font = Enum.Font.SourceSansItalic; PotatoDesc.TextWrapped = true
 
 local function Refresh() ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y + 15) end
 Cat1.MouseButton1Click:Connect(function() Frame1.Visible = not Frame1.Visible Cat1.Text = Frame1.Visible and "[ PLAYER ESP ]  -" or "[ PLAYER ESP ]  +" Refresh() end)
@@ -138,17 +144,14 @@ SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Togg
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
 
--- SMART POTATO MODE (PROTECTION)
+-- SMART POTATO MODE (PROTECTION + RE-RUN LOGIC)
 PotatoBtn.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(PotatoBtn, _PotatoMode, "POTATO MODE (ANTI LAG)")
     
     if _PotatoMode then
         for _, v in pairs(game.Workspace:GetDescendants()) do
-            -- 1. CEK APAKAH OBJEK ADALAH PLAYER/KILLER
             local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
-            
-            -- 2. CEK APAKAH OBJEK ADALAH GENERATOR ATAU PALLET
             local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
 
             if not isPlayer and not isImportant then
