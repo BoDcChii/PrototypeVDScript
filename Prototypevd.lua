@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.9.4: THE LOCKED MASTER 🎸 ]] --
--- Update: Smart Potato Mode + Re-run Instruction Description
+-- [[ BoDcChii Project - v4.9.8: THE LOCKED MASTER 🎸 ]] --
+-- Fix: Removed accidental text at the end of script
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -114,13 +114,12 @@ local GenBtn = CreateBtn(Frame2, "ESP GENERATOR")
 local SkillBtn = CreateBtn(Frame2, "NO SKILL CHECK GENERATOR")
 
 local Cat3 = CreateCat("SMOOTH MAPS")
-local Frame3 = CreateFrame(150) -- Ukuran ditambah untuk deskripsi
+local Frame3 = CreateFrame(150)
 local _FullBright, _NoFog, _PotatoMode = false, false, false
 local BrightBtn = CreateBtn(Frame3, "FULL BRIGHT")
 local FogBtn = CreateBtn(Frame3, "NO FOG / MIST")
 local PotatoBtn = CreateBtn(Frame3, "POTATO MODE (ANTI LAG)")
 
--- Tambahkan Deskripsi Khusus Potato Mode
 local PotatoDesc = Instance.new("TextLabel", Frame3)
 PotatoDesc.Size = UDim2.new(0.9, 0, 0, 30); PotatoDesc.BackgroundTransparency = 1
 PotatoDesc.Text = "*Nyalakan ulang/Reload fitur ini setiap pindah map"; PotatoDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -144,16 +143,13 @@ SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Togg
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
 
--- SMART POTATO MODE (PROTECTION + RE-RUN LOGIC)
 PotatoBtn.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(PotatoBtn, _PotatoMode, "POTATO MODE (ANTI LAG)")
-    
     if _PotatoMode then
         for _, v in pairs(game.Workspace:GetDescendants()) do
             local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
             local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
-
             if not isPlayer and not isImportant then
                 if v:IsA("BasePart") then
                     v.Material = Enum.Material.SmoothPlastic
@@ -206,6 +202,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
+-- --- METATABLE RE-FIX ---
 local mt = getrawmetatable(game)
 if mt then
     local old = mt.__namecall
