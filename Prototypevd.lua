@@ -1,5 +1,5 @@
 -- [[ BoDcChii Project - v4.9: THE LOCKED MASTER 🎸 ]] --
--- Update: Fixed ESP Generator (Deep Search) + Locked Features
+-- Update: Optimization for Low-End Devices (RAM 4GB/Helio G85)
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -140,6 +140,37 @@ SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Togg
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
 
+-- OPTIMASI CACHE & POLLING
+local _GenCache = {}
+
+-- Background Task untuk Generator (Berjalan tiap 3 detik saja - SANGAT RINGAN)
+task.spawn(function()
+    while true do
+        if _GenOn then
+            for _, v in pairs(game.Workspace:GetDescendants()) do
+                if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
+                    if not v:FindFirstChild("GenEsp") then
+                        local h = Instance.new("Highlight")
+                        h.Name = "GenEsp"
+                        h.Parent = v
+                        h.FillColor = Color3.fromRGB(255, 255, 0)
+                        h.OutlineColor = Color3.new(1, 1, 1)
+                        h.FillTransparency = 0.5
+                    end
+                    v.GenEsp.Enabled = true
+                end
+            end
+        else
+            -- Matikan semua highlight jika OFF
+            for _, v in pairs(game.Workspace:GetDescendants()) do
+                if v:FindFirstChild("GenEsp") then v.GenEsp.Enabled = false end
+            end
+        end
+        task.wait(3) -- Delay 3 detik agar CPU tidak panas
+    end
+end)
+
+-- Heartbeat hanya untuk Fitur yang butuh update cepat (ESP Player & Lighting)
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
@@ -151,29 +182,6 @@ RunService.Heartbeat:Connect(function()
             local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
             hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn)
             hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
-        end
-    end
-
-    -- --- FIX KHUSUS ESP GENERATOR ---
-    if _GenOn then
-        for _, v in pairs(game.Workspace:GetDescendants()) do
-            if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
-                local h = v:FindFirstChild("GenEsp")
-                if not h then
-                    h = Instance.new("Highlight")
-                    h.Name = "GenEsp"
-                    h.Parent = v
-                    h.FillColor = Color3.fromRGB(255, 255, 0)
-                    h.OutlineColor = Color3.new(1, 1, 1)
-                    h.FillTransparency = 0.5
-                end
-                h.Enabled = true
-            end
-        end
-    else
-        for _, v in pairs(game.Workspace:GetDescendants()) do
-            local h = v:FindFirstChild("GenEsp")
-            if h then h.Enabled = false end
         end
     end
 end)
