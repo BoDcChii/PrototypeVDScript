@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v5.0.0: THE SIDE-TAB EVOLUTION 🎸 ]] --
--- Status: Rectangle UI + Right Sidebar (1, 2, 3) + Locked Features
+-- [[ BoDcChii Project - v5.0.2: ONLY NUMBERS SIDEBAR 🎸 ]] --
+-- Status: Rectangle UI + Right Sidebar (1, 2, 3 Only) + Locked Features
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -59,15 +59,14 @@ Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(OpenButton)
 
--- --- 3. MAIN FRAME (RECTANGLE) ---
+-- --- 3. MAIN FRAME ---
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 380, 0, 240); MainFrame.Position = UDim2.new(0.5, -190, 0.4, 0)
+MainFrame.Size = UDim2.new(0, 350, 0, 200); MainFrame.Position = UDim2.new(0.5, -175, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(MainFrame)
 
--- HEADER & LINE
 local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 18
@@ -77,91 +76,79 @@ LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 3
 LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
 Instance.new("UICorner", LineH)
 
--- SIDEBAR RIGHT (ANGKA 1, 2, 3)
+-- SIDEBAR RIGHT (MURNI ANGKA)
 local Sidebar = Instance.new("Frame", MainFrame)
-Sidebar.Size = UDim2.new(0, 60, 1, -45); Sidebar.Position = UDim2.new(1, -65, 0, 42)
+Sidebar.Size = UDim2.new(0, 45, 1, -45); Sidebar.Position = UDim2.new(1, -50, 0, 42)
 Sidebar.BackgroundTransparency = 1
 local SidebarList = Instance.new("UIListLayout", Sidebar)
-SidebarList.Padding = UDim.new(0, 8); SidebarList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+SidebarList.Padding = UDim.new(0, 5); SidebarList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
--- VERTICAL SEPARATOR LINE
+-- VERTICAL LINE
 local LineV = Instance.new("Frame", MainFrame)
-LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(1, -70, 0, 42)
+LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(1, -55, 0, 42)
 LineV.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineV.BorderSizePixel = 0
 
--- CONTENT AREA (LEFT)
+-- CONTENT LEFT
 local ContentArea = Instance.new("Frame", MainFrame)
-ContentArea.Size = UDim2.new(1, -85, 1, -50); ContentArea.Position = UDim2.new(0, 10, 0, 45)
+ContentArea.Size = UDim2.new(1, -65, 1, -50); ContentArea.Position = UDim2.new(0, 10, 0, 45)
 ContentArea.BackgroundTransparency = 1
 
 local function CreateTabBtn(num)
     local btn = Instance.new("TextButton", Sidebar)
-    btn.Size = UDim2.new(0, 45, 0, 45); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    btn.Size = UDim2.new(0, 35, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.Text = tostring(num); btn.TextColor3 = Color3.new(1, 1, 1); btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 20; Instance.new("UICorner", btn)
-    local s = Instance.new("UIStroke", btn); s.Color = Color3.fromRGB(255, 105, 180); s.Thickness = 1
+    btn.TextSize = 16; Instance.new("UICorner", btn)
+    local s = Instance.new("UIStroke", btn); s.Color = Color3.fromRGB(255, 105, 180)
     return btn
 end
 
-local Tab1Btn = CreateTabBtn(1)
-local Tab2Btn = CreateTabBtn(2)
-local Tab3Btn = CreateTabBtn(3)
+local Tab1Btn, Tab2Btn, Tab3Btn = CreateTabBtn(1), CreateTabBtn(2), CreateTabBtn(3)
 
--- PAGES
 local function CreatePage()
-    local sc = Instance.new("ScrollingFrame", ContentArea)
-    sc.Size = UDim2.new(1, 0, 1, 0); sc.BackgroundTransparency = 1; sc.Visible = false
-    sc.ScrollBarThickness = 2; sc.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-    local l = Instance.new("UIListLayout", sc); l.Padding = UDim.new(0, 5); l.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    return sc
+    local f = Instance.new("Frame", ContentArea)
+    f.Size = UDim2.new(1, 0, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
+    local l = Instance.new("UIListLayout", f); l.Padding = UDim.new(0, 5); l.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    return f
 end
 
-local Page1 = CreatePage() -- ESP
-local Page2 = CreatePage() -- SKILLS
-local Page3 = CreatePage() -- MAPS
+local Page1, Page2, Page3 = CreatePage(), CreatePage(), CreatePage()
 
 local function ShowPage(page, btn)
     Page1.Visible = false; Page2.Visible = false; Page3.Visible = false
-    Tab1Btn.UIStroke.Thickness = 1; Tab2Btn.UIStroke.Thickness = 1; Tab3Btn.UIStroke.Thickness = 1
-    page.Visible = true; btn.UIStroke.Thickness = 3
+    Tab1Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    Tab2Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    Tab3Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    page.Visible = true; btn.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 end
 
 Tab1Btn.MouseButton1Click:Connect(function() ShowPage(Page1, Tab1Btn) end)
 Tab2Btn.MouseButton1Click:Connect(function() ShowPage(Page2, Tab2Btn) end)
 Tab3Btn.MouseButton1Click:Connect(function() ShowPage(Page3, Tab3Btn) end)
-ShowPage(Page1, Tab1Btn) -- Default view
+ShowPage(Page1, Tab1Btn)
 
--- --- 4. BUTTON GENERATOR (LOGIC REUSE) ---
+-- --- 4. BUTTONS ---
 local function CreateBtn(parent, text)
-    local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(0.95, 0, 0, 40)
+    local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(0.95, 0, 0, 35)
     btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); btn.Text = text .. ": OFF"; btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 10; Instance.new("UICorner", btn)
     local s = Instance.new("UIStroke", btn); s.Color = Color3.fromRGB(200, 50, 50)
     return btn
 end
 
--- Tab 1: PLAYER ESP
 local _SurvOn, _KillOn = false, false
 local SurvBtn = CreateBtn(Page1, "ESP SURVIVAL")
 local KillBtn = CreateBtn(Page1, "ESP KILLER")
 
--- Tab 2: SURVIVAL SKILLS
 local _GenOn, _NoSkillGen = false, false
 local GenBtn = CreateBtn(Page2, "ESP GENERATOR")
 local SkillBtn = CreateBtn(Page2, "NO SKILL CHECK GENERATOR")
 
--- Tab 3: SMOOTH MAPS
 local _FullBright, _NoFog, _PotatoMode = false, false, false
 local BrightBtn = CreateBtn(Page3, "FULL BRIGHT")
 local FogBtn = CreateBtn(Page3, "NO FOG / MIST")
 local PotatoBtn = CreateBtn(Page3, "POTATO MODE (ANTI LAG)")
 
-local PotatoDesc = Instance.new("TextLabel", Page3)
-PotatoDesc.Size = UDim2.new(0.9, 0, 0, 30); PotatoDesc.BackgroundTransparency = 1
-PotatoDesc.Text = "*Reload fitur ini setiap pindah map"; PotatoDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
-PotatoDesc.TextSize = 8; PotatoDesc.Font = Enum.Font.SourceSansItalic; PotatoDesc.TextWrapped = true
-
--- --- 5. LOGIKA FITUR (LOCKED & STABLE) ---
+-- --- 5. LOGIC (LOCKED) ---
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
     btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
@@ -180,4 +167,63 @@ PotatoBtn.MouseButton1Click:Connect(function()
     if _PotatoMode then
         for _, v in pairs(game.Workspace:GetDescendants()) do
             local isP = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
-            local isI = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find
+            local isI = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
+            if not isP and not isI then
+                if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic if v:IsA("MeshPart") then v.TextureID = "" end
+                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
+                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
+                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if _GenOn then
+            for _, v in pairs(game.Workspace:GetDescendants()) do
+                if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
+                    if not v:FindFirstChild("GenEsp") then
+                        local h = Instance.new("Highlight", v); h.Name = "GenEsp"; h.FillColor = Color3.fromRGB(255, 255, 0); h.FillTransparency = 0.5
+                    end
+                    v.GenEsp.Enabled = true
+                end
+            end
+        else
+            for _, v in pairs(game.Workspace:GetDescendants()) do if v:FindFirstChild("GenEsp") then v.GenEsp.Enabled = false end end
+        end
+        task.wait(3)
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
+    if _NoFog then Lighting.FogEnd = 999999 end
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= Players.LocalPlayer and p.Character then
+            local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
+            hl.Name = "BDEsp"
+            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
+            hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn)
+            hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
+        end
+    end
+end)
+
+local mt = getrawmetatable(game)
+if mt then
+    local old = mt.__namecall
+    setreadonly(mt, false)
+    mt.__namecall = newcclosure(function(self, ...)
+        local method = getnamecallmethod()
+        if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
+            local n = tostring(self):lower()
+            if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
+        end
+        return old(self, ...)
+    end)
+    setreadonly(mt, true)
+end
+
+OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
