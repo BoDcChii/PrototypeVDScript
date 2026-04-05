@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.9.7: THE LOCKED MASTER 🎸 ]] --
--- Update: Survival Aim Assist (Pistol Magnet)
+-- [[ BoDcChii Project - v4.9.8: THE LOCKED MASTER 🎸 ]] --
+-- Update: Cleaned Survival Skills (Removed Aim Assist)
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -61,7 +61,7 @@ EnableDrag(OpenButton)
 
 -- --- 3. MAIN FRAME ---
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 240, 0, 260); MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
+MainFrame.Size = UDim2.new(0, 240, 0, 240); MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(255, 105, 180)
@@ -108,11 +108,10 @@ local SurvBtn = CreateBtn(Frame1, "ESP SURVIVAL")
 local KillBtn = CreateBtn(Frame1, "ESP KILLER")
 
 local Cat2 = CreateCat("SURVIVAL SKILLS")
-local Frame2 = CreateFrame(120)
-local _GenOn, _NoSkillGen, _AimAssist = false, false, false
+local Frame2 = CreateFrame(80)
+local _GenOn, _NoSkillGen = false, false
 local GenBtn = CreateBtn(Frame2, "ESP GENERATOR")
 local SkillBtn = CreateBtn(Frame2, "NO SKILL CHECK GENERATOR")
-local AimBtn = CreateBtn(Frame2, "AIM ASSIST PISTOL (MAGNET)")
 
 local Cat3 = CreateCat("SMOOTH MAPS")
 local Frame3 = CreateFrame(150)
@@ -142,7 +141,6 @@ GenBtn.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(GenBtn, _
 SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(SkillBtn, _NoSkillGen, "NO SKILL CHECK GENERATOR") end)
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
-AimBtn.MouseButton1Click:Connect(function() _AimAssist = not _AimAssist Toggle(AimBtn, _AimAssist, "AIM ASSIST PISTOL (MAGNET)") end)
 
 -- POTATO MODE LOGIC
 PotatoBtn.MouseButton1Click:Connect(function() 
@@ -161,48 +159,6 @@ PotatoBtn.MouseButton1Click:Connect(function()
         end
     end
 end)
-
--- --- 6. AIM ASSIST LOGIC (Silent Position) ---
-local function GetClosestKiller()
-    local target = nil
-    local dist = math.huge
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
-            if isK then
-                local d = (p.Character.HumanoidRootPart.Position - Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                if d < dist then dist = d target = p.Character.HumanoidRootPart end
-            end
-        end
-    end
-    return target
-end
-
--- --- 7. METATABLE HOOKING ---
-local mt = getrawmetatable(game)
-local old = mt.__index
-setreadonly(mt, false)
-mt.__index = newcclosure(function(self, k)
-    if _AimAssist and k == "Hit" and tostring(self) == "Mouse" then
-        local target = GetClosestKiller()
-        if target then return target.CFrame end
-    end
-    return old(self, k)
-end)
-setreadonly(mt, true)
-
--- Re-use Namecall for No Skill Check
-local old2 = mt.__namecall
-setreadonly(mt, false)
-mt.__namecall = newcclosure(function(self, ...)
-    local method = getnamecallmethod()
-    if method == "FireServer" or method == "InvokeServer" then
-        local n = tostring(self):lower()
-        if _NoSkillGen and (n:find("fail") or n:find("skillcheck") or n:find("explode")) then return nil end
-    end
-    return old2(self, ...)
-end)
-setreadonly(mt, true)
 
 -- Background Task (ESP Gen & Player)
 task.spawn(function()
@@ -228,12 +184,3 @@ RunService.Heartbeat:Connect(function()
     if _NoFog then Lighting.FogEnd = 999999 end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
-            local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character); hl.Name = "BDEsp"
-            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
-            hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn)
-            hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
-        end
-    end
-end)
-
-OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
