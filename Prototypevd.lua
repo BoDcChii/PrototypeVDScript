@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.9.8: THE LOCKED MASTER 🎸 ]] --
--- Fix: Removed accidental text at the end of script
+-- [[ BoDcChii Project - v4.9.5: THE LOCKED MASTER 🎸 ]] --
+-- Status: UI Rectangle + Full Features Integrated (LOCKED)
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -59,9 +59,9 @@ Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(OpenButton)
 
--- --- 3. MAIN FRAME ---
+-- --- 3. MAIN FRAME (RECTANGLE) ---
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 240, 0, 240); MainFrame.Position = UDim2.new(0.5, -120, 0.4, 0)
+MainFrame.Size = UDim2.new(0, 320, 0, 220); MainFrame.Position = UDim2.new(0.5, -160, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(255, 105, 180)
@@ -71,8 +71,14 @@ local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 18
 
+-- --- SEPARATOR LINE ---
+local Line = Instance.new("Frame", MainFrame)
+Line.Size = UDim2.new(0.9, 0, 0, 2); Line.Position = UDim2.new(0.05, 0, 0, 36)
+Line.BackgroundColor3 = Color3.fromRGB(255, 105, 180); Line.BorderSizePixel = 0
+Instance.new("UICorner", Line)
+
 local ScrollFrame = Instance.new("ScrollingFrame", MainFrame)
-ScrollFrame.Size = UDim2.new(1, -10, 1, -45); ScrollFrame.Position = UDim2.new(0, 5, 0, 40)
+ScrollFrame.Size = UDim2.new(1, -10, 1, -55); ScrollFrame.Position = UDim2.new(0, 5, 0, 45)
 ScrollFrame.BackgroundTransparency = 1; ScrollFrame.ScrollBarThickness = 3
 ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180); ScrollFrame.BorderSizePixel = 0
 local UIList = Instance.new("UIListLayout", ScrollFrame)
@@ -130,7 +136,7 @@ Cat1.MouseButton1Click:Connect(function() Frame1.Visible = not Frame1.Visible Ca
 Cat2.MouseButton1Click:Connect(function() Frame2.Visible = not Frame2.Visible Cat2.Text = Frame2.Visible and "[ SURVIVAL SKILLS ]  -" or "[ SURVIVAL SKILLS ]  +" Refresh() end)
 Cat3.MouseButton1Click:Connect(function() Frame3.Visible = not Frame3.Visible Cat3.Text = Frame3.Visible and "[ SMOOTH MAPS ]  -" or "[ SMOOTH MAPS ]  +" Refresh() end)
 
--- --- 5. LOGIKA FITUR ---
+-- --- 5. LOGIKA FITUR (LOCKED) ---
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
     btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
@@ -166,7 +172,6 @@ PotatoBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Generator ESP Polling (3 Detik)
 task.spawn(function()
     while true do
         if _GenOn then
@@ -192,30 +197,4 @@ RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
     for _, p in pairs(Players:GetPlayers()) do
-        if p ~= Players.LocalPlayer and p.Character then
-            local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
-            hl.Name = "BDEsp"
-            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
-            hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn)
-            hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
-        end
-    end
-end)
-
--- --- METATABLE RE-FIX ---
-local mt = getrawmetatable(game)
-if mt then
-    local old = mt.__namecall
-    setreadonly(mt, false)
-    mt.__namecall = newcclosure(function(self, ...)
-        local method = getnamecallmethod()
-        if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
-            local n = tostring(self):lower()
-            if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
-        end
-        return old(self, ...)
-    end)
-    setreadonly(mt, true)
-end
-
-OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+        if p ~= Players.
