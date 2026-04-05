@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v5.0.8: ABSOLUTE LEFT SIDEBAR FIX 🎸 ]] --
+-- [[ BoDcChii Project - v5.0.9: LEFT SIDEBAR + WELCOME RESTORED 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -6,7 +6,28 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 
+-- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
+if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
+
+-- --- 1. WELCOME NOTIFICATION (RESTORED) ---
+local function ShowWelcome()
+    local WelcomeGui = Instance.new("ScreenGui", CoreGui)
+    WelcomeGui.Name = "BoDcChii_Welcome"
+    local WelcomeFrame = Instance.new("Frame", WelcomeGui)
+    WelcomeFrame.Size = UDim2.new(0, 220, 0, 45)
+    WelcomeFrame.Position = UDim2.new(0.5, -110, 0.1, 0)
+    WelcomeFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    Instance.new("UICorner", WelcomeFrame).CornerRadius = UDim.new(0, 10)
+    local Stroke = Instance.new("UIStroke", WelcomeFrame)
+    Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
+    local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
+    WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
+    WelcomeLabel.Text = "Welcome To BoDcChii Project"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
+    task.delay(2, function() WelcomeGui:Destroy() end)
+end
+pcall(ShowWelcome)
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BoDcChii_Minimalist"
@@ -49,23 +70,19 @@ Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Heade
 local LineH = Instance.new("Frame", MainFrame)
 LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 36); LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
 
--- [[ SIDEBAR DI KIRI (ABSOLUTE 0 POS) ]] --
+-- SIDEBAR LEFT
 local Sidebar = Instance.new("Frame", MainFrame)
-Sidebar.Size = UDim2.new(0, 115, 1, -45)
-Sidebar.Position = UDim2.new(0, 5, 0, 42) -- Pastikan di kiri
-Sidebar.BackgroundTransparency = 1
+Sidebar.Size = UDim2.new(0, 115, 1, -45); Sidebar.Position = UDim2.new(0, 5, 0, 42); Sidebar.BackgroundTransparency = 1
 Instance.new("UIListLayout", Sidebar).Padding = UDim.new(0, 5)
 
--- GARIS PEMISAH VERTIKAL (MENEMPEL SIDEBAR)
+-- VERTICAL LINE
 local LineV = Instance.new("Frame", MainFrame)
 LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(0, 122, 0, 42)
 LineV.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineV.BorderSizePixel = 0
 
--- [[ ISI FITUR DI KANAN ]] --
+-- CONTENT AREA
 local ContentArea = Instance.new("Frame", MainFrame)
-ContentArea.Size = UDim2.new(1, -135, 1, -50)
-ContentArea.Position = UDim2.new(0, 130, 0, 45) -- Geser ke kanan supaya tidak tumpang tindih
-ContentArea.BackgroundTransparency = 1
+ContentArea.Size = UDim2.new(1, -135, 1, -50); ContentArea.Position = UDim2.new(0, 130, 0, 45); ContentArea.BackgroundTransparency = 1
 
 local function CreateTabBtn(text)
     local btn = Instance.new("TextButton", Sidebar); btn.Size = UDim2.new(1, 0, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -100,7 +117,7 @@ local function CreateBtn(parent, text)
     return btn
 end
 
--- LOGIC & BUTTONS (TIDAK BERUBAH)
+-- LOGIC & BUTTONS (SAME AS v5.0.8)
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode = false, false, false, false, false, false, false
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
