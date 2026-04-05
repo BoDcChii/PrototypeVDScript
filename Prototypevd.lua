@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v5.0.7: REAL LEFT SIDEBAR FIX 🎸 ]] --
+-- [[ BoDcChii Project - v5.0.8: ABSOLUTE LEFT SIDEBAR FIX 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -49,19 +49,23 @@ Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Heade
 local LineH = Instance.new("Frame", MainFrame)
 LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 36); LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
 
--- SIDEBAR (FIXED TO LEFT)
+-- [[ SIDEBAR DI KIRI (ABSOLUTE 0 POS) ]] --
 local Sidebar = Instance.new("Frame", MainFrame)
-Sidebar.Size = UDim2.new(0, 110, 1, -45); Sidebar.Position = UDim2.new(0, 10, 0, 42); Sidebar.BackgroundTransparency = 1
+Sidebar.Size = UDim2.new(0, 115, 1, -45)
+Sidebar.Position = UDim2.new(0, 5, 0, 42) -- Pastikan di kiri
+Sidebar.BackgroundTransparency = 1
 Instance.new("UIListLayout", Sidebar).Padding = UDim.new(0, 5)
 
--- VERTICAL SEPARATOR (LEFT SIDE)
+-- GARIS PEMISAH VERTIKAL (MENEMPEL SIDEBAR)
 local LineV = Instance.new("Frame", MainFrame)
-LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(0, 125, 0, 42)
+LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(0, 122, 0, 42)
 LineV.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineV.BorderSizePixel = 0
 
--- CONTENT AREA (RIGHT SIDE)
+-- [[ ISI FITUR DI KANAN ]] --
 local ContentArea = Instance.new("Frame", MainFrame)
-ContentArea.Size = UDim2.new(1, -145, 1, -50); ContentArea.Position = UDim2.new(0, 135, 0, 45); ContentArea.BackgroundTransparency = 1
+ContentArea.Size = UDim2.new(1, -135, 1, -50)
+ContentArea.Position = UDim2.new(0, 130, 0, 45) -- Geser ke kanan supaya tidak tumpang tindih
+ContentArea.BackgroundTransparency = 1
 
 local function CreateTabBtn(text)
     local btn = Instance.new("TextButton", Sidebar); btn.Size = UDim2.new(1, 0, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -81,4 +85,67 @@ end
 local P1, P2, P3 = CreatePage(), CreatePage(), CreatePage()
 
 local function Show(p, b)
-    P1.Visible = false; P2.Visible = false; P3.Visible =
+    P1.Visible = false; P2.Visible = false; P3.Visible = false
+    T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    p.Visible = true; b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+end
+
+T1.MouseButton1Click:Connect(function() Show(P1, T1) end); T2.MouseButton1Click:Connect(function() Show(P2, T2) end); T3.MouseButton1Click:Connect(function() Show(P3, T3) end)
+Show(P1, T1)
+
+local function CreateBtn(parent, text)
+    local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(1, 0, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    btn.Text = text .. ": OFF"; btn.TextColor3 = Color3.new(1, 1, 1); btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 9
+    Instance.new("UICorner", btn); local s = Instance.new("UIStroke", btn); s.Color = Color3.fromRGB(200, 50, 50)
+    return btn
+end
+
+-- LOGIC & BUTTONS (TIDAK BERUBAH)
+local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode = false, false, false, false, false, false, false
+local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
+local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
+local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
+
+local function Toggle(btn, state, txt)
+    btn.Text = txt .. (state and ": ON" or ": OFF")
+    btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
+end
+
+Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
+Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
+Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
+Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(Btn4, _NoSkillGen, "NO SKILL CHECK") end)
+Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
+Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
+Btn7.MouseButton1Click:Connect(function() _PotatoMode = not _PotatoMode Toggle(Btn7, _PotatoMode, "POTATO MODE")
+    if _PotatoMode then for _, v in pairs(game.Workspace:GetDescendants()) do if v:IsA("BasePart") and not v:FindFirstAncestorOfClass("Model") then v.Material = "SmoothPlastic" end end end
+end)
+
+task.spawn(function()
+    while task.wait(3) do
+        if _GenOn then
+            for _, v in pairs(game.Workspace:GetDescendants()) do
+                if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
+                    if not v:FindFirstChild("GenEsp") then local h = Instance.new("Highlight", v); h.Name = "GenEsp"; h.FillColor = Color3.new(1, 1, 0) end
+                    v.GenEsp.Enabled = true
+                end
+            end
+        else
+            for _, v in pairs(game.Workspace:GetDescendants()) do if v:FindFirstChild("GenEsp") then v.GenEsp.Enabled = false end end
+        end
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
+    if _NoFog then Lighting.FogEnd = 1e5 end
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= Players.LocalPlayer and p.Character then
+            local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character); hl.Name = "BDEsp"
+            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
+            hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn); hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
+        end
+    end
+end)
+
+OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
