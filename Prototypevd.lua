@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v5.1.2: LEFT SIDEBAR MASTER EDITION 🎸 ]] --
+-- [[ BoDcChii Project - v5.1.3: DUAL SCROLLING EDITION 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -72,20 +72,30 @@ Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Heade
 local LineH = Instance.new("Frame", MainFrame)
 LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 36); LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
 
--- --- 4. SIDEBAR (KIRI) ---
-local Sidebar = Instance.new("Frame", MainFrame)
-Sidebar.Size = UDim2.new(0, 115, 1, -45); Sidebar.Position = UDim2.new(0, 5, 0, 42); Sidebar.BackgroundTransparency = 1
-Instance.new("UIListLayout", Sidebar).Padding = UDim.new(0, 5)
+-- --- 4. SIDEBAR SCROLLING (KIRI) ---
+local SidebarScroll = Instance.new("ScrollingFrame", MainFrame)
+SidebarScroll.Size = UDim2.new(0, 115, 1, -45); SidebarScroll.Position = UDim2.new(0, 5, 0, 42)
+SidebarScroll.BackgroundTransparency = 1; SidebarScroll.ScrollBarThickness = 2
+SidebarScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180); SidebarScroll.BorderSizePixel = 0
+SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, 0) -- Auto adjust nanti
+
+local SideLayout = Instance.new("UIListLayout", SidebarScroll)
+SideLayout.Padding = UDim.new(0, 5)
+SideLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, SideLayout.AbsoluteContentSize.Y + 5)
+end)
 
 local LineV = Instance.new("Frame", MainFrame)
 LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(0, 122, 0, 42); LineV.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineV.BorderSizePixel = 0
 
--- --- 5. CONTENT AREA ---
-local ContentArea = Instance.new("Frame", MainFrame)
-ContentArea.Size = UDim2.new(1, -135, 1, -50); ContentArea.Position = UDim2.new(0, 130, 0, 45); ContentArea.BackgroundTransparency = 1
+-- --- 5. CONTENT SCROLLING (KANAN) ---
+local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
+ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.new(0, 130, 0, 45)
+ContentScroll.BackgroundTransparency = 1; ContentScroll.ScrollBarThickness = 2
+ContentScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180); ContentScroll.BorderSizePixel = 0
 
 local function CreateTabBtn(text)
-    local btn = Instance.new("TextButton", Sidebar); btn.Size = UDim2.new(1, 0, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    local btn = Instance.new("TextButton", SidebarScroll); btn.Size = UDim2.new(1, -5, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.Text = text; btn.TextColor3 = Color3.new(1, 1, 1); btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 10
     Instance.new("UICorner", btn); Instance.new("UIStroke", btn).Color = Color3.fromRGB(255, 105, 180)
     return btn
@@ -94,8 +104,12 @@ end
 local T1, T2, T3 = CreateTabBtn("1. PLAYER ESP"), CreateTabBtn("2. SURVIVAL"), CreateTabBtn("3. SMOOTH MAPS")
 
 local function CreatePage()
-    local f = Instance.new("Frame", ContentArea); f.Size = UDim2.new(1, 0, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
-    Instance.new("UIListLayout", f).Padding = UDim.new(0, 5)
+    local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -5, 0, 0); f.BackgroundTransparency = 1; f.Visible = false
+    local l = Instance.new("UIListLayout", f); l.Padding = UDim.new(0, 5)
+    l:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        f.Size = UDim2.new(1, -5, 0, l.AbsoluteContentSize.Y)
+        if f.Visible then ContentScroll.CanvasSize = UDim2.new(0, 0, 0, l.AbsoluteContentSize.Y + 5) end
+    end)
     return f
 end
 
@@ -105,6 +119,7 @@ local function Show(p, b)
     P1.Visible = false; P2.Visible = false; P3.Visible = false
     T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     p.Visible = true; b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+    ContentScroll.CanvasSize = UDim2.new(0, 0, 0, p.Size.Y.Offset + 5)
 end
 
 T1.MouseButton1Click:Connect(function() Show(P1, T1) end); T2.MouseButton1Click:Connect(function() Show(P2, T2) end); T3.MouseButton1Click:Connect(function() Show(P3, T3) end)
@@ -117,7 +132,7 @@ local function CreateBtn(parent, text)
     return btn
 end
 
--- --- 6. LOGIKA FITUR (DARI v4.9.4 MASTER) ---
+-- --- 6. LOGIKA FITUR (TETAP SAMA) ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode = false, false, false, false, false, false, false
 local SurvBtn = CreateBtn(P1, "ESP SURVIVAL"); local KillBtn = CreateBtn(P1, "ESP KILLER")
 local GenBtn = CreateBtn(P2, "ESP GENERATOR"); local SkillBtn = CreateBtn(P2, "NO SKILL CHECK")
@@ -135,7 +150,6 @@ SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Togg
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG") end)
 
--- SMART POTATO MODE LOGIC
 PotatoBtn.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(PotatoBtn, _PotatoMode, "POTATO MODE")
@@ -159,7 +173,6 @@ PotatoBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Generator ESP Polling (DARI v4.9.4)
 task.spawn(function()
     while task.wait(3) do
         if _GenOn then
@@ -178,7 +191,6 @@ task.spawn(function()
     end
 end)
 
--- Player ESP & Lighting Heartbeat
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
@@ -192,7 +204,6 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- Metatable Anti-Fail (DARI v4.9.4)
 local mt = getrawmetatable(game)
 if mt then
     local old = mt.__namecall
