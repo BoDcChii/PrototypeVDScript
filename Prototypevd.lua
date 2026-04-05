@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v5.1.0: POTATO MODE FIX 🎸 ]] --
+-- [[ BoDcChii Project - v5.1.1: TOTAL TEXTURE REMOVAL 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -135,17 +135,22 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- FIXED POTATO MODE
+-- SUPER POTATO MODE (FORCED TEXTURE REMOVAL)
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
     if _PotatoMode then 
-        for _, v in pairs(game.Workspace:GetDescendants()) do 
+        for _, v in pairs(game:GetDescendants()) do 
             if v:IsA("BasePart") and not v:FindFirstAncestorOfClass("Model") then 
                 v.Material = Enum.Material.SmoothPlastic
                 if v:IsA("MeshPart") then v.TextureID = "" end
+                if v:IsA("UnionOperation") then v.UsePartColor = true end
             elseif v:IsA("Decal") or v:IsA("Texture") then
                 v.Transparency = 1
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Enabled = false
+            elseif v:IsA("Sky") then
+                v:Destroy()
             end 
         end 
     end 
