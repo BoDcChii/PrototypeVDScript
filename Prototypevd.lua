@@ -1,5 +1,5 @@
--- [[ BoDcChii Project - v4.9.1: THE LOCKED MASTER 🎸 ]] --
--- Update: Power Potato Mode (Material Stripping)
+-- [[ BoDcChii Project - v4.9.2: THE LOCKED MASTER 🎸 ]] --
+-- Update: Ultra Potato Mode (ID & Surface Stripping)
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -138,24 +138,25 @@ SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Togg
 BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
 FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG / MIST") end)
 
--- FIXED POTATO MODE (FORCE SMOOTH PLASTIC)
+-- ULTRA POTATO MODE (ANTI DETAIL)
 PotatoBtn.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(PotatoBtn, _PotatoMode, "POTATO MODE (ANTI LAG)")
     
-    local function Clean(obj)
-        if _PotatoMode then
-            if obj:IsA("BasePart") then
-                obj.Material = Enum.Material.SmoothPlastic -- Force Burik
-            elseif obj:IsA("Texture") or obj:IsA("Decal") then
-                obj.Transparency = 1
-            elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-                obj.Enabled = false
+    if _PotatoMode then
+        for _, v in pairs(game.Workspace:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.Material = Enum.Material.SmoothPlastic
+                if v:IsA("MeshPart") then v.TextureID = "" end -- Hapus tekstur Mesh
+            elseif v:IsA("Texture") or v:IsA("Decal") then
+                v.Transparency = 1
+            elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
+            elseif v:IsA("SpecialMesh") then
+                v.TextureId = "" -- Hapus tekstur SpecialMesh
             end
         end
     end
-
-    for _, v in pairs(game.Workspace:GetDescendants()) do Clean(v) end
 end)
 
 -- Generator ESP Polling (3 Detik)
