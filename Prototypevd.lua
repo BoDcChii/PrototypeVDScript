@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v5.1.1: TOTAL TEXTURE REMOVAL 🎸 ]] --
+-- [[ BoDcChii Project - v5.1.2: LEFT SIDEBAR MASTER EDITION 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -30,7 +30,7 @@ end
 pcall(ShowWelcome)
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "BoDcChii_Minimalist"
+ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
 
 local function EnableDrag(gui)
     local dragging, dragStart, startPos
@@ -48,14 +48,16 @@ local function EnableDrag(gui)
     UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end end)
 end
 
+-- --- 2. ICON "BD" ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 50, 0, 50); OpenButton.Position = UDim2.new(0, 20, 0.5, -25)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
-OpenButton.TextSize = 24; OpenButton.Font = Enum.Font.SourceSansBold
+OpenButton.TextSize = 24; OpenButton.Font = Enum.Font.SourceSansBold; OpenButton.ZIndex = 500
 Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(OpenButton)
 
+-- --- 3. MAIN FRAME ---
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 380, 0, 220); MainFrame.Position = UDim2.new(0.5, -190, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
@@ -70,17 +72,15 @@ Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Heade
 local LineH = Instance.new("Frame", MainFrame)
 LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 36); LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
 
--- SIDEBAR LEFT
+-- --- 4. SIDEBAR (KIRI) ---
 local Sidebar = Instance.new("Frame", MainFrame)
 Sidebar.Size = UDim2.new(0, 115, 1, -45); Sidebar.Position = UDim2.new(0, 5, 0, 42); Sidebar.BackgroundTransparency = 1
 Instance.new("UIListLayout", Sidebar).Padding = UDim.new(0, 5)
 
--- VERTICAL LINE
 local LineV = Instance.new("Frame", MainFrame)
-LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(0, 122, 0, 42)
-LineV.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineV.BorderSizePixel = 0
+LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(0, 122, 0, 42); LineV.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineV.BorderSizePixel = 0
 
--- CONTENT AREA
+-- --- 5. CONTENT AREA ---
 local ContentArea = Instance.new("Frame", MainFrame)
 ContentArea.Size = UDim2.new(1, -135, 1, -50); ContentArea.Position = UDim2.new(0, 130, 0, 45); ContentArea.BackgroundTransparency = 1
 
@@ -91,7 +91,7 @@ local function CreateTabBtn(text)
     return btn
 end
 
-local T1, T2, T3 = CreateTabBtn("1. PLAYER"), CreateTabBtn("2. SURVIVAL"), CreateTabBtn("3. SMOOTH MAPS")
+local T1, T2, T3 = CreateTabBtn("1. PLAYER ESP"), CreateTabBtn("2. SURVIVAL"), CreateTabBtn("3. SMOOTH MAPS")
 
 local function CreatePage()
     local f = Instance.new("Frame", ContentArea); f.Size = UDim2.new(1, 0, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
@@ -117,51 +117,58 @@ local function CreateBtn(parent, text)
     return btn
 end
 
--- --- LOGIC & BUTTONS ---
+-- --- 6. LOGIKA FITUR (DARI v4.9.4 MASTER) ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode = false, false, false, false, false, false, false
-local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
-local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
-local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
+local SurvBtn = CreateBtn(P1, "ESP SURVIVAL"); local KillBtn = CreateBtn(P1, "ESP KILLER")
+local GenBtn = CreateBtn(P2, "ESP GENERATOR"); local SkillBtn = CreateBtn(P2, "NO SKILL CHECK")
+local BrightBtn = CreateBtn(P3, "FULL BRIGHT"); local FogBtn = CreateBtn(P3, "NO FOG"); local PotatoBtn = CreateBtn(P3, "POTATO MODE")
 
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
     btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
 end
 
-Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
-Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
-Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
-Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(Btn4, _NoSkillGen, "NO SKILL CHECK") end)
-Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
-Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
+SurvBtn.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(SurvBtn, _SurvOn, "ESP SURVIVAL") end)
+KillBtn.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(KillBtn, _KillOn, "ESP KILLER") end)
+GenBtn.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(GenBtn, _GenOn, "ESP GENERATOR") end)
+SkillBtn.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(SkillBtn, _NoSkillGen, "NO SKILL CHECK") end)
+BrightBtn.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BrightBtn, _FullBright, "FULL BRIGHT") end)
+FogBtn.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(FogBtn, _NoFog, "NO FOG") end)
 
--- SUPER POTATO MODE (FORCED TEXTURE REMOVAL)
-Btn7.MouseButton1Click:Connect(function() 
+-- SMART POTATO MODE LOGIC
+PotatoBtn.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
-    Toggle(Btn7, _PotatoMode, "POTATO MODE")
-    if _PotatoMode then 
-        for _, v in pairs(game:GetDescendants()) do 
-            if v:IsA("BasePart") and not v:FindFirstAncestorOfClass("Model") then 
-                v.Material = Enum.Material.SmoothPlastic
-                if v:IsA("MeshPart") then v.TextureID = "" end
-                if v:IsA("UnionOperation") then v.UsePartColor = true end
-            elseif v:IsA("Decal") or v:IsA("Texture") then
-                v.Transparency = 1
-            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                v.Enabled = false
-            elseif v:IsA("Sky") then
-                v:Destroy()
-            end 
-        end 
-    end 
+    Toggle(PotatoBtn, _PotatoMode, "POTATO MODE")
+    if _PotatoMode then
+        for _, v in pairs(game.Workspace:GetDescendants()) do
+            local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
+            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
+            if not isPlayer and not isImportant then
+                if v:IsA("BasePart") then
+                    v.Material = Enum.Material.SmoothPlastic
+                    if v:IsA("MeshPart") then v.TextureID = "" end
+                elseif v:IsA("Texture") or v:IsA("Decal") then
+                    v.Transparency = 1
+                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
+                elseif v:IsA("SpecialMesh") then
+                    v.TextureId = ""
+                end
+            end
+        end
+    end
 end)
 
+-- Generator ESP Polling (DARI v4.9.4)
 task.spawn(function()
     while task.wait(3) do
         if _GenOn then
             for _, v in pairs(game.Workspace:GetDescendants()) do
                 if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
-                    if not v:FindFirstChild("GenEsp") then local h = Instance.new("Highlight", v); h.Name = "GenEsp"; h.FillColor = Color3.new(1, 1, 0) end
+                    if not v:FindFirstChild("GenEsp") then
+                        local h = Instance.new("Highlight", v); h.Name = "GenEsp"
+                        h.FillColor = Color3.fromRGB(255, 255, 0); h.FillTransparency = 0.5
+                    end
                     v.GenEsp.Enabled = true
                 end
             end
@@ -171,16 +178,34 @@ task.spawn(function()
     end
 end)
 
+-- Player ESP & Lighting Heartbeat
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
-    if _NoFog then Lighting.FogEnd = 1e5 end
+    if _NoFog then Lighting.FogEnd = 999999 end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character); hl.Name = "BDEsp"
             local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
-            hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn); hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
+            hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn)
+            hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
         end
     end
 end)
+
+-- Metatable Anti-Fail (DARI v4.9.4)
+local mt = getrawmetatable(game)
+if mt then
+    local old = mt.__namecall
+    setreadonly(mt, false)
+    mt.__namecall = newcclosure(function(self, ...)
+        local method = getnamecallmethod()
+        if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
+            local n = tostring(self):lower()
+            if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
+        end
+        return old(self, ...)
+    end)
+    setreadonly(mt, true)
+end
 
 OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
