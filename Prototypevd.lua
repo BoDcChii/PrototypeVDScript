@@ -197,4 +197,29 @@ RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
     for _, p in pairs(Players:GetPlayers()) do
-        if p ~= Players.
+        if p ~= Players.LocalPlayer and p.Character then
+            local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
+            hl.Name = "BDEsp"
+            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
+            hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn)
+            hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
+        end
+    end
+end)
+
+local mt = getrawmetatable(game)
+if mt then
+    local old = mt.__namecall
+    setreadonly(mt, false)
+    mt.__namecall = newcclosure(function(self, ...)
+        local method = getnamecallmethod()
+        if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
+            local n = tostring(self):lower()
+            if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
+        end
+        return old(self, ...)
+    end)
+    setreadonly(mt, true)
+end
+
+OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
