@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v5.1.3: DUAL SCROLLING EDITION 🎸 ]] --
+-- [[ BoDcChii Project - v5.1.4: FIXED DUAL SCROLLING 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -77,13 +77,12 @@ local SidebarScroll = Instance.new("ScrollingFrame", MainFrame)
 SidebarScroll.Size = UDim2.new(0, 115, 1, -45); SidebarScroll.Position = UDim2.new(0, 5, 0, 42)
 SidebarScroll.BackgroundTransparency = 1; SidebarScroll.ScrollBarThickness = 2
 SidebarScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180); SidebarScroll.BorderSizePixel = 0
-SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, 0) -- Auto adjust nanti
+SidebarScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y -- Perbaikan Fitur Geser
+SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+SidebarScroll.ScrollingDirection = Enum.ScrollingDirection.Y
 
 local SideLayout = Instance.new("UIListLayout", SidebarScroll)
 SideLayout.Padding = UDim.new(0, 5)
-SideLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, SideLayout.AbsoluteContentSize.Y + 5)
-end)
 
 local LineV = Instance.new("Frame", MainFrame)
 LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(0, 122, 0, 42); LineV.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineV.BorderSizePixel = 0
@@ -93,6 +92,9 @@ local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
 ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.new(0, 130, 0, 45)
 ContentScroll.BackgroundTransparency = 1; ContentScroll.ScrollBarThickness = 2
 ContentScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180); ContentScroll.BorderSizePixel = 0
+ContentScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y -- Perbaikan Fitur Geser
+ContentScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+ContentScroll.ScrollingDirection = Enum.ScrollingDirection.Y
 
 local function CreateTabBtn(text)
     local btn = Instance.new("TextButton", SidebarScroll); btn.Size = UDim2.new(1, -5, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -106,10 +108,7 @@ local T1, T2, T3 = CreateTabBtn("1. PLAYER ESP"), CreateTabBtn("2. SURVIVAL"), C
 local function CreatePage()
     local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -5, 0, 0); f.BackgroundTransparency = 1; f.Visible = false
     local l = Instance.new("UIListLayout", f); l.Padding = UDim.new(0, 5)
-    l:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        f.Size = UDim2.new(1, -5, 0, l.AbsoluteContentSize.Y)
-        if f.Visible then ContentScroll.CanvasSize = UDim2.new(0, 0, 0, l.AbsoluteContentSize.Y + 5) end
-    end)
+    f.AutomaticSize = Enum.AutomaticSize.Y -- Supaya frame mengikuti isi
     return f
 end
 
@@ -119,7 +118,6 @@ local function Show(p, b)
     P1.Visible = false; P2.Visible = false; P3.Visible = false
     T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     p.Visible = true; b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-    ContentScroll.CanvasSize = UDim2.new(0, 0, 0, p.Size.Y.Offset + 5)
 end
 
 T1.MouseButton1Click:Connect(function() Show(P1, T1) end); T2.MouseButton1Click:Connect(function() Show(P2, T2) end); T3.MouseButton1Click:Connect(function() Show(P3, T3) end)
