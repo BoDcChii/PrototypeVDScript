@@ -1,5 +1,5 @@
 -- [[ BoDcChii Project - v4.9.5: THE LOCKED MASTER 🎸 ]] --
--- Status: UI Rectangle + Header Line + Full Features (STABLE FIX)
+-- Status: UI Rectangle + Header Line + Full Features (BACK TO STABLE)
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -207,22 +207,20 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- Metatable Hook (Updated for Executor Compatibility)
-task.spawn(function()
-    local success, mt = pcall(function() return getrawmetatable(game) end)
-    if success and mt then
-        local oldNamecall
-        oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-            local method = getnamecallmethod()
-            if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
-                local name = tostring(self):lower()
-                if name:find("fail") or name:find("skillcheck") or name:find("explode") then
-                    return nil
-                end
-            end
-            return oldNamecall(self, ...)
-        end)
-    end
-end)
+-- Metatable Hook (Stable Version)
+local mt = getrawmetatable(game)
+if mt then
+    local old = mt.__namecall
+    setreadonly(mt, false)
+    mt.__namecall = newcclosure(function(self, ...)
+        local method = getnamecallmethod()
+        if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
+            local n = tostring(self):lower()
+            if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
+        end
+        return old(self, ...)
+    end)
+    setreadonly(mt, true)
+end
 
 OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
