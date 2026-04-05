@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v5.0.9: LEFT SIDEBAR + WELCOME RESTORED 🎸 ]] --
+-- [[ BoDcChii Project - v5.1.0: POTATO MODE FIX 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -10,7 +10,7 @@ local Lighting = game:GetService("Lighting")
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
 if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
 
--- --- 1. WELCOME NOTIFICATION (RESTORED) ---
+-- --- 1. WELCOME NOTIFICATION ---
 local function ShowWelcome()
     local WelcomeGui = Instance.new("ScreenGui", CoreGui)
     WelcomeGui.Name = "BoDcChii_Welcome"
@@ -117,7 +117,7 @@ local function CreateBtn(parent, text)
     return btn
 end
 
--- LOGIC & BUTTONS (SAME AS v5.0.8)
+-- --- LOGIC & BUTTONS ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode = false, false, false, false, false, false, false
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
@@ -134,8 +134,21 @@ Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenO
 Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(Btn4, _NoSkillGen, "NO SKILL CHECK") end)
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
-Btn7.MouseButton1Click:Connect(function() _PotatoMode = not _PotatoMode Toggle(Btn7, _PotatoMode, "POTATO MODE")
-    if _PotatoMode then for _, v in pairs(game.Workspace:GetDescendants()) do if v:IsA("BasePart") and not v:FindFirstAncestorOfClass("Model") then v.Material = "SmoothPlastic" end end end
+
+-- FIXED POTATO MODE
+Btn7.MouseButton1Click:Connect(function() 
+    _PotatoMode = not _PotatoMode 
+    Toggle(Btn7, _PotatoMode, "POTATO MODE")
+    if _PotatoMode then 
+        for _, v in pairs(game.Workspace:GetDescendants()) do 
+            if v:IsA("BasePart") and not v:FindFirstAncestorOfClass("Model") then 
+                v.Material = Enum.Material.SmoothPlastic
+                if v:IsA("MeshPart") then v.TextureID = "" end
+            elseif v:IsA("Decal") or v:IsA("Texture") then
+                v.Transparency = 1
+            end 
+        end 
+    end 
 end)
 
 task.spawn(function()
