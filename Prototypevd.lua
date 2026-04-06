@@ -1,11 +1,11 @@
--- [[ BoDcChii Project - v0.4: BOCCHI POLISH EDITION 🎸 ]] --
+-- [[ BoDcChii Project - v0.5: PARRY MASTER EDITION 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
-local TweenService = game:GetService("TweenService") -- Tambahan untuk Animasi
+local TweenService = game:GetService("TweenService")
 
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
@@ -59,11 +59,10 @@ local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(255, 105, 180); MainStroke.Thickness = 2
 EnableDrag(MainFrame)
 
--- FITUR RAINBOW STROKE (BOCCHI VIBE)
 task.spawn(function()
     while task.wait() do
         local hue = tick() % 5 / 5
-        MainStroke.Color = Color3.fromHSV(hue, 0.6, 1) -- Pelangi lembut
+        MainStroke.Color = Color3.fromHSV(hue, 0.6, 1)
     end
 end)
 
@@ -119,10 +118,10 @@ end
 
 local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
--- --- ISI ABOUT PAGE ---
+-- ISI ABOUT
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4 (Aesthetic)\n\nUpdate:\n- Rainbow UI Stroke\n- Fade Open/Close Animation\n- Fitur Potato Mode Tetap Aktif"
+AboutInfo.Text = "Creator: BoDcChii\nTester: Xiaoo\nVersi: v0.5\n\nUpdate:\n- New: AUTO PARRY (Tab 2)\n- UI Aesthetic Rainbow\n- Optimized for G85 RAM 4GB"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -145,10 +144,10 @@ local function CreateBtn(parent, text)
     return btn
 end
 
--- --- 5. LOGIKA FITUR (MASTER) ---
-local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode = false, false, false, false, false, false, false
+-- --- 5. LOGIKA FITUR ---
+local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
-local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
+local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK"); local BtnParry = CreateBtn(P2, "AUTO PARRY")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
 
 local function Toggle(btn, state, txt)
@@ -160,10 +159,35 @@ Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _Su
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
 Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(Btn4, _NoSkillGen, "NO SKILL CHECK") end)
+BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnParry, _AutoParry, "AUTO PARRY") end)
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- FITUR POTATO MODE TETAP SAMA
+-- LOGIKA AUTO PARRY (DALAM SURVIVAL)
+RunService.Stepped:Connect(function()
+    if _AutoParry then
+        local char = Players.LocalPlayer.Character
+        local tool = char and char:FindFirstChildOfClass("Tool")
+        if tool then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    local dist = (char.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                    local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
+                    
+                    if isK and dist < 12 then -- Deteksi Killer dalam jangkauan
+                        local killerTool = p.Character:FindFirstChildOfClass("Tool")
+                        if killerTool then
+                            -- Simulasi Aktifkan Block/Parry
+                            tool:Activate() 
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- FITUR POTATO MODE
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
@@ -172,16 +196,10 @@ Btn7.MouseButton1Click:Connect(function()
             local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
             local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
             if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then 
-                    v.Material = Enum.Material.SmoothPlastic 
-                    if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then 
-                    v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then 
-                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then 
-                    v.TextureId = "" 
-                end
+                if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic if v:IsA("MeshPart") then v.TextureID = "" end
+                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
+                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
+                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
             end
         end
     end
@@ -227,7 +245,7 @@ if mt then
     end); setreadonly(mt, true)
 end
 
--- --- 6. BUTTON & TOGGLE (DENGAN ANIMASI FADE) ---
+-- --- 6. BUTTON & TOGGLE ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 50, 0, 50); OpenButton.Position = UDim2.new(0, 20, 0.5, -25)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
@@ -237,7 +255,6 @@ local BtnStroke = Instance.new("UIStroke", OpenButton)
 BtnStroke.Color = Color3.fromRGB(255, 105, 180); BtnStroke.Thickness = 2
 EnableDrag(OpenButton)
 
--- RAINBOW UNTUK TOMBOL BUKA JUGA
 task.spawn(function()
     while task.wait() do
         local hue = tick() % 5 / 5
@@ -247,15 +264,11 @@ end)
 
 local function ToggleMenu()
     if MainFrame.Visible then
-        -- Animasi Menutup
         MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true)
         task.delay(0.3, function() MainFrame.Visible = false end)
     else
-        -- Animasi Membuka
-        MainFrame.Visible = true
-        MainFrame.Size = UDim2.new(0, 0, 0, 0)
+        MainFrame.Visible = true; MainFrame.Size = UDim2.new(0, 0, 0, 0)
         MainFrame:TweenSize(UDim2.new(0, 380, 0, 220), "Out", "Back", 0.4, true)
     end
 end
-
 OpenButton.MouseButton1Click:Connect(ToggleMenu)
