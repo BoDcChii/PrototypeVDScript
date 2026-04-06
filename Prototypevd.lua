@@ -163,58 +163,52 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [ PERBAIKAN AUTO PARRY - INSTANT SIGNAL BYPASS ]
+-- [ PERBAIKAN AUTO PARRY - ADVANCED ANIMATION MONITOR ]
 RunService.Stepped:Connect(function()
     if _AutoParry then
         pcall(function()
             local lp = Players.LocalPlayer
             local char = lp.Character
-            local tool = char and char:FindFirstChildOfClass("Tool")
             local myRoot = char and char:FindFirstChild("HumanoidRootPart")
-            
-            if tool and myRoot then
-                for _, k in pairs(Players:GetPlayers()) do
-                    if k ~= lp and k.Character then
-                        local kChar = k.Character
+            local weapon = char and char:FindFirstChildOfClass("Tool")
+
+            if myRoot and weapon then
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= lp and p.Character then
+                        local kChar = p.Character
                         local kHum = kChar:FindFirstChild("Humanoid")
                         local kRoot = kChar:FindFirstChild("HumanoidRootPart")
-                        
-                        -- Deteksi Killer berdasarkan Health atau Team
-                        local isK = (kHum and kHum.MaxHealth > 100) or (k.TeamColor ~= lp.TeamColor)
-                        
-                        if isK and kRoot then
+
+                        if kHum and kRoot then
                             local dist = (myRoot.Position - kRoot.Position).Magnitude
                             
-                            -- MONITORING SERANGAN (Violence District System)
-                            local attackFound = false
-                            
-                            -- 1. Deteksi melalui Animasi (Speed & Weight)
+                            -- Deteksi Animasi Serangan (Sangat Sensitif)
+                            local isAttacking = false
                             for _, track in pairs(kHum:GetPlayingAnimationTracks()) do
-                                if track.IsPlaying and track.Speed > 0.3 and track.WeightTarget > 0 then
-                                    attackFound = true break
-                                end
-                            end
-                            
-                            -- 2. Deteksi melalui munculnya Part "Hitbox" atau "Swing" di tangan Killer
-                            if not attackFound then
-                                for _, part in pairs(kChar:GetDescendants()) do
-                                    if part:IsA("BasePart") and (part.Name:find("Hit") or part.Name:find("Swing") or part.Name:find("Attack")) then
-                                        attackFound = true break
+                                -- Di Violence District, animasi pukul biasanya durasinya < 1.5 detik
+                                if track.IsPlaying and track.Length > 0 and track.Length < 1.6 then
+                                    if track.TimePosition > 0 and track.TimePosition < 0.6 then
+                                        isAttacking = true break
                                     end
                                 end
                             end
 
-                            -- EKSEKUSI PARRY
-                            if dist < 18 and attackFound then
-                                -- Memicu Event Parry secara langsung tanpa nunggu Input
-                                tool:Activate()
+                            -- Eksekusi Parry (Radius 15 Studs)
+                            if dist < 15 and isAttacking then
+                                -- 1. Aktivasi Tool
+                                weapon:Activate()
                                 
-                                -- Mencari RemoteEvent khusus di dalam Tool (Violence District sering pakai RemoteEvent tersembunyi)
-                                for _, remote in pairs(tool:GetDescendants()) do
-                                    if remote:IsA("RemoteEvent") then
-                                        remote:FireServer()
-                                        remote:FireServer("Parry") -- Argument cadangan
+                                -- 2. Bypass Remote Langsung ke Server
+                                for _, rem in pairs(weapon:GetDescendants()) do
+                                    if rem:IsA("RemoteEvent") then
+                                        rem:FireServer()
+                                        rem:FireServer("Action", "Parry") -- Varian argumen VD
                                     end
+                                end
+                                
+                                -- 3. Mencoba memicu "Skill" parry jika ada di tool
+                                if weapon:FindFirstChild("Remote") then
+                                    weapon.Remote:FireServer(true)
                                 end
                             end
                         end
