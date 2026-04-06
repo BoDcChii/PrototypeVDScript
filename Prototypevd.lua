@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.3: ABOUT RESTORED & v5.1.6 LOGIC 🎸 ]] --
+-- [[ BoDcChii Project - v0.3: FINAL REPAIR 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -96,31 +96,28 @@ local function CreateTabBtn(text)
     return btn
 end
 
--- Membuat Tombol Tab
 local T0 = CreateTabBtn("0. ABOUT")
 local T1 = CreateTabBtn("1. PLAYER ESP")
 local T2 = CreateTabBtn("2. SURVIVAL")
 local T3 = CreateTabBtn("3. SMOOTH MAPS")
 
 local function CreatePage()
-    local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -10, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
-    Instance.new("UIListLayout", f).Padding = UDim.new(0, 5)
+    local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, 0, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
+    local l = Instance.new("UIListLayout", f); l.Padding = UDim.new(0, 5)
     return f
 end
 
--- Membuat Halaman Page
-local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
+local P0 = CreatePage(); local P1 = CreatePage(); local P2 = CreatePage(); local P3 = CreatePage()
 
 -- --- ISI ABOUT PAGE ---
 local AboutInfo = Instance.new("TextLabel", P0)
-AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
+AboutInfo.Size = UDim2.new(1, 0, 1, 0); AboutInfo.BackgroundTransparency = 1
 AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.3\n\nUpdate:\n- Optimalisasi ESP Generator\n- UI Baru dan Lebih Rapi\n- Fitur Potato Mode"
-AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
+AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left; AboutInfo.TextYAlignment = Enum.TextYAlignment.Top
 
 local function Show(p, b)
     P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false
-    T0.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    T0.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     p.Visible = true; b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 end
 
@@ -137,7 +134,7 @@ local function CreateBtn(parent, text)
     return btn
 end
 
--- --- 5. LOGIKA FITUR (MASTER v5.1.6) ---
+-- --- 5. LOGIKA FITUR (ASLI v5.1.6) ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode = false, false, false, false, false, false, false
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
