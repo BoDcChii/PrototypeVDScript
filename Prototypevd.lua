@@ -1,6 +1,5 @@
 -- [[ BoDcChii Project - v0.4.1: LOW-END OPTIMIZED 🚀 ]] --
 
--- Global Caching untuk Performa (HP Low-End butuh ini)
 local game = game
 local Workspace = game:GetService("Workspace")
 local CoreGui = game:GetService("CoreGui")
@@ -14,7 +13,7 @@ local LP = Players.LocalPlayer
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
 
--- --- 1. MINIMALIST UI (BENTUK TETAP SAMA) ---
+-- --- 1. MINIMALIST UI ---
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
 
@@ -26,16 +25,14 @@ Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(255, 105, 180); MainStroke.Thickness = 2
 
--- Rainbow Effect Optimized (Hemat CPU)
 task.spawn(function()
     local hue = 0
-    while task.wait(0.05) do -- Tidak perlu setiap frame
+    while task.wait(0.05) do
         hue = (hue + 0.01) % 1
         MainStroke.Color = Color3.fromHSV(hue, 0.6, 1)
     end
 end)
 
--- --- 2. DRAG LOGIC (COMPACT) ---
 local function EnableDrag(gui)
     local dragging, dragStart, startPos
     gui.InputBegan:Connect(function(input)
@@ -53,13 +50,13 @@ local function EnableDrag(gui)
 end
 EnableDrag(MainFrame)
 
--- --- 3. HEADER & SCROLLING ---
+-- --- 2. HEADER & SCROLLING ---
 local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 18
 
 local function SetupScroll(scroll)
-    scroll.Active = true; scroll.ScrollBarThickness = 2 -- Tipis biar enteng
+    scroll.Active = true; scroll.ScrollBarThickness = 2
     scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
     scroll.CanvasSize = UDim2.new(0, 0, 1.5, 0); scroll.ScrollingDirection = Enum.ScrollingDirection.Y
 end
@@ -73,13 +70,12 @@ local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
 ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.new(0, 130, 0, 45); ContentScroll.BackgroundTransparency = 1
 SetupScroll(ContentScroll)
 
--- Lines (Decoration)
 local LineH = Instance.new("Frame", MainFrame)
 LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 36); LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
 local LineV = Instance.new("Frame", MainFrame)
 LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(0, 122, 0, 42); LineV.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineV.BorderSizePixel = 0
 
--- --- 4. TABS & PAGES ---
+-- --- 3. TABS & PAGES ---
 local Pages = {}
 local function CreateTabBtn(text, id)
     local btn = Instance.new("TextButton", SidebarScroll); btn.Size = UDim2.new(1, -10, 0, 35)
@@ -99,25 +95,22 @@ local function CreateTabBtn(text, id)
 end
 
 local P0 = CreateTabBtn("0. ABOUT", 0); local P1 = CreateTabBtn("1. PLAYER ESP", 1)
-local P2 = CreateTabBtn("2. SURVIVAL", 2); local P3 = CreateTabBtn("3. SMOOTH MAPS", 3)
+local P2 = CreateTabBtn("2. SURVIVAL", 2); 
+local P3 = CreateTabBtn("3. Setting", 3) -- NAMA HALAMAN BERUBAH DI SINI
 
 -- About Info
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 150); AboutInfo.BackgroundTransparency = 1; AboutInfo.TextColor3 = Color3.new(1, 1, 1)
-AboutInfo.Text = "Creator: BoDcChii\nv0.4.1 (HP OPTIMIZED)\n\nPerubahan:\n- Caching System\n- Low-Hertz Heartbeat\n- Resource Guard Active"
+AboutInfo.Text = "Creator: BoDcChii\nv0.4.1 (SETTING UPDATE)\n\nPerubahan:\n- UI Label Updated\n- Low-End Optimized\n- State-Injection Parry"
 AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
--- Default Show
 Pages[0].page.Visible = true; Pages[0].btn.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 
--- --- 5. FEATURE LOGIC (ULTRA OPTIMIZED) ---
-local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
-
+-- --- 4. FEATURE LOGIC ---
 local function CreateBtn(parent, text, varName)
     local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(1, 0, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.Text = text .. ": OFF"; btn.TextColor3 = Color3.new(1, 1, 1); btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 9; Instance.new("UICorner", btn)
     local s = Instance.new("UIStroke", btn); s.Color = Color3.fromRGB(200, 50, 50)
-    
     btn.MouseButton1Click:Connect(function()
         _G[varName] = not _G[varName]
         local state = _G[varName]
@@ -127,15 +120,13 @@ local function CreateBtn(parent, text, varName)
     return btn
 end
 
--- Link Variable ke Global untuk kemudahan akses
 _G.Surv = false; _G.Kill = false; _G.Gen = false; _G.Skill = false; _G.Parry = false; _G.Bright = false; _G.Fog = false; _G.Potato = false
 
 CreateBtn(P1, "ESP SURVIVAL", "Surv"); CreateBtn(P1, "ESP KILLER", "Kill")
 CreateBtn(P2, "ESP GENERATOR", "Gen"); CreateBtn(P2, "NO SKILL CHECK", "Skill"); CreateBtn(P2, "AUTO PARRY (BETA)", "Parry")
-CreateBtn(P3, "FULL BRIGHT", "Bright"); CreateBtn(P3, "NO FOG", "Fog")
-local PBtn = CreateBtn(P3, "POTATO MODE", "Potato")
+CreateBtn(P3, "FULL BRIGHT", "Bright"); CreateBtn(P3, "NO FOG", "Fog"); local PBtn = CreateBtn(P3, "POTATO MODE", "Potato")
 
--- [[ OPTIMIZED AUTO PARRY ]]
+-- [[ AUTO PARRY LOGIC ]]
 local lastParry = 0
 local function TriggerParry()
     if tick() - lastParry < 0.6 then return end
@@ -151,11 +142,10 @@ local function TriggerParry()
     end
 end
 
--- Heartbeat Throttling (ESP & Parry dijalankan lebih efisien)
 local counter = 0
 RunService.Heartbeat:Connect(function()
-    counter = counter + 1
-    if counter % 2 ~= 0 then return end -- Hanya jalan di frame genap (Hemat 50% CPU)
+    counter = (counter + 1) % 2
+    if counter ~= 0 then return end 
 
     if _G.Parry then
         local myChar = LP.Character
@@ -179,14 +169,11 @@ RunService.Heartbeat:Connect(function()
         end
     end
 
-    -- ESP Player (Optimized)
     if _G.Surv or _G.Kill then
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character then
-                local hl = p.Character:FindFirstChild("BDEsp")
-                if not hl then 
-                    hl = Instance.new("Highlight", p.Character); hl.Name = "BDEsp"; hl.OutlineTransparency = 0.5
-                end
+                local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
+                hl.Name = "BDEsp"; hl.OutlineTransparency = 0.5
                 local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
                 hl.Enabled = (isK and _G.Kill) or (not isK and _G.Surv)
                 hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
@@ -198,7 +185,6 @@ RunService.Heartbeat:Connect(function()
     if _G.Fog then Lighting.FogEnd = 1e5 end
 end)
 
--- Potato Mode (Satu kali jalan agar tidak lag)
 PBtn.MouseButton1Click:Connect(function()
     if _G.Potato then
         for _, v in pairs(Workspace:GetDescendants()) do
@@ -210,7 +196,7 @@ PBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- 6. BUTTON TOGGLE (NO TWEEN FOR PERFORMANCE) ---
+-- --- 5. BUTTON TOGGLE ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 45, 0, 45); OpenButton.Position = UDim2.new(0, 10, 0.5, -22)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"
@@ -223,7 +209,6 @@ OpenButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- Metatable Skillcheck (Tetap Sama)
 local mt = getrawmetatable(game)
 local old = mt.__namecall
 setreadonly(mt, false)
