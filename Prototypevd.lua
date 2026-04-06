@@ -163,8 +163,8 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [ PERBAIKAN AUTO PARRY - PRECISION LOGIC ]
-RunService.Heartbeat:Connect(function()
+-- [ PERBAIKAN AUTO PARRY - ULTRA FAST DETECTION ]
+RunService.Stepped:Connect(function()
     if _AutoParry then
         pcall(function()
             local lp = Players.LocalPlayer
@@ -176,8 +176,6 @@ RunService.Heartbeat:Connect(function()
                     if p ~= lp and p.Character then
                         local kChar = p.Character
                         local kHum = kChar:FindFirstChild("Humanoid")
-                        
-                        -- Cek apakah target adalah Killer
                         local isK = (p.Team and p.Team.Name:lower():find("kill")) or (kHum and kHum.MaxHealth > 100)
                         
                         if isK then
@@ -185,22 +183,25 @@ RunService.Heartbeat:Connect(function()
                             local myRoot = char:FindFirstChild("HumanoidRootPart")
                             if kRoot and myRoot then
                                 local dist = (myRoot.Position - kRoot.Position).Magnitude
-                                if dist < 17 then
-                                    -- Deteksi Animasi Serangan secara Instan
-                                    local isSwinging = false
-                                    for _, track in pairs(kHum:GetPlayingAnimationTracks()) do
-                                        -- Cek status track animasi (Violence District menggunakan sistem track weight)
-                                        if track.IsPlaying and track.WeightTarget > 0 and track.Speed > 0 then
-                                            isSwinging = true break
+                                if dist < 20 then
+                                    -- DETEKSI 1: Animasi Aktif
+                                    local isSwing = false
+                                    for _, t in pairs(kHum:GetPlayingAnimationTracks()) do
+                                        if t.IsPlaying and t.Speed > 0.1 then 
+                                            isSwing = true break 
                                         end
                                     end
                                     
-                                    if isSwinging then
-                                        -- Langsung memicu aksi tool
+                                    -- DETEKSI 2: Jarak Sangat Dekat (Panic Parry)
+                                    if isSwing or dist < 12 then
+                                        -- EKSEKUSI: Tembak semua sinyal parry
                                         tool:Activate()
-                                        -- Cek Remote bawaan game (Force Fire)
                                         local remote = tool:FindFirstChildOfClass("RemoteEvent") or tool:FindFirstChild("Remote")
-                                        if remote then remote:FireServer() end
+                                        if remote then 
+                                            remote:FireServer() 
+                                            -- Tambahan khusus Violence District (Trigger Server Call)
+                                            remote:FireServer(unpack({[1] = "Parry", [2] = tick()}))
+                                        end
                                     end
                                 end
                             end
