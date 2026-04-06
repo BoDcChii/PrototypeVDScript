@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.4.1: LEGIT PARRY EDITION 🎸 ]] --
+-- [[ BoDcChii Project - v0.4.1: BOCCHI POLISH EDITION 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
-local VirtualInputManager = game:GetService("VirtualInputManager") -- Tambahan untuk bypass server
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
@@ -122,7 +122,7 @@ local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 -- --- ISI ABOUT PAGE ---
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.1 (Legit Parry)\n\nUpdate:\n- Improved Auto Parry (VirtualInput)\n- Frame-Perfect Timing\n- Rainbow UI Stroke & Fade"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.1 (Final Parry)\n\nUpdate:\n- State-Injection Parry\n- Lower Studs Threshold\n- Anti-Latency Guard"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -164,34 +164,42 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [[ BAGIAN PERBAIKAN: MASTER AUTO PARRY LEGIT TIMING ]]
+-- [[ FINAL REVISI: STATE-INJECTION AUTO PARRY ]]
 local lastParry = 0
 local function TriggerParry()
-    if tick() - lastParry < 0.65 then return end -- Cooldown agar tidak dianggap spam oleh server
-    
+    if tick() - lastParry < 0.55 then return end
+    lastParry = tick()
+
     local char = Players.LocalPlayer.Character
-    local weapon = char and char:FindFirstChildOfClass("Tool")
+    local tool = char and char:FindFirstChildOfClass("Tool")
     
-    if weapon then
-        lastParry = tick()
-        -- 1. Simulasi Input Klik Mouse/Touch (Agar server menganggap ini input legit)
+    if tool then
+        -- 1. Simulate Legit Press
         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-        task.wait(0.04) -- Menahan klik sejenak
-        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
         
-        -- 2. Force Activate Tool (Sebagai backup)
-        weapon:Activate()
-        
-        -- 3. Single Remote Fire (Hanya jika perlu, dikirim sekali saja)
-        for _, r in pairs(weapon:GetDescendants()) do
-            if r:IsA("RemoteEvent") then
-                r:FireServer("Parry", true)
+        -- 2. State Injection (Pura-pura memblokir secara fisik)
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then
+            -- Memaksa animasi blokir lokal (Bypass visual)
+            for _, track in pairs(hum:GetPlayingAnimationTracks()) do
+                if track.Name:find("Idle") or track.Name:find("Run") then track:Stop() end
             end
         end
+
+        -- 3. High-Priority Remote Call (Direct Signal)
+        local rem = tool:FindFirstChildOfClass("RemoteEvent") or tool:FindFirstChild("Remote")
+        if rem then
+            rem:FireServer("Parry", true)
+            rem:FireServer("Block", true)
+            rem:FireServer(true) -- Beberapa game butuh boolean polos
+        end
+
+        task.wait(0.1)
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
     end
 end
 
-RunService.Stepped:Connect(function()
+RunService.Heartbeat:Connect(function()
     if _AutoParry then
         pcall(function()
             local lp = Players.LocalPlayer
@@ -206,29 +214,20 @@ RunService.Stepped:Connect(function()
                     if kRoot and kHum then
                         local dist = (myRoot.Position - kRoot.Position).Magnitude
                         
-                        -- Jarak dipersempit (8-11 studs) agar timing server akurat
-                        if dist < 12 then
-                            -- Deteksi Animasi Pukul (Frame-Perfect)
+                        -- AMBANG BATAS: 9-11 Studs (Jarak Hitbox Terkuat)
+                        if dist < 11.5 then
                             local isAttacking = false
                             for _, track in pairs(kHum:GetPlayingAnimationTracks()) do
-                                -- Mencari animasi cepat khas killer
-                                if track.IsPlaying and track.Length > 0 and track.Length < 1.4 then
-                                    -- Trigger hanya saat animasi di awal (0.01 - 0.25 detik)
-                                    if track.TimePosition > 0 and track.TimePosition < 0.3 then
+                                -- Deteksi Animasi Serang Sangat Cepat
+                                if track.IsPlaying and track.Length < 1.2 then
+                                    if track.TimePosition > 0 and track.TimePosition < 0.25 then
                                         isAttacking = true break
                                     end
                                 end
                             end
                             
-                            -- Deteksi Objek Hitbox Mendadak
-                            local hitboxDetected = false
-                            for _, obj in pairs(k.Character:GetDescendants()) do
-                                if obj:IsA("BasePart") and (obj.Name:find("Hit") or obj.Name:find("Swing")) then
-                                    hitboxDetected = true break
-                                end
-                            end
-
-                            if isAttacking or hitboxDetected then
+                            -- Deteksi Kecepatan Gerak Killer (Lunge/Attack Move)
+                            if isAttacking or (dist < 7 and kRoot.Velocity.Magnitude > 22) then
                                 TriggerParry()
                             end
                         end
@@ -239,7 +238,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- --- FITUR LAIN (TIDAK BERUBAH) ---
+-- --- FITUR LAINNYA (SAMA SEPERTI ASLINYA) ---
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
@@ -300,7 +299,7 @@ if mt then
     end); setreadonly(mt, true)
 end
 
--- --- 6. BUTTON & TOGGLE MENU ---
+-- --- 6. BUTTON & TOGGLE ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 50, 0, 50); OpenButton.Position = UDim2.new(0, 20, 0.5, -25)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
