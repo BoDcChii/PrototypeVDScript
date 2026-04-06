@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.3: ULTIMATE HYBRID FIX 🎸 ]] --
+-- [[ BoDcChii Project - v0.3: ABOUT RESTORED & v5.1.6 LOGIC 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -60,7 +60,7 @@ local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 18
 
--- --- 3. SCROLLING SETUP (FIXED) ---
+-- --- 3. SCROLLING SETUP ---
 local function SetupScroll(scroll)
     scroll.Active = true
     scroll.ScrollBarThickness = 4
@@ -81,7 +81,7 @@ ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.
 ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0
 SetupScroll(ContentScroll)
 
--- VISUAL DIVIDERS (Garis Pemisah)
+-- VISUAL DIVIDERS
 local LineH = Instance.new("Frame", MainFrame)
 LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 36); LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
 local LineV = Instance.new("Frame", MainFrame)
@@ -96,6 +96,7 @@ local function CreateTabBtn(text)
     return btn
 end
 
+-- Membuat Tombol Tab
 local T0 = CreateTabBtn("0. ABOUT")
 local T1 = CreateTabBtn("1. PLAYER ESP")
 local T2 = CreateTabBtn("2. SURVIVAL")
@@ -107,9 +108,10 @@ local function CreatePage()
     return f
 end
 
+-- Membuat Halaman Page
 local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
--- --- ISI ABOUT PAGE (STETAP DI v0.3) ---
+-- --- ISI ABOUT PAGE ---
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
 AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.3\n\nUpdate:\n- Optimalisasi ESP Generator\n- UI Baru dan Lebih Rapi\n- Fitur Potato Mode"
@@ -135,7 +137,7 @@ local function CreateBtn(parent, text)
     return btn
 end
 
--- --- 5. LOGIKA FITUR (MASTER v5.1.6 LOGIC) ---
+-- --- 5. LOGIKA FITUR (MASTER v5.1.6) ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode = false, false, false, false, false, false, false
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
@@ -171,7 +173,6 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- LOGIC LOOPS (v5.1.6 VERSION)
 task.spawn(function()
     while task.wait(3) do
         if _GenOn then
