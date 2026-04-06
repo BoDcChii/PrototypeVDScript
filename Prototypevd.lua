@@ -99,8 +99,9 @@ LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(0, 122, 0, 42);
 -- --- 4. TABS & PAGES ---
 local function CreateTabBtn(text)
     local btn = Instance.new("TextButton", SidebarScroll); btn.Size = UDim2.new(1, -10, 0, 35)
-    btn.BackgroundColor3 = Color3.fromRGB(255, 105, 180); btn.Text = text; btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); btn.Text = text; btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 10; Instance.new("UICorner", btn)
+    Instance.new("UIStroke", btn).Color = Color3.fromRGB(255, 105, 180)
     return btn
 end
 
@@ -162,35 +163,54 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [ PERBAIKAN AUTO PARRY ]
-RunService.Stepped:Connect(function()
-    if _AutoParry then
-        pcall(function()
-            local char = Players.LocalPlayer.Character
-            local tool = char and char:FindFirstChildOfClass("Tool")
-            if tool then
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= Players.LocalPlayer and p.Character then
-                        local kChar = p.Character
-                        local isK = (p.Team and p.Team.Name:lower():find("kill")) or (kChar:FindFirstChild("Humanoid") and kChar.Humanoid.MaxHealth > 100)
-                        
-                        if isK then
-                            local kRoot = kChar:FindFirstChild("HumanoidRootPart")
-                            local myRoot = char:FindFirstChild("HumanoidRootPart")
-                            if kRoot and myRoot then
-                                local dist = (myRoot.Position - kRoot.Position).Magnitude
-                                -- Cek apakah killer memegang tool dan tool tersebut "Active" (berayun)
-                                local kTool = kChar:FindFirstChildOfClass("Tool")
-                                if dist < 15 and kTool then
-                                    -- Logika: Jika killer memegang senjata dalam jarak dekat, kita langsung nangkis
-                                    tool:Activate()
+-- [ PERBAIKAN AUTO PARRY - VIOLENCE DISTRICT OPTIMIZED ]
+task.spawn(function()
+    while task.wait() do
+        if _AutoParry then
+            pcall(function()
+                local lp = Players.LocalPlayer
+                local char = lp.Character
+                local tool = char and char:FindFirstChildOfClass("Tool")
+                
+                if tool then
+                    for _, p in pairs(Players:GetPlayers()) do
+                        if p ~= lp and p.Character then
+                            local kChar = p.Character
+                            local kHum = kChar:FindFirstChild("Humanoid")
+                            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (kHum and kHum.MaxHealth > 100)
+                            
+                            if isK then
+                                local kRoot = kChar:FindFirstChild("HumanoidRootPart")
+                                local myRoot = char:FindFirstChild("HumanoidRootPart")
+                                if kRoot and myRoot then
+                                    local dist = (myRoot.Position - kRoot.Position).Magnitude
+                                    
+                                    -- Cek animasi spesifik di Violence District
+                                    local isAtk = false
+                                    for _, t in pairs(kHum:GetPlayingAnimationTracks()) do
+                                        if t.IsPlaying and t.WeightTarget > 0 then
+                                            local aid = t.Animation.AnimationId:lower()
+                                            -- Deteksi ID animasi pukul/attack secara general
+                                            if aid:find("rbxassetid") then
+                                                isAtk = true break
+                                            end
+                                        end
+                                    end
+
+                                    if dist < 14 and isAtk then
+                                        tool:Activate()
+                                        -- Tambahan: Trigger Event jika Activate() standar lambat
+                                        local event = tool:FindFirstChildOfClass("RemoteEvent") or tool:FindFirstChild("Remote")
+                                        if event then event:FireServer() end
+                                        task.wait(0.2)
+                                    end
                                 end
                             end
                         end
                     end
                 end
-            end
-        end)
+            end)
+        end
     end
 end)
 
