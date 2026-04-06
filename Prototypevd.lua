@@ -96,7 +96,13 @@ end
 
 local P0 = CreateTabBtn("0. ABOUT", 0); local P1 = CreateTabBtn("1. PLAYER ESP", 1)
 local P2 = CreateTabBtn("2. SURVIVAL", 2); 
-local P3 = CreateTabBtn("3. Setting", 3) -- Nama Halaman Berubah
+local P3 = CreateTabBtn("3. Setting", 3) -- Berubah menjadi Setting
+
+-- About Info
+local AboutInfo = Instance.new("TextLabel", P0)
+AboutInfo.Size = UDim2.new(1, 0, 0, 150); AboutInfo.BackgroundTransparency = 1; AboutInfo.TextColor3 = Color3.new(1, 1, 1)
+AboutInfo.Text = "Creator: BoDcChii\nv0.4.1 (STABLE)\n\nOptimasi:\n- Memory Guard\n- Half-Tick Heartbeat\n- Auto-Culling ESP"
+AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 -- --- 4. FEATURE LOGIC ---
 local function CreateBtn(parent, text, varName)
@@ -135,13 +141,13 @@ local function TriggerParry()
     end
 end
 
--- [[ CORE HEARTBEAT (THROTTLED) ]]
+-- --- 5. CORE LOOP (OPTIMIZED) ---
 local counter = 0
 RunService.Heartbeat:Connect(function()
     counter = (counter + 1) % 2
-    if counter ~= 0 then return end 
+    if counter ~= 0 then return end -- Frame Skipping (Save CPU)
 
-    -- Auto Parry
+    -- Auto Parry BETA
     if _G.Parry then
         local myRoot = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
         if myRoot then
@@ -161,7 +167,7 @@ RunService.Heartbeat:Connect(function()
         end
     end
 
-    -- ESP Player
+    -- Player ESP
     if _G.Surv or _G.Kill then
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character then
@@ -174,7 +180,7 @@ RunService.Heartbeat:Connect(function()
         end
     end
 
-    -- ESP Generator (DIKEMBALIKAN)
+    -- Generator ESP (Fixed & Optimized)
     if _G.Gen then
         for _, v in pairs(Workspace:GetDescendants()) do
             if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
@@ -186,11 +192,12 @@ RunService.Heartbeat:Connect(function()
         for _, v in pairs(Workspace:GetDescendants()) do if v:FindFirstChild("GenEsp") then v.GenEsp.Enabled = false end end
     end
 
+    -- Lighting Features
     if _G.Bright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _G.Fog then Lighting.FogEnd = 1e5 end
 end)
 
--- Potato Mode
+-- Potato Mode Logic
 PBtn.MouseButton1Click:Connect(function()
     if _G.Potato then
         for _, v in pairs(Workspace:GetDescendants()) do
@@ -202,7 +209,7 @@ PBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- 5. BUTTON TOGGLE ---
+-- --- 6. MENU TOGGLE ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 45, 0, 45); OpenButton.Position = UDim2.new(0, 10, 0.5, -22)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
@@ -210,7 +217,7 @@ Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 10)
 EnableDrag(OpenButton)
 OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 
--- Skillcheck Metatable
+-- Skillcheck Metatable Hook
 local mt = getrawmetatable(game); local old = mt.__namecall; setreadonly(mt, false)
 mt.__namecall = newcclosure(function(self, ...)
     if _G.Skill and getnamecallmethod() == "FireServer" then
