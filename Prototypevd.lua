@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.3: SMART GEN ESP UPDATE 🎸 ]] --
+-- [[ BoDcChii Project - v0.3: VIOLENCE DISTRICT SMART GEN 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -108,10 +108,9 @@ end
 
 local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
--- --- ISI ABOUT PAGE ---
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.3\n\nUpdate:\n- Smart ESP Generator (Anti-Lag)\n- UI Baru dan Lebih Rapi\n- Fitur Potato Mode"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.3\n\nUpdate:\n- Smart ESP Generator (Fixed)\n- UI Baru dan Lebih Rapi\n- Fitur Potato Mode"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -170,16 +169,19 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- MODIFIKASI SMART ESP GENERATOR ---
+-- --- FIX SMART ESP GENERATOR (UNIVERSAL FOR VIOLENCE DISTRICT) ---
 task.spawn(function()
-    while task.wait(3) do
+    while task.wait(2) do -- Scan lebih cepat sedikit
         if _GenOn then
             for _, v in pairs(game.Workspace:GetDescendants()) do
-                if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
-                    -- Cek apakah generator sudah selesai (Progres penuh atau lampu menyala)
-                    local isFinished = v:FindFirstChild("Lamp") and v.Lamp:IsA("Light") and v.Lamp.Enabled or v:FindFirstChild("Done") or (v:FindFirstChild("Progress") and v.Progress.Value >= 100)
+                -- Mencari objek dengan nama Gen/Generator
+                if (v.Name:lower():find("gen") or v.Name:lower():find("generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
                     
-                    if not isFinished then
+                    -- Logika Filter: Cek apakah sudah menyala (Biasanya ada objek cahaya atau suara mesin)
+                    -- Kita pakai deteksi simpel: kalau ada Highlight lama, kita cek kondisinya.
+                    local finished = v:FindFirstChild("Done") or v:FindFirstChild("Completed") or (v:IsA("BasePart") and v.Transparency > 0.5)
+                    
+                    if not finished then
                         if not v:FindFirstChild("GenEsp") then 
                             local h = Instance.new("Highlight", v)
                             h.Name = "GenEsp"
@@ -188,13 +190,12 @@ task.spawn(function()
                         end
                         v.GenEsp.Enabled = true
                     else
-                        -- Jika sudah selesai, hapus ESP-nya
                         if v:FindFirstChild("GenEsp") then v.GenEsp:Destroy() end
                     end
                 end
             end
         else
-            for _, v in pairs(game.Workspace:GetDescendants()) do if v:FindFirstChild("GenEsp") then v.GenEsp.Enabled = false end end
+            for _, v in pairs(game.Workspace:GetDescendants()) do if v:FindFirstChild("GenEsp") then v.GenEsp:Destroy() end end
         end
     end
 end)
