@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.3: FINAL REPAIR 🎸 ]] --
+-- [[ BoDcChii Project - v0.3: POTATO MODE ULTIMATE SYNC 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -65,7 +65,7 @@ local function SetupScroll(scroll)
     scroll.Active = true
     scroll.ScrollBarThickness = 4
     scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-    scroll.CanvasSize = UDim2.new(0, 0, 2, 0) 
+    scroll.CanvasSize = UDim2.new(0, 0, 1.5, 0) 
     scroll.ScrollingDirection = Enum.ScrollingDirection.Y
     scroll.ElasticBehavior = Enum.ElasticBehavior.Always
 end
@@ -81,7 +81,6 @@ ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.
 ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0
 SetupScroll(ContentScroll)
 
--- VISUAL DIVIDERS
 local LineH = Instance.new("Frame", MainFrame)
 LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 36); LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
 local LineV = Instance.new("Frame", MainFrame)
@@ -102,22 +101,23 @@ local T2 = CreateTabBtn("2. SURVIVAL")
 local T3 = CreateTabBtn("3. SMOOTH MAPS")
 
 local function CreatePage()
-    local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, 0, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
-    local l = Instance.new("UIListLayout", f); l.Padding = UDim.new(0, 5)
+    local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -10, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
+    Instance.new("UIListLayout", f).Padding = UDim.new(0, 5)
     return f
 end
 
-local P0 = CreatePage(); local P1 = CreatePage(); local P2 = CreatePage(); local P3 = CreatePage()
+local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
 -- --- ISI ABOUT PAGE ---
 local AboutInfo = Instance.new("TextLabel", P0)
-AboutInfo.Size = UDim2.new(1, 0, 1, 0); AboutInfo.BackgroundTransparency = 1
+AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
 AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.3\n\nUpdate:\n- Optimalisasi ESP Generator\n- UI Baru dan Lebih Rapi\n- Fitur Potato Mode"
-AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left; AboutInfo.TextYAlignment = Enum.TextYAlignment.Top
+AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
     P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false
-    T0.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    T0.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     p.Visible = true; b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 end
 
@@ -134,7 +134,7 @@ local function CreateBtn(parent, text)
     return btn
 end
 
--- --- 5. LOGIKA FITUR (ASLI v5.1.6) ---
+-- --- 5. LOGIKA FITUR (MASTER) ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode = false, false, false, false, false, false, false
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
@@ -152,6 +152,7 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
+-- FITUR POTATO MODE DARI v5.1.6 (ULTIMATE)
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
@@ -160,10 +161,15 @@ Btn7.MouseButton1Click:Connect(function()
             local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
             local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
             if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
+                if v:IsA("BasePart") then 
+                    v.Material = Enum.Material.SmoothPlastic 
+                    if v:IsA("MeshPart") then v.TextureID = "" end
+                elseif v:IsA("Texture") or v:IsA("Decal") then 
+                    v.Transparency = 1
+                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then 
+                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
+                elseif v:IsA("SpecialMesh") then 
+                    v.TextureId = "" 
                 end
             end
         end
