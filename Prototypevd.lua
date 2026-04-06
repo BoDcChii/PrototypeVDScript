@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.3: ABOUT UPDATE 🎸 ]] --
+-- [[ BoDcChii Project - v0.3: ABOUT UPDATE LOG 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -109,10 +109,10 @@ end
 
 local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
--- --- ISI ABOUT PAGE (UPDATED) ---
+-- --- ISI ABOUT PAGE (WITH UPDATE LOG) ---
 local AboutInfo = Instance.new("TextLabel", P0)
-AboutInfo.Size = UDim2.new(1, 0, 0, 100); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.3"
+AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.3\n\nUpdate:\n- Optimalisasi ESP Generator\n- UI Baru dan Lebih Rapi\n- Fitur Potato Mode"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
