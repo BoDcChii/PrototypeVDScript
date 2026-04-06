@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v5.1.7: ABOUT TABLE EDITION 🎸 ]] --
+-- [[ BoDcChii Project - v5.1.7: SCROLL & LINES RESTORED 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -60,7 +60,7 @@ local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 18
 
--- --- 3. SCROLLING SETUP ---
+-- --- 3. SCROLLING SETUP (FITUR GESER) ---
 local function SetupScroll(scroll)
     scroll.Active = true
     scroll.ScrollBarThickness = 4
@@ -81,6 +81,7 @@ ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.
 ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0
 SetupScroll(ContentScroll)
 
+-- --- GARIS PEMISAH ---
 local LineH = Instance.new("Frame", MainFrame)
 LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 36); LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
 local LineV = Instance.new("Frame", MainFrame)
@@ -95,7 +96,6 @@ local function CreateTabBtn(text)
     return btn
 end
 
--- Tambah tab About di atas
 local T0 = CreateTabBtn("0. ABOUT")
 local T1 = CreateTabBtn("1. PLAYER ESP")
 local T2 = CreateTabBtn("2. SURVIVAL")
@@ -109,7 +109,7 @@ end
 
 local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
--- ISI ABOUT PAGE
+-- ABOUT INFO
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 120); AboutInfo.BackgroundTransparency = 1
 AboutInfo.Text = "CREATOR: BoDcChii\nPROJECT: Violence District\nVERSION: v5.1.7\n\nSTATUS: Active\nPLATFORM: Low-End Optimized"
@@ -126,7 +126,7 @@ T0.MouseButton1Click:Connect(function() Show(P0, T0) end)
 T1.MouseButton1Click:Connect(function() Show(P1, T1) end)
 T2.MouseButton1Click:Connect(function() Show(P2, T2) end)
 T3.MouseButton1Click:Connect(function() Show(P3, T3) end)
-Show(P0, T0) -- Default ke About
+Show(P0, T0)
 
 local function CreateBtn(parent, text)
     local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(1, 0, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -159,24 +159,20 @@ Btn7.MouseButton1Click:Connect(function()
     if _PotatoMode then
         for _, v in pairs(game.Workspace:GetDescendants()) do
             local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
-            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
-            if not isPlayer and not isImportant then
+            if not isPlayer then
                 if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
+                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1 end
             end
         end
     end
 end)
 
--- LOGIC LOOPS
 task.spawn(function()
     while task.wait(3) do
         if _GenOn then
             for _, v in pairs(game.Workspace:GetDescendants()) do
                 if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
-                    if not v:FindFirstChild("GenEsp") then local h = Instance.new("Highlight", v); h.Name = "GenEsp"; h.FillColor = Color3.fromRGB(255, 255, 0); h.FillTransparency = 0.5 end
+                    if not v:FindFirstChild("GenEsp") then local h = Instance.new("Highlight", v); h.Name = "GenEsp"; h.FillColor = Color3.fromRGB(255, 255, 0) end
                     v.GenEsp.Enabled = true
                 end
             end
@@ -205,7 +201,7 @@ if mt then
         local method = getnamecallmethod()
         if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
             local n = tostring(self):lower()
-            if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
+            if n:find("fail") or n:find("skillcheck") then return nil end
         end
         return old(self, ...)
     end); setreadonly(mt, true)
