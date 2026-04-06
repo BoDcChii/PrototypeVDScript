@@ -163,53 +163,47 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [ PERBAIKAN AUTO PARRY - ADVANCED ANIMATION MONITOR ]
+-- [[ MASTER AUTO PARRY PERBAIKAN v0.4 - DETEKSI HITBOX INSTAN ]]
+local function TriggerParry()
+    local char = Players.LocalPlayer.Character
+    local weapon = char and char:FindFirstChildOfClass("Tool")
+    if weapon then
+        weapon:Activate()
+        for _, r in pairs(weapon:GetDescendants()) do
+            if r:IsA("RemoteEvent") then
+                r:FireServer()
+                r:FireServer("Parry", true)
+                r:FireServer("Block", true)
+            end
+        end
+    end
+end
+
+-- Memantau kemunculan objek serang di karakter killer
 RunService.Stepped:Connect(function()
     if _AutoParry then
         pcall(function()
             local lp = Players.LocalPlayer
-            local char = lp.Character
-            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
-            local weapon = char and char:FindFirstChildOfClass("Tool")
+            local myRoot = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+            if not myRoot then return end
 
-            if myRoot and weapon then
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= lp and p.Character then
-                        local kChar = p.Character
-                        local kHum = kChar:FindFirstChild("Humanoid")
-                        local kRoot = kChar:FindFirstChild("HumanoidRootPart")
-
-                        if kHum and kRoot then
-                            local dist = (myRoot.Position - kRoot.Position).Magnitude
-                            
-                            -- Deteksi Animasi Serangan (Sangat Sensitif)
-                            local isAttacking = false
-                            for _, track in pairs(kHum:GetPlayingAnimationTracks()) do
-                                -- Di Violence District, animasi pukul biasanya durasinya < 1.5 detik
-                                if track.IsPlaying and track.Length > 0 and track.Length < 1.6 then
-                                    if track.TimePosition > 0 and track.TimePosition < 0.6 then
-                                        isAttacking = true break
-                                    end
-                                end
+            for _, k in pairs(Players:GetPlayers()) do
+                if k ~= lp and k.Character then
+                    local kRoot = k.Character:FindFirstChild("HumanoidRootPart")
+                    local kHum = k.Character:FindFirstChild("Humanoid")
+                    
+                    if kRoot and (kRoot.Position - myRoot.Position).Magnitude < 18 then
+                        -- 1. Deteksi Animasi Pukul (Biasanya Animasi Pendek)
+                        for _, track in pairs(kHum:GetPlayingAnimationTracks()) do
+                            if track.IsPlaying and track.Length > 0 and track.Length < 1.3 then
+                                TriggerParry() break
                             end
-
-                            -- Eksekusi Parry (Radius 15 Studs)
-                            if dist < 15 and isAttacking then
-                                -- 1. Aktivasi Tool
-                                weapon:Activate()
-                                
-                                -- 2. Bypass Remote Langsung ke Server
-                                for _, rem in pairs(weapon:GetDescendants()) do
-                                    if rem:IsA("RemoteEvent") then
-                                        rem:FireServer()
-                                        rem:FireServer("Action", "Parry") -- Varian argumen VD
-                                    end
-                                end
-                                
-                                -- 3. Mencoba memicu "Skill" parry jika ada di tool
-                                if weapon:FindFirstChild("Remote") then
-                                    weapon.Remote:FireServer(true)
-                                end
+                        end
+                        
+                        -- 2. Deteksi Objek Serangan (Hitbox/Swing) yang muncul mendadak
+                        for _, obj in pairs(k.Character:GetDescendants()) do
+                            if obj:IsA("BasePart") and (obj.Name:find("Hit") or obj.Name:find("Damage") or obj.Name:find("Swing")) then
+                                TriggerParry() break
                             end
                         end
                     end
