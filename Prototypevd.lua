@@ -163,54 +163,49 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [ PERBAIKAN AUTO PARRY - VIOLENCE DISTRICT OPTIMIZED ]
-task.spawn(function()
-    while task.wait() do
-        if _AutoParry then
-            pcall(function()
-                local lp = Players.LocalPlayer
-                local char = lp.Character
-                local tool = char and char:FindFirstChildOfClass("Tool")
-                
-                if tool then
-                    for _, p in pairs(Players:GetPlayers()) do
-                        if p ~= lp and p.Character then
-                            local kChar = p.Character
-                            local kHum = kChar:FindFirstChild("Humanoid")
-                            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (kHum and kHum.MaxHealth > 100)
-                            
-                            if isK then
-                                local kRoot = kChar:FindFirstChild("HumanoidRootPart")
-                                local myRoot = char:FindFirstChild("HumanoidRootPart")
-                                if kRoot and myRoot then
-                                    local dist = (myRoot.Position - kRoot.Position).Magnitude
-                                    
-                                    -- Cek animasi spesifik di Violence District
-                                    local isAtk = false
-                                    for _, t in pairs(kHum:GetPlayingAnimationTracks()) do
-                                        if t.IsPlaying and t.WeightTarget > 0 then
-                                            local aid = t.Animation.AnimationId:lower()
-                                            -- Deteksi ID animasi pukul/attack secara general
-                                            if aid:find("rbxassetid") then
-                                                isAtk = true break
-                                            end
+-- [ PERBAIKAN AUTO PARRY - BYPASS SYSTEM ]
+RunService.Stepped:Connect(function()
+    if _AutoParry then
+        pcall(function()
+            local lp = Players.LocalPlayer
+            local char = lp.Character
+            local tool = char and char:FindFirstChildOfClass("Tool")
+            
+            if tool then
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= lp and p.Character then
+                        local kChar = p.Character
+                        local kHum = kChar:FindFirstChild("Humanoid")
+                        local isK = (p.Team and p.Team.Name:lower():find("kill")) or (kHum and kHum.MaxHealth > 100)
+                        
+                        if isK then
+                            local kRoot = kChar:FindFirstChild("HumanoidRootPart")
+                            local myRoot = char:FindFirstChild("HumanoidRootPart")
+                            if kRoot and myRoot then
+                                local dist = (myRoot.Position - kRoot.Position).Magnitude
+                                if dist < 18 then
+                                    -- Deteksi Animasi secara Mendalam
+                                    local isAttacking = false
+                                    for _, track in pairs(kHum:GetPlayingAnimationTracks()) do
+                                        if track.IsPlaying and track.WeightTarget > 0 then
+                                            isAttacking = true break
                                         end
                                     end
-
-                                    if dist < 14 and isAtk then
+                                    
+                                    if isAttacking then
+                                        -- Bypass Activation
                                         tool:Activate()
-                                        -- Tambahan: Trigger Event jika Activate() standar lambat
-                                        local event = tool:FindFirstChildOfClass("RemoteEvent") or tool:FindFirstChild("Remote")
-                                        if event then event:FireServer() end
-                                        task.wait(0.2)
+                                        -- Cek jika ada Remote bawaan untuk nangkis
+                                        local r = tool:FindFirstChildOfClass("RemoteEvent") or tool:FindFirstChild("Remote")
+                                        if r then r:FireServer() end
                                     end
                                 end
                             end
                         end
                     end
                 end
-            end)
-        end
+            end
+        end)
     end
 end)
 
