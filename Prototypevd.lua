@@ -1,10 +1,11 @@
--- [[ BoDcChii Project - v0.3: POTATO MODE ULTIMATE SYNC 🎸 ]] --
+-- [[ BoDcChii Project - v0.4: BOCCHI POLISH EDITION 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService") -- Tambahan untuk Animasi
 
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
@@ -52,9 +53,19 @@ end
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 380, 0, 220); MainFrame.Position = UDim2.new(0.5, -190, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
+MainFrame.ClipsDescendants = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
-Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(255, 105, 180)
+local MainStroke = Instance.new("UIStroke", MainFrame)
+MainStroke.Color = Color3.fromRGB(255, 105, 180); MainStroke.Thickness = 2
 EnableDrag(MainFrame)
+
+-- FITUR RAINBOW STROKE (BOCCHI VIBE)
+task.spawn(function()
+    while task.wait() do
+        local hue = tick() % 5 / 5
+        MainStroke.Color = Color3.fromHSV(hue, 0.6, 1) -- Pelangi lembut
+    end
+end)
 
 local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
@@ -111,7 +122,7 @@ local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 -- --- ISI ABOUT PAGE ---
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.3\n\nUpdate:\n- Optimalisasi ESP Generator\n- UI Baru dan Lebih Rapi\n- Fitur Potato Mode"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4 (Aesthetic)\n\nUpdate:\n- Rainbow UI Stroke\n- Fade Open/Close Animation\n- Fitur Potato Mode Tetap Aktif"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -152,7 +163,7 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- FITUR POTATO MODE DARI v5.1.6 (ULTIMATE)
+-- FITUR POTATO MODE TETAP SAMA
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
@@ -216,13 +227,35 @@ if mt then
     end); setreadonly(mt, true)
 end
 
--- --- 6. BUTTON & TOGGLE ---
+-- --- 6. BUTTON & TOGGLE (DENGAN ANIMASI FADE) ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 50, 0, 50); OpenButton.Position = UDim2.new(0, 20, 0.5, -25)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
 OpenButton.TextSize = 24; OpenButton.Font = Enum.Font.SourceSansBold; OpenButton.ZIndex = 500
 Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
-Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(255, 105, 180)
+local BtnStroke = Instance.new("UIStroke", OpenButton)
+BtnStroke.Color = Color3.fromRGB(255, 105, 180); BtnStroke.Thickness = 2
 EnableDrag(OpenButton)
 
-OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+-- RAINBOW UNTUK TOMBOL BUKA JUGA
+task.spawn(function()
+    while task.wait() do
+        local hue = tick() % 5 / 5
+        BtnStroke.Color = Color3.fromHSV(hue, 0.6, 1)
+    end
+end)
+
+local function ToggleMenu()
+    if MainFrame.Visible then
+        -- Animasi Menutup
+        MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true)
+        task.delay(0.3, function() MainFrame.Visible = false end)
+    else
+        -- Animasi Membuka
+        MainFrame.Visible = true
+        MainFrame.Size = UDim2.new(0, 0, 0, 0)
+        MainFrame:TweenSize(UDim2.new(0, 380, 0, 220), "Out", "Back", 0.4, true)
+    end
+end
+
+OpenButton.MouseButton1Click:Connect(ToggleMenu)
