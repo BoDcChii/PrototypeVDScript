@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v5.1.6: ULTIMATE SCROLL FIX 🎸 ]] --
+-- [[ BoDcChii Project - v0.3: ULTIMATE HYBRID FIX 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -60,30 +60,28 @@ local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 18
 
--- --- 3. SCROLLING SETUP (UNIVERSAL FIX) ---
+-- --- 3. SCROLLING SETUP (FIXED) ---
 local function SetupScroll(scroll)
     scroll.Active = true
     scroll.ScrollBarThickness = 4
     scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-    scroll.CanvasSize = UDim2.new(0, 0, 2, 0) -- Force canvas to be larger
+    scroll.CanvasSize = UDim2.new(0, 0, 2, 0) 
     scroll.ScrollingDirection = Enum.ScrollingDirection.Y
     scroll.ElasticBehavior = Enum.ElasticBehavior.Always
 end
 
--- LEFT SIDEBAR
 local SidebarScroll = Instance.new("ScrollingFrame", MainFrame)
 SidebarScroll.Size = UDim2.new(0, 115, 1, -45); SidebarScroll.Position = UDim2.new(0, 5, 0, 42)
 SidebarScroll.BackgroundTransparency = 1; SidebarScroll.BorderSizePixel = 0
 SetupScroll(SidebarScroll)
 local SideLayout = Instance.new("UIListLayout", SidebarScroll); SideLayout.Padding = UDim.new(0, 5)
 
--- RIGHT CONTENT
 local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
 ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.new(0, 130, 0, 45)
 ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0
 SetupScroll(ContentScroll)
 
--- VISUAL DIVIDERS
+-- VISUAL DIVIDERS (Garis Pemisah)
 local LineH = Instance.new("Frame", MainFrame)
 LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 36); LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
 local LineV = Instance.new("Frame", MainFrame)
@@ -98,7 +96,10 @@ local function CreateTabBtn(text)
     return btn
 end
 
-local T1 = CreateTabBtn("1. PLAYER ESP"); local T2 = CreateTabBtn("2. SURVIVAL"); local T3 = CreateTabBtn("3. SMOOTH MAPS")
+local T0 = CreateTabBtn("0. ABOUT")
+local T1 = CreateTabBtn("1. PLAYER ESP")
+local T2 = CreateTabBtn("2. SURVIVAL")
+local T3 = CreateTabBtn("3. SMOOTH MAPS")
 
 local function CreatePage()
     local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -10, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
@@ -106,16 +107,26 @@ local function CreatePage()
     return f
 end
 
-local P1, P2, P3 = CreatePage(), CreatePage(), CreatePage()
+local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
+
+-- --- ISI ABOUT PAGE (STETAP DI v0.3) ---
+local AboutInfo = Instance.new("TextLabel", P0)
+AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.3\n\nUpdate:\n- Optimalisasi ESP Generator\n- UI Baru dan Lebih Rapi\n- Fitur Potato Mode"
+AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
-    P1.Visible = false; P2.Visible = false; P3.Visible = false
-    T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false
+    T0.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     p.Visible = true; b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 end
 
-T1.MouseButton1Click:Connect(function() Show(P1, T1) end); T2.MouseButton1Click:Connect(function() Show(P2, T2) end); T3.MouseButton1Click:Connect(function() Show(P3, T3) end)
-Show(P1, T1)
+T0.MouseButton1Click:Connect(function() Show(P0, T0) end)
+T1.MouseButton1Click:Connect(function() Show(P1, T1) end)
+T2.MouseButton1Click:Connect(function() Show(P2, T2) end)
+T3.MouseButton1Click:Connect(function() Show(P3, T3) end)
+Show(P0, T0)
 
 local function CreateBtn(parent, text)
     local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(1, 0, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -124,7 +135,7 @@ local function CreateBtn(parent, text)
     return btn
 end
 
--- --- 5. LOGIKA FITUR (MASTER) ---
+-- --- 5. LOGIKA FITUR (MASTER v5.1.6 LOGIC) ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode = false, false, false, false, false, false, false
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
@@ -154,12 +165,13 @@ Btn7.MouseButton1Click:Connect(function()
                 elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
                 elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
                 elseif v:IsA("SpecialMesh") then v.TextureId = "" end
+                end
             end
         end
     end
 end)
 
--- LOGIC LOOPS
+-- LOGIC LOOPS (v5.1.6 VERSION)
 task.spawn(function()
     while task.wait(3) do
         if _GenOn then
