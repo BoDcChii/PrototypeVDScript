@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v5.1.7: SCROLL & LINES RESTORED 🎸 ]] --
+-- [[ BoDcChii Project - v0.3: ABOUT UPDATE 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -60,7 +60,7 @@ local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 18
 
--- --- 3. SCROLLING SETUP (FITUR GESER) ---
+-- --- 3. SCROLLING SETUP ---
 local function SetupScroll(scroll)
     scroll.Active = true
     scroll.ScrollBarThickness = 4
@@ -109,11 +109,11 @@ end
 
 local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
--- ABOUT INFO
+-- --- ISI ABOUT PAGE (UPDATED) ---
 local AboutInfo = Instance.new("TextLabel", P0)
-AboutInfo.Size = UDim2.new(1, 0, 0, 120); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "CREATOR: BoDcChii\nPROJECT: Violence District\nVERSION: v5.1.7\n\nSTATUS: Active\nPLATFORM: Low-End Optimized"
-AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
+AboutInfo.Size = UDim2.new(1, 0, 0, 100); AboutInfo.BackgroundTransparency = 1
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.3"
+AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
     P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false
