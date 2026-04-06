@@ -163,45 +163,47 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [ PERBAIKAN AUTO PARRY - ULTRA FAST DETECTION ]
-RunService.Stepped:Connect(function()
+-- [ PERBAIKAN AUTO PARRY - HITBOX SCANNER ]
+RunService.RenderStepped:Connect(function()
     if _AutoParry then
         pcall(function()
             local lp = Players.LocalPlayer
             local char = lp.Character
             local tool = char and char:FindFirstChildOfClass("Tool")
-            
-            if tool then
+            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+
+            if tool and myRoot then
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= lp and p.Character then
                         local kChar = p.Character
+                        local kRoot = kChar:FindFirstChild("HumanoidRootPart")
                         local kHum = kChar:FindFirstChild("Humanoid")
+                        
+                        -- Identifikasi Killer (Tim atau Health)
                         local isK = (p.Team and p.Team.Name:lower():find("kill")) or (kHum and kHum.MaxHealth > 100)
                         
-                        if isK then
-                            local kRoot = kChar:FindFirstChild("HumanoidRootPart")
-                            local myRoot = char:FindFirstChild("HumanoidRootPart")
-                            if kRoot and myRoot then
-                                local dist = (myRoot.Position - kRoot.Position).Magnitude
-                                if dist < 20 then
-                                    -- DETEKSI 1: Animasi Aktif
-                                    local isSwing = false
-                                    for _, t in pairs(kHum:GetPlayingAnimationTracks()) do
-                                        if t.IsPlaying and t.Speed > 0.1 then 
-                                            isSwing = true break 
-                                        end
+                        if isK and kRoot then
+                            local dist = (myRoot.Position - kRoot.Position).Magnitude
+                            
+                            -- Deteksi Gerakan Agresif (Velocity & Animations)
+                            local isAttacking = false
+                            if kRoot.Velocity.Magnitude > 15 then -- Killer lari menyerang
+                                for _, track in pairs(kHum:GetPlayingAnimationTracks()) do
+                                    if track.IsPlaying and track.WeightTarget > 0 then
+                                        isAttacking = true break
                                     end
-                                    
-                                    -- DETEKSI 2: Jarak Sangat Dekat (Panic Parry)
-                                    if isSwing or dist < 12 then
-                                        -- EKSEKUSI: Tembak semua sinyal parry
-                                        tool:Activate()
-                                        local remote = tool:FindFirstChildOfClass("RemoteEvent") or tool:FindFirstChild("Remote")
-                                        if remote then 
-                                            remote:FireServer() 
-                                            -- Tambahan khusus Violence District (Trigger Server Call)
-                                            remote:FireServer(unpack({[1] = "Parry", [2] = tick()}))
-                                        end
+                                end
+                            end
+
+                            -- Eksekusi Parry (Jarak 16 Studs untuk Respon Cepat)
+                            if dist < 16 and isAttacking then
+                                -- Memicu Aktivasi Tool
+                                tool:Activate()
+                                -- Mencari dan Menembakkan semua RemoteEvent di dalam Tool
+                                for _, rem in pairs(tool:GetDescendants()) do
+                                    if rem:IsA("RemoteEvent") then
+                                        rem:FireServer()
+                                        rem:FireServer("Parry", true) -- Beberapa script butuh string "Parry"
                                     end
                                 end
                             end
