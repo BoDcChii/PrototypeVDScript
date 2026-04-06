@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.4: BOCCHI POLISH EDITION 🎸 ]] --
+-- [[ BoDcChii Project - v0.4.1: BOCCHI POLISH EDITION 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
+local VirtualInputManager = game:GetService("VirtualInputManager") -- Untuk bypass server validation
 
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
@@ -121,7 +122,7 @@ local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 -- --- ISI ABOUT PAGE ---
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4 (Aesthetic)\n\nUpdate:\n- Rainbow UI Stroke\n- Fade Open/Close Animation\n- Fitur Potato Mode Tetap Aktif"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.1 (Legit Parry)\n\nUpdate:\n- VirtualInput Bypass\n- Fitur ESP & Potato Tetap Aktif"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -163,23 +164,29 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [[ MASTER AUTO PARRY PERBAIKAN v0.4 - DETEKSI HITBOX INSTAN ]]
+-- [[ REVISED AUTO PARRY - LEGIT INPUT SIMULATION ]]
+local lastParry = 0
 local function TriggerParry()
+    if tick() - lastParry < 0.6 then return end -- Anti-spam cooldown
+    lastParry = tick()
+    
     local char = Players.LocalPlayer.Character
     local weapon = char and char:FindFirstChildOfClass("Tool")
     if weapon then
-        weapon:Activate()
+        -- 1. Simulasi Klik Legit (Bypass Server Validation)
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+        task.wait(0.05)
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+        
+        -- 2. Backup Sinyal (Hanya 1x, bukan spam)
         for _, r in pairs(weapon:GetDescendants()) do
             if r:IsA("RemoteEvent") then
-                r:FireServer()
                 r:FireServer("Parry", true)
-                r:FireServer("Block", true)
             end
         end
     end
 end
 
--- Memantau kemunculan objek serang di karakter killer
 RunService.Stepped:Connect(function()
     if _AutoParry then
         pcall(function()
@@ -192,18 +199,26 @@ RunService.Stepped:Connect(function()
                     local kRoot = k.Character:FindFirstChild("HumanoidRootPart")
                     local kHum = k.Character:FindFirstChild("Humanoid")
                     
-                    if kRoot and (kRoot.Position - myRoot.Position).Magnitude < 18 then
-                        -- 1. Deteksi Animasi Pukul (Biasanya Animasi Pendek)
-                        for _, track in pairs(kHum:GetPlayingAnimationTracks()) do
-                            if track.IsPlaying and track.Length > 0 and track.Length < 1.3 then
-                                TriggerParry() break
-                            end
-                        end
+                    if kRoot and kHum then
+                        local dist = (myRoot.Position - kRoot.Position).Magnitude
                         
-                        -- 2. Deteksi Objek Serangan (Hitbox/Swing) yang muncul mendadak
-                        for _, obj in pairs(k.Character:GetDescendants()) do
-                            if obj:IsA("BasePart") and (obj.Name:find("Hit") or obj.Name:find("Damage") or obj.Name:find("Swing")) then
-                                TriggerParry() break
+                        -- Jarak diperketat (8-12 studs) agar timing masuk akal di server
+                        if dist < 12 then
+                            -- Deteksi Animasi Pukul (Legit Frame Check)
+                            for _, track in pairs(kHum:GetPlayingAnimationTracks()) do
+                                if track.IsPlaying and track.Length < 1.5 then
+                                    -- Parry di awal animasi (Frame-Perfect)
+                                    if track.TimePosition > 0.01 and track.TimePosition < 0.3 then
+                                        TriggerParry() break
+                                    end
+                                end
+                            end
+                            
+                            -- Deteksi Objek Serangan mendadak
+                            for _, obj in pairs(k.Character:GetDescendants()) do
+                                if obj:IsA("BasePart") and (obj.Name:find("Hit") or obj.Name:find("Swing")) then
+                                    TriggerParry() break
+                                end
                             end
                         end
                     end
