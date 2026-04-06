@@ -1,38 +1,19 @@
--- [[ BoDcChii Project - v0.5.1: MOBILE FIX 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.2: PRECISION PARRY 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
-local TweenService = game:GetService("TweenService")
 
 -- --- 0. ANTI-REDUNDANT ---
-local oldGui = CoreGui:FindFirstChild("BoDcChii_Minimalist") or CoreGui:FindFirstChild("BoDcChii_Welcome")
+local oldGui = CoreGui:FindFirstChild("BoDcChii_Minimalist")
 if oldGui then oldGui:Destroy() end
-
--- --- 1. WELCOME NOTIFICATION ---
-local function ShowWelcome()
-    local WelcomeGui = Instance.new("ScreenGui", CoreGui)
-    WelcomeGui.Name = "BoDcChii_Welcome"
-    local WelcomeFrame = Instance.new("Frame", WelcomeGui)
-    WelcomeFrame.Size = UDim2.new(0, 220, 0, 45)
-    WelcomeFrame.Position = UDim2.new(0.5, -110, 0.1, 0)
-    WelcomeFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    Instance.new("UICorner", WelcomeFrame).CornerRadius = UDim.new(0, 10)
-    local Stroke = Instance.new("UIStroke", WelcomeFrame)
-    Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
-    local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
-    WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "Welcome To BoDcChii Project"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
-    WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
-    task.delay(2, function() WelcomeGui:Destroy() end)
-end
-pcall(ShowWelcome)
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
 
+-- [ FUNGSI DRAG TETAP SAMA ]
 local function EnableDrag(gui)
     local dragging, dragStart, startPos
     gui.InputBegan:Connect(function(input)
@@ -70,32 +51,16 @@ local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 18
 
--- --- 3. SCROLLING SETUP ---
-local function SetupScroll(scroll)
-    scroll.Active = true
-    scroll.ScrollBarThickness = 2
-    scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-    scroll.CanvasSize = UDim2.new(0, 0, 1.5, 0) 
-    scroll.ScrollingDirection = Enum.ScrollingDirection.Y
-end
-
 local SidebarScroll = Instance.new("ScrollingFrame", MainFrame)
 SidebarScroll.Size = UDim2.new(0, 115, 1, -45); SidebarScroll.Position = UDim2.new(0, 5, 0, 42)
-SidebarScroll.BackgroundTransparency = 1; SidebarScroll.BorderSizePixel = 0
-SetupScroll(SidebarScroll)
+SidebarScroll.BackgroundTransparency = 1; SidebarScroll.BorderSizePixel = 0; SidebarScroll.CanvasSize = UDim2.new(0,0,1.2,0)
 Instance.new("UIListLayout", SidebarScroll).Padding = UDim.new(0, 5)
 
 local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
 ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.new(0, 130, 0, 45)
-ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0
-SetupScroll(ContentScroll)
+ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0; ContentScroll.CanvasSize = UDim2.new(0,0,1.5,0)
 
-local LineH = Instance.new("Frame", MainFrame)
-LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 36); LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
-local LineV = Instance.new("Frame", MainFrame)
-LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(0, 122, 0, 42); LineV.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineV.BorderSizePixel = 0
-
--- --- 4. TABS & PAGES ---
+-- --- TABS ---
 local function CreateTabBtn(text)
     local btn = Instance.new("TextButton", SidebarScroll); btn.Size = UDim2.new(1, -10, 0, 35)
     btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); btn.Text = text; btn.TextColor3 = Color3.new(1, 1, 1)
@@ -104,10 +69,7 @@ local function CreateTabBtn(text)
     return btn
 end
 
-local T0 = CreateTabBtn("0. ABOUT")
-local T1 = CreateTabBtn("1. PLAYER ESP")
-local T2 = CreateTabBtn("2. SURVIVAL")
-local T3 = CreateTabBtn("3. SMOOTH MAPS")
+local T0, T1, T2, T3 = CreateTabBtn("0. ABOUT"), CreateTabBtn("1. PLAYER ESP"), CreateTabBtn("2. SURVIVAL"), CreateTabBtn("3. SMOOTH MAPS")
 
 local function CreatePage()
     local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -10, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
@@ -116,19 +78,12 @@ local function CreatePage()
 end
 
 local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
-
-local AboutInfo = Instance.new("TextLabel", P0)
-AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nTester: Xiaoo\nVersi: v0.5.1 (Fix)\n\nUpdate:\n- AUTO PARRY (Tab 2)\n- Mobile Fix Optimization"
-AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
-
 local function Show(p, b)
     P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false
     T0.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     p.Visible = true; b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 end
-
 T0.MouseButton1Click:Connect(function() Show(P0, T0) end)
 T1.MouseButton1Click:Connect(function() Show(P1, T1) end)
 T2.MouseButton1Click:Connect(function() Show(P2, T2) end)
@@ -161,22 +116,36 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- AUTO PARRY LOOP (OPTIMIZED)
+-- --- LOGIKA BARU: AUTO PARRY BY ANIMATION ---
 task.spawn(function()
-    while task.wait(0.1) do
+    while task.wait() do
         if _AutoParry then
             pcall(function()
-                local char = Players.LocalPlayer.Character
-                local root = char and char:FindFirstChild("HumanoidRootPart")
-                local tool = char and char:FindFirstChildOfClass("Tool")
-                if root and tool then
-                    for _, p in pairs(Players:GetPlayers()) do
-                        if p ~= Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                            local kRoot = p.Character.HumanoidRootPart
-                            local dist = (root.Position - kRoot.Position).Magnitude
-                            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
-                            if isK and dist < 12 then
-                                tool:Activate()
+                local myChar = Players.LocalPlayer.Character
+                local myTool = myChar and myChar:FindFirstChildOfClass("Tool")
+                
+                if myTool then
+                    for _, kPlayer in pairs(Players:GetPlayers()) do
+                        if kPlayer ~= Players.LocalPlayer and kPlayer.Character then
+                            local kChar = kPlayer.Character
+                            local kHum = kChar:FindFirstChild("Humanoid")
+                            local kRoot = kChar:FindFirstChild("HumanoidRootPart")
+                            local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+                            
+                            if kHum and kRoot and myRoot then
+                                local dist = (myRoot.Position - kRoot.Position).Magnitude
+                                if dist < 15 then -- Jarak deteksi
+                                    -- CEK APAKAH KILLER SEDANG MUKUL
+                                    local anims = kHum:GetPlayingAnimationTracks()
+                                    for _, track in pairs(anims) do
+                                        -- Cek kata kunci animasi mukul (biasanya mengandung 'attack', 'slash', atau 'swing')
+                                        local animName = track.Animation.AnimationId:lower()
+                                        if animName:find("attack") or animName:find("slash") or animName:find("swing") or track.IsPlaying and track.WeightTarget > 0 then
+                                            myTool:Activate() -- TANGKIS!
+                                            task.wait(0.3) -- Jeda biar gak spam berat
+                                        end
+                                    end
+                                end
                             end
                         end
                     end
@@ -186,7 +155,7 @@ task.spawn(function()
     end
 end)
 
--- POTATO MODE
+-- [ SISANYA FITUR LAMA: POTATO, ESP, NO FOG TETAP SAMA ]
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
@@ -202,7 +171,6 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- ESP & LIGHTING LOOP
 RunService.Heartbeat:Connect(function()
     pcall(function()
         if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
@@ -219,23 +187,7 @@ RunService.Heartbeat:Connect(function()
     end)
 end)
 
--- NO SKILL CHECK (METATABLE FIX)
-pcall(function()
-    local mt = getrawmetatable(game)
-    local old = mt.__namecall
-    setreadonly(mt, false)
-    mt.__namecall = newcclosure(function(self, ...)
-        local method = getnamecallmethod()
-        if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
-            local n = tostring(self):lower()
-            if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
-        end
-        return old(self, ...)
-    end)
-    setreadonly(mt, true)
-end)
-
--- --- 6. BUTTON & TOGGLE ---
+-- --- BUTTON BUKA MENU ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 50, 0, 50); OpenButton.Position = UDim2.new(0, 20, 0.5, -25)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
