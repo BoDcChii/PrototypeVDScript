@@ -5,7 +5,7 @@ local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
-local TweenService = game:GetService("TweenService") -- Tambahan untuk Animasi
+local TweenService = game:GetService("TweenService")
 
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
@@ -59,11 +59,10 @@ local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(255, 105, 180); MainStroke.Thickness = 2
 EnableDrag(MainFrame)
 
--- FITUR RAINBOW STROKE (BOCCHI VIBE)
 task.spawn(function()
     while task.wait() do
         local hue = tick() % 5 / 5
-        MainStroke.Color = Color3.fromHSV(hue, 0.6, 1) -- Pelangi lembut
+        MainStroke.Color = Color3.fromHSV(hue, 0.6, 1)
     end
 end)
 
@@ -100,9 +99,8 @@ LineV.Size = UDim2.new(0, 2, 1, -50); LineV.Position = UDim2.new(0, 122, 0, 42);
 -- --- 4. TABS & PAGES ---
 local function CreateTabBtn(text)
     local btn = Instance.new("TextButton", SidebarScroll); btn.Size = UDim2.new(1, -10, 0, 35)
-    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); btn.Text = text; btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.BackgroundColor3 = Color3.fromRGB(255, 105, 180); btn.Text = text; btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 10; Instance.new("UICorner", btn)
-    Instance.new("UIStroke", btn).Color = Color3.fromRGB(255, 105, 180)
     return btn
 end
 
@@ -164,6 +162,38 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
+-- [ PERBAIKAN AUTO PARRY ]
+RunService.Stepped:Connect(function()
+    if _AutoParry then
+        pcall(function()
+            local char = Players.LocalPlayer.Character
+            local tool = char and char:FindFirstChildOfClass("Tool")
+            if tool then
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= Players.LocalPlayer and p.Character then
+                        local kChar = p.Character
+                        local isK = (p.Team and p.Team.Name:lower():find("kill")) or (kChar:FindFirstChild("Humanoid") and kChar.Humanoid.MaxHealth > 100)
+                        
+                        if isK then
+                            local kRoot = kChar:FindFirstChild("HumanoidRootPart")
+                            local myRoot = char:FindFirstChild("HumanoidRootPart")
+                            if kRoot and myRoot then
+                                local dist = (myRoot.Position - kRoot.Position).Magnitude
+                                -- Cek apakah killer memegang tool dan tool tersebut "Active" (berayun)
+                                local kTool = kChar:FindFirstChildOfClass("Tool")
+                                if dist < 15 and kTool then
+                                    -- Logika: Jika killer memegang senjata dalam jarak dekat, kita langsung nangkis
+                                    tool:Activate()
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
 -- FITUR POTATO MODE TETAP SAMA
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
@@ -184,42 +214,6 @@ Btn7.MouseButton1Click:Connect(function()
                     v.TextureId = "" 
                 end
             end
-        end
-    end
-end)
-
--- LOGIKA AUTO PARRY BY ANIMATION (TAMBAHAN BARU)
-task.spawn(function()
-    while task.wait() do
-        if _AutoParry then
-            pcall(function()
-                local char = Players.LocalPlayer.Character
-                local tool = char and char:FindFirstChildOfClass("Tool")
-                if tool then
-                    for _, kPlayer in pairs(Players:GetPlayers()) do
-                        if kPlayer ~= Players.LocalPlayer and kPlayer.Character then
-                            local kChar = kPlayer.Character
-                            local kHum = kChar:FindFirstChild("Humanoid")
-                            local kRoot = kChar:FindFirstChild("HumanoidRootPart")
-                            local myRoot = char:FindFirstChild("HumanoidRootPart")
-                            
-                            if kHum and kRoot and myRoot then
-                                local dist = (myRoot.Position - kRoot.Position).Magnitude
-                                if dist < 15 then
-                                    local anims = kHum:GetPlayingAnimationTracks()
-                                    for _, track in pairs(anims) do
-                                        local name = track.Animation.AnimationId:lower()
-                                        if (name:find("attack") or name:find("swing") or name:find("slash")) and track.IsPlaying then
-                                            tool:Activate()
-                                            task.wait(0.3)
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
         end
     end
 end)
@@ -264,7 +258,7 @@ if mt then
     end); setreadonly(mt, true)
 end
 
--- --- 6. BUTTON & TOGGLE (DENGAN ANIMASI FADE) ---
+-- --- 6. BUTTON & TOGGLE ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 50, 0, 50); OpenButton.Position = UDim2.new(0, 20, 0.5, -25)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
@@ -274,7 +268,6 @@ local BtnStroke = Instance.new("UIStroke", OpenButton)
 BtnStroke.Color = Color3.fromRGB(255, 105, 180); BtnStroke.Thickness = 2
 EnableDrag(OpenButton)
 
--- RAINBOW UNTUK TOMBOL BUKA JUGA
 task.spawn(function()
     while task.wait() do
         local hue = tick() % 5 / 5
@@ -284,15 +277,11 @@ end)
 
 local function ToggleMenu()
     if MainFrame.Visible then
-        -- Animasi Menutup
         MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true)
         task.delay(0.3, function() MainFrame.Visible = false end)
     else
-        -- Animasi Membuka
-        MainFrame.Visible = true
-        MainFrame.Size = UDim2.new(0, 0, 0, 0)
+        MainFrame.Visible = true; MainFrame.Size = UDim2.new(0, 0, 0, 0)
         MainFrame:TweenSize(UDim2.new(0, 380, 0, 220), "Out", "Back", 0.4, true)
     end
 end
-
 OpenButton.MouseButton1Click:Connect(ToggleMenu)
