@@ -1,17 +1,17 @@
--- [[ BoDcChii Project - v0.4: BOCCHI POLISH EDITION 🎸 ]] --
+-- [[ BoDcChii Project - v0.4.1: BOCCHI POLISH EDITION (LOGIC SYNC) 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
-local TweenService = game:GetService("TweenService") -- Tambahan untuk Animasi
+local TweenService = game:GetService("TweenService")
 
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
 if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
 
--- --- 1. WELCOME NOTIFICATION ---
+-- --- 1. WELCOME NOTIFICATION (UI PERTAMA) ---
 local function ShowWelcome()
     local WelcomeGui = Instance.new("ScreenGui", CoreGui)
     WelcomeGui.Name = "BoDcChii_Welcome"
@@ -49,7 +49,7 @@ local function EnableDrag(gui)
     UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end end)
 end
 
--- --- 2. MAIN UI STRUCTURE ---
+-- --- 2. MAIN UI STRUCTURE (UI PERTAMA) ---
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 380, 0, 220); MainFrame.Position = UDim2.new(0.5, -190, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
@@ -59,11 +59,11 @@ local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(255, 105, 180); MainStroke.Thickness = 2
 EnableDrag(MainFrame)
 
--- FITUR RAINBOW STROKE (BOCCHI VIBE)
+-- RAINBOW STROKE
 task.spawn(function()
     while task.wait() do
         local hue = tick() % 5 / 5
-        MainStroke.Color = Color3.fromHSV(hue, 0.6, 1) -- Pelangi lembut
+        MainStroke.Color = Color3.fromHSV(hue, 0.6, 1)
     end
 end)
 
@@ -73,8 +73,7 @@ Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Heade
 
 -- --- 3. SCROLLING SETUP ---
 local function SetupScroll(scroll)
-    scroll.Active = true
-    scroll.ScrollBarThickness = 4
+    scroll.Active = true; scroll.ScrollBarThickness = 4
     scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
     scroll.CanvasSize = UDim2.new(0, 0, 1.5, 0) 
     scroll.ScrollingDirection = Enum.ScrollingDirection.Y
@@ -82,14 +81,12 @@ local function SetupScroll(scroll)
 end
 
 local SidebarScroll = Instance.new("ScrollingFrame", MainFrame)
-SidebarScroll.Size = UDim2.new(0, 115, 1, -45); SidebarScroll.Position = UDim2.new(0, 5, 0, 42)
-SidebarScroll.BackgroundTransparency = 1; SidebarScroll.BorderSizePixel = 0
+SidebarScroll.Size = UDim2.new(0, 115, 1, -45); SidebarScroll.Position = UDim2.new(0, 5, 0, 42); SidebarScroll.BackgroundTransparency = 1; SidebarScroll.BorderSizePixel = 0
 SetupScroll(SidebarScroll)
-local SideLayout = Instance.new("UIListLayout", SidebarScroll); SideLayout.Padding = UDim.new(0, 5)
+Instance.new("UIListLayout", SidebarScroll).Padding = UDim.new(0, 5)
 
 local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
-ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.new(0, 130, 0, 45)
-ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0
+ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.new(0, 130, 0, 45); ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0
 SetupScroll(ContentScroll)
 
 local LineH = Instance.new("Frame", MainFrame)
@@ -106,10 +103,8 @@ local function CreateTabBtn(text)
     return btn
 end
 
-local T0 = CreateTabBtn("0. ABOUT")
-local T1 = CreateTabBtn("1. PLAYER ESP")
-local T2 = CreateTabBtn("2. SURVIVAL")
-local T3 = CreateTabBtn("3. SMOOTH MAPS")
+local T0 = CreateTabBtn("0. ABOUT"); local T1 = CreateTabBtn("1. PLAYER ESP")
+local T2 = CreateTabBtn("2. SURVIVAL"); local T3 = CreateTabBtn("3. SMOOTH MAPS")
 
 local function CreatePage()
     local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -10, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
@@ -119,7 +114,7 @@ end
 
 local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
--- --- ISI ABOUT PAGE ---
+-- ISI ABOUT (TIDAK DIUBAH)
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
 AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4 (Aesthetic)\n\nUpdate:\n- Rainbow UI Stroke\n- Fade Open/Close Animation\n- Fitur Potato Mode Tetap Aktif"
@@ -145,7 +140,7 @@ local function CreateBtn(parent, text)
     return btn
 end
 
--- --- 5. LOGIKA FITUR (MASTER) ---
+-- --- 5. LOGIKA FITUR (DARI KODINGAN KEDUA/v0.3) ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode = false, false, false, false, false, false, false
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
@@ -163,7 +158,7 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- FITUR POTATO MODE TETAP SAMA
+-- LOGIKA POTATO MODE ULTIMATE SYNC
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
@@ -175,18 +170,16 @@ Btn7.MouseButton1Click:Connect(function()
                 if v:IsA("BasePart") then 
                     v.Material = Enum.Material.SmoothPlastic 
                     if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then 
-                    v.Transparency = 1
+                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
                 elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then 
                     if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then 
-                    v.TextureId = "" 
-                end
+                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
             end
         end
     end
 end)
 
+-- LOGIKA ESP GENERATOR
 task.spawn(function()
     while task.wait(3) do
         if _GenOn then
@@ -202,6 +195,7 @@ task.spawn(function()
     end
 end)
 
+-- LOGIKA ESP PLAYER & LIGHTING
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
@@ -214,6 +208,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
+-- LOGIKA NO SKILL CHECK (METATABLE)
 local mt = getrawmetatable(game)
 if mt then
     local old = mt.__namecall; setreadonly(mt, false)
@@ -227,17 +222,15 @@ if mt then
     end); setreadonly(mt, true)
 end
 
--- --- 6. BUTTON & TOGGLE (DENGAN ANIMASI FADE) ---
+-- --- 6. BUTTON & TOGGLE (DENGAN ANIMASI FADE - UI PERTAMA) ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 50, 0, 50); OpenButton.Position = UDim2.new(0, 20, 0.5, -25)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
 OpenButton.TextSize = 24; OpenButton.Font = Enum.Font.SourceSansBold; OpenButton.ZIndex = 500
 Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 12)
-local BtnStroke = Instance.new("UIStroke", OpenButton)
-BtnStroke.Color = Color3.fromRGB(255, 105, 180); BtnStroke.Thickness = 2
+local BtnStroke = Instance.new("UIStroke", OpenButton); BtnStroke.Color = Color3.fromRGB(255, 105, 180); BtnStroke.Thickness = 2
 EnableDrag(OpenButton)
 
--- RAINBOW UNTUK TOMBOL BUKA JUGA
 task.spawn(function()
     while task.wait() do
         local hue = tick() % 5 / 5
@@ -247,15 +240,11 @@ end)
 
 local function ToggleMenu()
     if MainFrame.Visible then
-        -- Animasi Menutup
         MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true)
         task.delay(0.3, function() MainFrame.Visible = false end)
     else
-        -- Animasi Membuka
-        MainFrame.Visible = true
-        MainFrame.Size = UDim2.new(0, 0, 0, 0)
+        MainFrame.Visible = true; MainFrame.Size = UDim2.new(0, 0, 0, 0)
         MainFrame:TweenSize(UDim2.new(0, 380, 0, 220), "Out", "Back", 0.4, true)
     end
 end
-
 OpenButton.MouseButton1Click:Connect(ToggleMenu)
