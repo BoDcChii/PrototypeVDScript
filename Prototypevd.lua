@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5: PARRY MASTER EDITION 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.1: MOBILE FIX 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -8,8 +8,8 @@ local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
 
 -- --- 0. ANTI-REDUNDANT ---
-if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
-if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
+local oldGui = CoreGui:FindFirstChild("BoDcChii_Minimalist") or CoreGui:FindFirstChild("BoDcChii_Welcome")
+if oldGui then oldGui:Destroy() end
 
 -- --- 1. WELCOME NOTIFICATION ---
 local function ShowWelcome()
@@ -36,7 +36,7 @@ ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
 local function EnableDrag(gui)
     local dragging, dragStart, startPos
     gui.InputBegan:Connect(function(input)
-        if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+        if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
             dragging = true; dragStart = input.Position; startPos = gui.Position
         end
     end)
@@ -73,18 +73,17 @@ Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Heade
 -- --- 3. SCROLLING SETUP ---
 local function SetupScroll(scroll)
     scroll.Active = true
-    scroll.ScrollBarThickness = 4
+    scroll.ScrollBarThickness = 2
     scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
     scroll.CanvasSize = UDim2.new(0, 0, 1.5, 0) 
     scroll.ScrollingDirection = Enum.ScrollingDirection.Y
-    scroll.ElasticBehavior = Enum.ElasticBehavior.Always
 end
 
 local SidebarScroll = Instance.new("ScrollingFrame", MainFrame)
 SidebarScroll.Size = UDim2.new(0, 115, 1, -45); SidebarScroll.Position = UDim2.new(0, 5, 0, 42)
 SidebarScroll.BackgroundTransparency = 1; SidebarScroll.BorderSizePixel = 0
 SetupScroll(SidebarScroll)
-local SideLayout = Instance.new("UIListLayout", SidebarScroll); SideLayout.Padding = UDim.new(0, 5)
+Instance.new("UIListLayout", SidebarScroll).Padding = UDim.new(0, 5)
 
 local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
 ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.new(0, 130, 0, 45)
@@ -118,10 +117,9 @@ end
 
 local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
--- ISI ABOUT
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nTester: Xiaoo\nVersi: v0.5\n\nUpdate:\n- New: AUTO PARRY (Tab 2)\n- UI Aesthetic Rainbow\n- Optimized for G85 RAM 4GB"
+AboutInfo.Text = "Creator: BoDcChii\nTester: Xiaoo\nVersi: v0.5.1 (Fix)\n\nUpdate:\n- AUTO PARRY (Tab 2)\n- Mobile Fix Optimization"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -163,78 +161,69 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- LOGIKA AUTO PARRY (DALAM SURVIVAL)
-RunService.Stepped:Connect(function()
-    if _AutoParry then
-        local char = Players.LocalPlayer.Character
-        local tool = char and char:FindFirstChildOfClass("Tool")
-        if tool then
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    local dist = (char.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
-                    local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
-                    
-                    if isK and dist < 12 then -- Deteksi Killer dalam jangkauan
-                        local killerTool = p.Character:FindFirstChildOfClass("Tool")
-                        if killerTool then
-                            -- Simulasi Aktifkan Block/Parry
-                            tool:Activate() 
+-- AUTO PARRY LOOP (OPTIMIZED)
+task.spawn(function()
+    while task.wait(0.1) do
+        if _AutoParry then
+            pcall(function()
+                local char = Players.LocalPlayer.Character
+                local root = char and char:FindFirstChild("HumanoidRootPart")
+                local tool = char and char:FindFirstChildOfClass("Tool")
+                if root and tool then
+                    for _, p in pairs(Players:GetPlayers()) do
+                        if p ~= Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                            local kRoot = p.Character.HumanoidRootPart
+                            local dist = (root.Position - kRoot.Position).Magnitude
+                            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
+                            if isK and dist < 12 then
+                                tool:Activate()
+                            end
                         end
                     end
                 end
-            end
+            end)
         end
     end
 end)
 
--- FITUR POTATO MODE
+-- POTATO MODE
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
     if _PotatoMode then
-        for _, v in pairs(game.Workspace:GetDescendants()) do
-            local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
-            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
-            if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
-            end
-        end
-    end
-end)
-
-task.spawn(function()
-    while task.wait(3) do
-        if _GenOn then
+        pcall(function()
             for _, v in pairs(game.Workspace:GetDescendants()) do
-                if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
-                    if not v:FindFirstChild("GenEsp") then local h = Instance.new("Highlight", v); h.Name = "GenEsp"; h.FillColor = Color3.fromRGB(255, 255, 0); h.FillTransparency = 0.5 end
-                    v.GenEsp.Enabled = true
+                if v:IsA("BasePart") and not v:FindFirstAncestorOfClass("Model") then
+                    v.Material = Enum.Material.SmoothPlastic
+                    if v:IsA("MeshPart") then v.TextureID = "" end
                 end
             end
-        else
-            for _, v in pairs(game.Workspace:GetDescendants()) do if v:FindFirstChild("GenEsp") then v.GenEsp.Enabled = false end end
-        end
+        end)
     end
 end)
 
+-- ESP & LIGHTING LOOP
 RunService.Heartbeat:Connect(function()
-    if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
-    if _NoFog then Lighting.FogEnd = 999999 end
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= Players.LocalPlayer and p.Character then
-            local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character); hl.Name = "BDEsp"
-            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
-            hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn); hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
+    pcall(function()
+        if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
+        if _NoFog then Lighting.FogEnd = 9e9 end
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= Players.LocalPlayer and p.Character then
+                local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
+                hl.Name = "BDEsp"
+                local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
+                hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn)
+                hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
+            end
         end
-    end
+    end)
 end)
 
-local mt = getrawmetatable(game)
-if mt then
-    local old = mt.__namecall; setreadonly(mt, false)
+-- NO SKILL CHECK (METATABLE FIX)
+pcall(function()
+    local mt = getrawmetatable(game)
+    local old = mt.__namecall
+    setreadonly(mt, false)
     mt.__namecall = newcclosure(function(self, ...)
         local method = getnamecallmethod()
         if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
@@ -242,8 +231,9 @@ if mt then
             if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
         end
         return old(self, ...)
-    end); setreadonly(mt, true)
-end
+    end)
+    setreadonly(mt, true)
+end)
 
 -- --- 6. BUTTON & TOGGLE ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
@@ -262,7 +252,7 @@ task.spawn(function()
     end
 end)
 
-local function ToggleMenu()
+OpenButton.MouseButton1Click:Connect(function()
     if MainFrame.Visible then
         MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true)
         task.delay(0.3, function() MainFrame.Visible = false end)
@@ -270,5 +260,4 @@ local function ToggleMenu()
         MainFrame.Visible = true; MainFrame.Size = UDim2.new(0, 0, 0, 0)
         MainFrame:TweenSize(UDim2.new(0, 380, 0, 220), "Out", "Back", 0.4, true)
     end
-end
-OpenButton.MouseButton1Click:Connect(ToggleMenu)
+end)
