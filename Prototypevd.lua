@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.3: POTATO MODE ULTIMATE SYNC 🎸 ]] --
+-- [[ BoDcChii Project - v0.3: SMART GEN ESP UPDATE 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -111,7 +111,7 @@ local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 -- --- ISI ABOUT PAGE ---
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.3\n\nUpdate:\n- Optimalisasi ESP Generator\n- UI Baru dan Lebih Rapi\n- Fitur Potato Mode"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.3\n\nUpdate:\n- Smart ESP Generator (Anti-Lag)\n- UI Baru dan Lebih Rapi\n- Fitur Potato Mode"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -152,7 +152,6 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- FITUR POTATO MODE DARI v5.1.6 (ULTIMATE)
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
@@ -161,28 +160,37 @@ Btn7.MouseButton1Click:Connect(function()
             local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
             local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
             if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then 
-                    v.Material = Enum.Material.SmoothPlastic 
-                    if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then 
-                    v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then 
-                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then 
-                    v.TextureId = "" 
+                if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic if v:IsA("MeshPart") then v.TextureID = "" end
+                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
+                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
+                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
                 end
             end
         end
     end
 end)
 
+-- --- MODIFIKASI SMART ESP GENERATOR ---
 task.spawn(function()
     while task.wait(3) do
         if _GenOn then
             for _, v in pairs(game.Workspace:GetDescendants()) do
                 if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
-                    if not v:FindFirstChild("GenEsp") then local h = Instance.new("Highlight", v); h.Name = "GenEsp"; h.FillColor = Color3.fromRGB(255, 255, 0); h.FillTransparency = 0.5 end
-                    v.GenEsp.Enabled = true
+                    -- Cek apakah generator sudah selesai (Progres penuh atau lampu menyala)
+                    local isFinished = v:FindFirstChild("Lamp") and v.Lamp:IsA("Light") and v.Lamp.Enabled or v:FindFirstChild("Done") or (v:FindFirstChild("Progress") and v.Progress.Value >= 100)
+                    
+                    if not isFinished then
+                        if not v:FindFirstChild("GenEsp") then 
+                            local h = Instance.new("Highlight", v)
+                            h.Name = "GenEsp"
+                            h.FillColor = Color3.fromRGB(255, 255, 0)
+                            h.FillTransparency = 0.5 
+                        end
+                        v.GenEsp.Enabled = true
+                    else
+                        -- Jika sudah selesai, hapus ESP-nya
+                        if v:FindFirstChild("GenEsp") then v.GenEsp:Destroy() end
+                    end
                 end
             end
         else
