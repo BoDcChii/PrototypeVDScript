@@ -163,8 +163,8 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [ PERBAIKAN AUTO PARRY - BYPASS SYSTEM ]
-RunService.Stepped:Connect(function()
+-- [ PERBAIKAN AUTO PARRY - PRECISION LOGIC ]
+RunService.Heartbeat:Connect(function()
     if _AutoParry then
         pcall(function()
             local lp = Players.LocalPlayer
@@ -176,6 +176,8 @@ RunService.Stepped:Connect(function()
                     if p ~= lp and p.Character then
                         local kChar = p.Character
                         local kHum = kChar:FindFirstChild("Humanoid")
+                        
+                        -- Cek apakah target adalah Killer
                         local isK = (p.Team and p.Team.Name:lower():find("kill")) or (kHum and kHum.MaxHealth > 100)
                         
                         if isK then
@@ -183,21 +185,22 @@ RunService.Stepped:Connect(function()
                             local myRoot = char:FindFirstChild("HumanoidRootPart")
                             if kRoot and myRoot then
                                 local dist = (myRoot.Position - kRoot.Position).Magnitude
-                                if dist < 18 then
-                                    -- Deteksi Animasi secara Mendalam
-                                    local isAttacking = false
+                                if dist < 17 then
+                                    -- Deteksi Animasi Serangan secara Instan
+                                    local isSwinging = false
                                     for _, track in pairs(kHum:GetPlayingAnimationTracks()) do
-                                        if track.IsPlaying and track.WeightTarget > 0 then
-                                            isAttacking = true break
+                                        -- Cek status track animasi (Violence District menggunakan sistem track weight)
+                                        if track.IsPlaying and track.WeightTarget > 0 and track.Speed > 0 then
+                                            isSwinging = true break
                                         end
                                     end
                                     
-                                    if isAttacking then
-                                        -- Bypass Activation
+                                    if isSwinging then
+                                        -- Langsung memicu aksi tool
                                         tool:Activate()
-                                        -- Cek jika ada Remote bawaan untuk nangkis
-                                        local r = tool:FindFirstChildOfClass("RemoteEvent") or tool:FindFirstChild("Remote")
-                                        if r then r:FireServer() end
+                                        -- Cek Remote bawaan game (Force Fire)
+                                        local remote = tool:FindFirstChildOfClass("RemoteEvent") or tool:FindFirstChild("Remote")
+                                        if remote then remote:FireServer() end
                                     end
                                 end
                             end
