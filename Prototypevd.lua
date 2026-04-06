@@ -122,7 +122,7 @@ local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 -- --- ISI ABOUT PAGE ---
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.1 (Final Parry)\n\nUpdate:\n- State-Injection Parry\n- Lower Studs Threshold\n- Anti-Latency Guard"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.1 (BETA)\n\nUpdate:\n- State-Injection Parry\n- Lower Studs Threshold\n- Anti-Latency Guard"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -148,7 +148,9 @@ end
 -- --- 5. LOGIKA FITUR (MASTER) ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
-local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK"); local BtnParry = CreateBtn(P2, "AUTO PARRY")
+local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK"); 
+local BtnParry = CreateBtn(P2, "AUTO PARRY (BETA)") -- PERUBAHAN NAMA DI SINI
+
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
 
 local function Toggle(btn, state, txt)
@@ -160,40 +162,31 @@ Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _Su
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
 Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(Btn4, _NoSkillGen, "NO SKILL CHECK") end)
-BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnParry, _AutoParry, "AUTO PARRY") end)
+BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnParry, _AutoParry, "AUTO PARRY (BETA)") end)
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [[ FINAL REVISI: STATE-INJECTION AUTO PARRY ]]
+-- [[ LOGIKA AUTO PARRY TETAP SAMA ]]
 local lastParry = 0
 local function TriggerParry()
     if tick() - lastParry < 0.55 then return end
     lastParry = tick()
-
     local char = Players.LocalPlayer.Character
     local tool = char and char:FindFirstChildOfClass("Tool")
-    
     if tool then
-        -- 1. Simulate Legit Press
         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-        
-        -- 2. State Injection (Pura-pura memblokir secara fisik)
         local hum = char:FindFirstChild("Humanoid")
         if hum then
-            -- Memaksa animasi blokir lokal (Bypass visual)
             for _, track in pairs(hum:GetPlayingAnimationTracks()) do
                 if track.Name:find("Idle") or track.Name:find("Run") then track:Stop() end
             end
         end
-
-        -- 3. High-Priority Remote Call (Direct Signal)
         local rem = tool:FindFirstChildOfClass("RemoteEvent") or tool:FindFirstChild("Remote")
         if rem then
             rem:FireServer("Parry", true)
             rem:FireServer("Block", true)
-            rem:FireServer(true) -- Beberapa game butuh boolean polos
+            rem:FireServer(true)
         end
-
         task.wait(0.1)
         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
     end
@@ -205,28 +198,21 @@ RunService.Heartbeat:Connect(function()
             local lp = Players.LocalPlayer
             local myRoot = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
             if not myRoot then return end
-
             for _, k in pairs(Players:GetPlayers()) do
                 if k ~= lp and k.Character then
                     local kRoot = k.Character:FindFirstChild("HumanoidRootPart")
                     local kHum = k.Character:FindFirstChild("Humanoid")
-                    
                     if kRoot and kHum then
                         local dist = (myRoot.Position - kRoot.Position).Magnitude
-                        
-                        -- AMBANG BATAS: 9-11 Studs (Jarak Hitbox Terkuat)
                         if dist < 11.5 then
                             local isAttacking = false
                             for _, track in pairs(kHum:GetPlayingAnimationTracks()) do
-                                -- Deteksi Animasi Serang Sangat Cepat
                                 if track.IsPlaying and track.Length < 1.2 then
-                                    if track.TimePosition > 0 and track.TimePosition < 0.25 then
+                                    if track.TimePosition > 0 and track.TimePosition < 0.3 then
                                         isAttacking = true break
                                     end
                                 end
                             end
-                            
-                            -- Deteksi Kecepatan Gerak Killer (Lunge/Attack Move)
                             if isAttacking or (dist < 7 and kRoot.Velocity.Magnitude > 22) then
                                 TriggerParry()
                             end
@@ -238,7 +224,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- --- FITUR LAINNYA (SAMA SEPERTI ASLINYA) ---
+-- --- FITUR LAINNYA ---
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
