@@ -96,21 +96,14 @@ end
 
 local P0 = CreateTabBtn("0. ABOUT", 0); local P1 = CreateTabBtn("1. PLAYER ESP", 1)
 local P2 = CreateTabBtn("2. SURVIVAL", 2); 
-local P3 = CreateTabBtn("3. Setting", 3) -- NAMA HALAMAN BERUBAH DI SINI
-
--- About Info
-local AboutInfo = Instance.new("TextLabel", P0)
-AboutInfo.Size = UDim2.new(1, 0, 0, 150); AboutInfo.BackgroundTransparency = 1; AboutInfo.TextColor3 = Color3.new(1, 1, 1)
-AboutInfo.Text = "Creator: BoDcChii\nv0.4.1 (SETTING UPDATE)\n\nPerubahan:\n- UI Label Updated\n- Low-End Optimized\n- State-Injection Parry"
-AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
-
-Pages[0].page.Visible = true; Pages[0].btn.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+local P3 = CreateTabBtn("3. Setting", 3) -- Nama Halaman Berubah
 
 -- --- 4. FEATURE LOGIC ---
 local function CreateBtn(parent, text, varName)
     local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(1, 0, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.Text = text .. ": OFF"; btn.TextColor3 = Color3.new(1, 1, 1); btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 9; Instance.new("UICorner", btn)
     local s = Instance.new("UIStroke", btn); s.Color = Color3.fromRGB(200, 50, 50)
+    
     btn.MouseButton1Click:Connect(function()
         _G[varName] = not _G[varName]
         local state = _G[varName]
@@ -126,7 +119,7 @@ CreateBtn(P1, "ESP SURVIVAL", "Surv"); CreateBtn(P1, "ESP KILLER", "Kill")
 CreateBtn(P2, "ESP GENERATOR", "Gen"); CreateBtn(P2, "NO SKILL CHECK", "Skill"); CreateBtn(P2, "AUTO PARRY (BETA)", "Parry")
 CreateBtn(P3, "FULL BRIGHT", "Bright"); CreateBtn(P3, "NO FOG", "Fog"); local PBtn = CreateBtn(P3, "POTATO MODE", "Potato")
 
--- [[ AUTO PARRY LOGIC ]]
+-- [[ LOGIKA AUTO PARRY ]]
 local lastParry = 0
 local function TriggerParry()
     if tick() - lastParry < 0.6 then return end
@@ -142,14 +135,15 @@ local function TriggerParry()
     end
 end
 
+-- [[ CORE HEARTBEAT (THROTTLED) ]]
 local counter = 0
 RunService.Heartbeat:Connect(function()
     counter = (counter + 1) % 2
     if counter ~= 0 then return end 
 
+    -- Auto Parry
     if _G.Parry then
-        local myChar = LP.Character
-        local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+        local myRoot = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
         if myRoot then
             for _, k in pairs(Players:GetPlayers()) do
                 if k ~= LP and k.Character then
@@ -158,9 +152,7 @@ RunService.Heartbeat:Connect(function()
                         local hum = k.Character:FindFirstChild("Humanoid")
                         if hum then
                             for _, t in pairs(hum:GetPlayingAnimationTracks()) do
-                                if t.IsPlaying and t.Length < 1.2 and t.TimePosition < 0.3 then
-                                    TriggerParry() break
-                                end
+                                if t.IsPlaying and t.Length < 1.2 and t.TimePosition < 0.3 then TriggerParry() break end
                             end
                         end
                     end
@@ -169,6 +161,7 @@ RunService.Heartbeat:Connect(function()
         end
     end
 
+    -- ESP Player
     if _G.Surv or _G.Kill then
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character then
@@ -181,10 +174,23 @@ RunService.Heartbeat:Connect(function()
         end
     end
 
+    -- ESP Generator (DIKEMBALIKAN)
+    if _G.Gen then
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if (v.Name:find("Gen") or v.Name:find("Generator")) and (v:IsA("Model") or v:IsA("BasePart")) then
+                local gh = v:FindFirstChild("GenEsp") or Instance.new("Highlight", v)
+                gh.Name = "GenEsp"; gh.FillColor = Color3.fromRGB(255, 255, 0); gh.FillTransparency = 0.5; gh.Enabled = true
+            end
+        end
+    else
+        for _, v in pairs(Workspace:GetDescendants()) do if v:FindFirstChild("GenEsp") then v.GenEsp.Enabled = false end end
+    end
+
     if _G.Bright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _G.Fog then Lighting.FogEnd = 1e5 end
 end)
 
+-- Potato Mode
 PBtn.MouseButton1Click:Connect(function()
     if _G.Potato then
         for _, v in pairs(Workspace:GetDescendants()) do
@@ -199,24 +205,19 @@ end)
 -- --- 5. BUTTON TOGGLE ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 45, 0, 45); OpenButton.Position = UDim2.new(0, 10, 0.5, -22)
-OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"
-OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180); OpenButton.TextSize = 20
+OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
 Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 10)
-local BtnStroke = Instance.new("UIStroke", OpenButton); BtnStroke.Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(OpenButton)
+OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 
-OpenButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
-
-local mt = getrawmetatable(game)
-local old = mt.__namecall
-setreadonly(mt, false)
+-- Skillcheck Metatable
+local mt = getrawmetatable(game); local old = mt.__namecall; setreadonly(mt, false)
 mt.__namecall = newcclosure(function(self, ...)
     if _G.Skill and getnamecallmethod() == "FireServer" then
         local n = tostring(self):lower()
         if n:find("fail") or n:find("skillcheck") then return nil end
     end
     return old(self, ...)
-end)
-setreadonly(mt, true)
+end); setreadonly(mt, true)
+
+Pages[0].page.Visible = true; Pages[0].btn.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
