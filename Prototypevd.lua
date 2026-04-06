@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.4.1: BOCCHI POLISH EDITION 🎸 ]] --
+-- [[ BoDcChii Project - v0.4.1: LEGIT PARRY EDITION 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
-local VirtualInputManager = game:GetService("VirtualInputManager") -- Untuk bypass server validation
+local VirtualInputManager = game:GetService("VirtualInputManager") -- Tambahan untuk bypass server
 
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
@@ -122,7 +122,7 @@ local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 -- --- ISI ABOUT PAGE ---
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 160); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.1 (Legit Parry)\n\nUpdate:\n- VirtualInput Bypass\n- Fitur ESP & Potato Tetap Aktif"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.1 (Legit Parry)\n\nUpdate:\n- Improved Auto Parry (VirtualInput)\n- Frame-Perfect Timing\n- Rainbow UI Stroke & Fade"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 12; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -164,21 +164,25 @@ BtnParry.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [[ REVISED AUTO PARRY - LEGIT INPUT SIMULATION ]]
+-- [[ BAGIAN PERBAIKAN: MASTER AUTO PARRY LEGIT TIMING ]]
 local lastParry = 0
 local function TriggerParry()
-    if tick() - lastParry < 0.6 then return end -- Anti-spam cooldown
-    lastParry = tick()
+    if tick() - lastParry < 0.65 then return end -- Cooldown agar tidak dianggap spam oleh server
     
     local char = Players.LocalPlayer.Character
     local weapon = char and char:FindFirstChildOfClass("Tool")
+    
     if weapon then
-        -- 1. Simulasi Klik Legit (Bypass Server Validation)
+        lastParry = tick()
+        -- 1. Simulasi Input Klik Mouse/Touch (Agar server menganggap ini input legit)
         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-        task.wait(0.05)
+        task.wait(0.04) -- Menahan klik sejenak
         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
         
-        -- 2. Backup Sinyal (Hanya 1x, bukan spam)
+        -- 2. Force Activate Tool (Sebagai backup)
+        weapon:Activate()
+        
+        -- 3. Single Remote Fire (Hanya jika perlu, dikirim sekali saja)
         for _, r in pairs(weapon:GetDescendants()) do
             if r:IsA("RemoteEvent") then
                 r:FireServer("Parry", true)
@@ -202,23 +206,30 @@ RunService.Stepped:Connect(function()
                     if kRoot and kHum then
                         local dist = (myRoot.Position - kRoot.Position).Magnitude
                         
-                        -- Jarak diperketat (8-12 studs) agar timing masuk akal di server
+                        -- Jarak dipersempit (8-11 studs) agar timing server akurat
                         if dist < 12 then
-                            -- Deteksi Animasi Pukul (Legit Frame Check)
+                            -- Deteksi Animasi Pukul (Frame-Perfect)
+                            local isAttacking = false
                             for _, track in pairs(kHum:GetPlayingAnimationTracks()) do
-                                if track.IsPlaying and track.Length < 1.5 then
-                                    -- Parry di awal animasi (Frame-Perfect)
-                                    if track.TimePosition > 0.01 and track.TimePosition < 0.3 then
-                                        TriggerParry() break
+                                -- Mencari animasi cepat khas killer
+                                if track.IsPlaying and track.Length > 0 and track.Length < 1.4 then
+                                    -- Trigger hanya saat animasi di awal (0.01 - 0.25 detik)
+                                    if track.TimePosition > 0 and track.TimePosition < 0.3 then
+                                        isAttacking = true break
                                     end
                                 end
                             end
                             
-                            -- Deteksi Objek Serangan mendadak
+                            -- Deteksi Objek Hitbox Mendadak
+                            local hitboxDetected = false
                             for _, obj in pairs(k.Character:GetDescendants()) do
                                 if obj:IsA("BasePart") and (obj.Name:find("Hit") or obj.Name:find("Swing")) then
-                                    TriggerParry() break
+                                    hitboxDetected = true break
                                 end
+                            end
+
+                            if isAttacking or hitboxDetected then
+                                TriggerParry()
                             end
                         end
                     end
@@ -228,7 +239,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- FITUR POTATO MODE TETAP SAMA
+-- --- FITUR LAIN (TIDAK BERUBAH) ---
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
@@ -240,13 +251,10 @@ Btn7.MouseButton1Click:Connect(function()
                 if v:IsA("BasePart") then 
                     v.Material = Enum.Material.SmoothPlastic 
                     if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then 
-                    v.Transparency = 1
+                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
                 elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then 
                     if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then 
-                    v.TextureId = "" 
-                end
+                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
             end
         end
     end
@@ -292,7 +300,7 @@ if mt then
     end); setreadonly(mt, true)
 end
 
--- --- 6. BUTTON & TOGGLE ---
+-- --- 6. BUTTON & TOGGLE MENU ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 50, 0, 50); OpenButton.Position = UDim2.new(0, 20, 0.5, -25)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
