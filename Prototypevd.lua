@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.8: TOTAL ANALOG FREEDOM 🎸 ]] --
+-- [[ BoDcChii Project - v0.6.0: 50s COOLDOWN & ANALOG FIX 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -57,11 +57,11 @@ end
 
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 
-local BtnAP = CreateBtn("AUTO PARRY (FIXED ANALOG)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
+local BtnAP = CreateBtn("AUTO PARRY (50s COOLDOWN)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
 local Btn3 = CreateBtn("ESP GENERATOR"); local Btn4 = CreateBtn("NO SKILL CHECK"); local Btn5 = CreateBtn("FULL BRIGHT")
 local Btn6 = CreateBtn("NO FOG"); local Btn7 = CreateBtn("POTATO MODE")
 
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (FIXED ANALOG)") end)
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (50s COOLDOWN)") end)
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
@@ -79,34 +79,41 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- 4. CORE GHOST-PROOF PARRY ---
-local isPaused = false
-local lastEnemyDist = {}
+-- --- 4. CORE 50s HARD LOCK PARRY ---
+local isWaiting = false
+local prevDistances = {}
 
-local function ExecuteParryTap()
-    if isPaused then return end
-    isPaused = true -- KUNCI TOTAL: Matikan seluruh deteksi
+local function ExecuteParry()
+    if isWaiting then return end
+    isWaiting = true
     
-    local ViewSize = workspace.CurrentCamera.ViewportSize
-    local PX, PY = ViewSize.X * 0.85, ViewSize.Y * 0.70 
+    -- Ganti Nama Button UI sementara biar kamu tau lagi Cooldown
+    local oldText = BtnAP.Text
+    BtnAP.Text = "PARRY USED (50s WAIT...)"
     
-    -- Kirim klik super singkat (0.01 detik)
+    local View = workspace.CurrentCamera.ViewportSize
+    local PX, PY = View.X * 0.85, View.Y * 0.70 
+    
+    -- Satu kali klik instan
     VIM:SendMouseButtonEvent(PX, PY, 0, true, game, 0)
-    task.wait(0.01)
     VIM:SendMouseButtonEvent(PX, PY, 0, false, game, 0)
     
-    -- Berikan waktu 1.2 detik napas untuk layar HP kamu
-    task.delay(1.2, function()
-        isPaused = false
+    -- HARD LOCK: Script berhenti total selama 50 detik
+    task.delay(50, function()
+        isWaiting = false
+        if _AutoParry then 
+            BtnAP.Text = "AUTO PARRY (50s COOLDOWN): ON" 
+        else 
+            BtnAP.Text = "AUTO PARRY (50s COOLDOWN): OFF" 
+        end
     end)
 end
 
 task.spawn(function()
     while true do
-        task.wait(0.06) -- Standar kestabilan HP (Cek jarak setiap 0.06 detik)
-        
-        -- Jika Parry AKTIF dan TIDAK sedang COOLDOWN
-        if _AutoParry and not isPaused then
+        task.wait(0.06) 
+        -- Selama 'isWaiting' true, script di bawah ini tidak akan jalan (NOL KLIK)
+        if _AutoParry and not isWaiting then
             local lp = Players.LocalPlayer
             local root = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
             
@@ -114,21 +121,20 @@ task.spawn(function()
                 pcall(function()
                     for _, enemy in pairs(Players:GetPlayers()) do
                         if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                            -- Cek Killer (Berdasarkan Tim atau Darah)
                             local isK = (enemy.Team and (enemy.Team.Name:lower():find("kill") or enemy.Team.Name:lower():find("hunter"))) 
                                         or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
                             
                             if isK then
                                 local eRoot = enemy.Character.HumanoidRootPart
-                                local currentDist = (root.Position - eRoot.Position).Magnitude
-                                local prevDist = lastEnemyDist[enemy.Name] or currentDist
-                                lastEnemyDist[enemy.Name] = currentDist
+                                local d = (root.Position - eRoot.Position).Magnitude
+                                local lastD = prevDistances[enemy.Name] or d
+                                prevDistances[enemy.Name] = d
                                 
-                                -- LOGIKA: Jarak di bawah 10 unit DAN Killer bergerak mendekat cepat
-                                if currentDist < 10.2 then
-                                    if (prevDist - currentDist) > 0.3 or currentDist < 6 then
-                                        ExecuteParryTap()
-                                        break -- Stop loop demi keamanan analog
+                                -- Jarak 10 unit + Deteksi dia mendekat/menyerang
+                                if d < 10.5 then
+                                    if (lastD - d) > 0.3 or d < 6 then
+                                        ExecuteParry()
+                                        break
                                     end
                                 end
                             end
@@ -136,8 +142,9 @@ task.spawn(function()
                     end
                 end)
             end
-        elseif isPaused then
-            lastEnemyDist = {} -- Reset data saat sedang istirahat
+        elseif isWaiting then
+            -- Kosongkan data jarak saat menunggu agar refresh pas bangun
+            prevDistances = {}
         end
     end
 end)
