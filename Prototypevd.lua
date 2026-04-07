@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.4.2: POTATO MODE FIXED 🎸 ]] --
+-- [[ BoDcChii Project - v0.4.2: KILLER EDITION 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -52,7 +52,7 @@ end
 
 -- --- 2. MAIN UI STRUCTURE ---
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 380, 0, 220); MainFrame.Position = UDim2.new(0.5, -190, 0.4, 0)
+MainFrame.Size = UDim2.new(0, 380, 0, 240); MainFrame.Position = UDim2.new(0.5, -190, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
 MainFrame.ClipsDescendants = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
@@ -75,7 +75,7 @@ Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Heade
 local function SetupScroll(scroll)
     scroll.Active = true; scroll.ScrollBarThickness = 4
     scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-    scroll.CanvasSize = UDim2.new(0, 0, 1.8, 0) 
+    scroll.CanvasSize = UDim2.new(0, 0, 2, 0) 
     scroll.ScrollingDirection = Enum.ScrollingDirection.Y
 end
 
@@ -102,8 +102,11 @@ local function CreateTabBtn(text)
     return btn
 end
 
-local T0 = CreateTabBtn("0. ABOUT"); local T1 = CreateTabBtn("1. PLAYER ESP")
-local T2 = CreateTabBtn("2. SURVIVAL"); local T3 = CreateTabBtn("3. SMOOTH MAPS")
+local T0 = CreateTabBtn("0. ABOUT")
+local T1 = CreateTabBtn("1. PLAYER ESP")
+local T2 = CreateTabBtn("2. SURVIVAL")
+local T4 = CreateTabBtn("3. KILLER UTILS") -- TAB BARU
+local T3 = CreateTabBtn("4. SMOOTH MAPS")
 
 local function CreatePage()
     local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -10, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
@@ -111,23 +114,24 @@ local function CreatePage()
     return f
 end
 
-local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
+local P0, P1, P2, P3, P4 = CreatePage(), CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.2 (BETA)\n\nUpdate Fitur:\n- Auto Parry Beta (50s Cooldown)\n- Fitur Auto Parry dalam tahap\n  pengembangan, kemungkinan\n  masih terdapat bug.\n- Fix Analog Lock (Mobile)"
+AboutInfo.Text = "Creator: BoDcChii\nTester: Xiaoo\nVersi: v0.4.2 (KILLER UPDATE)\n\nUpdate:\n- Tab Killer Utils\n- No Attack Cooldown\n- Hitbox Expander\n- Potato Mode Fix"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
-    P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false
+    P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false; P4.Visible = false
     T0.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T4.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     p.Visible = true; b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 end
 
 T0.MouseButton1Click:Connect(function() Show(P0, T0) end)
 T1.MouseButton1Click:Connect(function() Show(P1, T1) end)
 T2.MouseButton1Click:Connect(function() Show(P2, T2) end)
+T4.MouseButton1Click:Connect(function() Show(P4, T4) end)
 T3.MouseButton1Click:Connect(function() Show(P3, T3) end)
 Show(P0, T0)
 
@@ -140,11 +144,12 @@ end
 
 -- --- 5. LOGIKA FITUR ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
+local _NoCD, _HitboxEx = false, false
 local isWaitingParry = false
-local threatTimer = 0
 
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
+local BtnNoCD = CreateBtn(P4, "NO ATTACK COOLDOWN"); local BtnHitbox = CreateBtn(P4, "HITBOX EXPANDER")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
 
 local function Toggle(btn, state, txt)
@@ -154,75 +159,62 @@ end
 
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
 Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(Btn4, _NoSkillGen, "NO SKILL CHECK") end)
-Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
-Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- AUTO PARRY LOGIC
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
+-- KILLER LOGIC
+BtnNoCD.MouseButton1Click:Connect(function() _NoCD = not _NoCD Toggle(BtnNoCD, _NoCD, "NO ATTACK COOLDOWN") end)
+BtnHitbox.MouseButton1Click:Connect(function() _HitboxEx = not _HitboxEx Toggle(BtnHitbox, _HitboxEx, "HITBOX EXPANDER") end)
 
-task.spawn(function()
-    while true do
-        task.wait(0.05)
-        if _AutoParry and not isWaitingParry then
-            local lp = Players.LocalPlayer
-            local root = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-            local inDanger = false
-            if root then
-                pcall(function()
-                    for _, enemy in pairs(Players:GetPlayers()) do
-                        if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                            local isK = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
-                            if isK then
-                                local d = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
-                                if d < 9.5 then
-                                    inDanger = true
-                                    threatTimer = threatTimer + 0.05
-                                    if threatTimer >= 0.15 then
-                                        isWaitingParry = true
-                                        BtnAP.Text = "COOLDOWN (50s)"
-                                        local View = workspace.CurrentCamera.ViewportSize
-                                        VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, true, game, 0)
-                                        task.wait(0.01)
-                                        VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, false, game, 0)
-                                        task.delay(50, function() isWaitingParry = false Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
-                                        threatTimer = 0
-                                        break
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end)
-            end
-            if not inDanger then threatTimer = 0 end
-        end
-    end
-end)
-
--- --- POTATO MODE ULTIMATE SYNC ---
+-- POTATO MODE FIX
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
     if _PotatoMode then
         for _, v in pairs(game.Workspace:GetDescendants()) do
             local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
-            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
-            if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then 
-                    v.Material = Enum.Material.SmoothPlastic 
-                    if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then 
-                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
+            if not isPlayer and (v:IsA("BasePart") or v:IsA("Texture") or v:IsA("Decal")) then
+                if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end
+                if v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1 end
             end
         end
     end
 end)
 
--- ESP & LIGHTING
+-- LOOP FITUR (HITBOX & COOLDOWN)
+task.spawn(function()
+    while task.wait(0.5) do
+        if _HitboxEx then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    p.Character.HumanoidRootPart.Size = Vector3.new(10, 10, 10)
+                    p.Character.HumanoidRootPart.Transparency = 0.7
+                end
+            end
+        end
+    end
+end)
+
+-- METATABLE HOOK (NO CD & NO SKILL CHECK)
+local mt = getrawmetatable(game)
+local old = mt.__namecall
+setreadonly(mt, false)
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+    if _NoCD and method == "FireServer" and tostring(self) == "AttackRemote" then -- Ganti "AttackRemote" dengan nama remote aslinya
+        return old(self, unpack(args))
+    end
+    if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
+        local n = tostring(self):lower()
+        if n:find("fail") or n:find("skillcheck") then return nil end
+    end
+    return old(self, ...)
+end)
+setreadonly(mt, true)
+
+-- ESP & LIGHTING LOOP
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
@@ -235,23 +227,8 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- NO SKILL CHECK
-local mt = getrawmetatable(game)
-if mt then
-    local old = mt.__namecall; setreadonly(mt, false)
-    mt.__namecall = newcclosure(function(self, ...)
-        local method = getnamecallmethod()
-        if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
-            local n = tostring(self):lower()
-            if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
-        end
-        return old(self, ...)
-    end); setreadonly(mt, true)
-end
-
--- --- 6. BUTTON & TOGGLE ---
+-- --- 6. TOGGLE BUTTON ---
 local OpenButton = Instance.new("ScreenGui", CoreGui)
-OpenButton.Name = "BoDcChii_Toggle"
 local MainBtn = Instance.new("TextButton", OpenButton)
 MainBtn.Size = UDim2.new(0, 50, 0, 50); MainBtn.Position = UDim2.new(0, 20, 0.5, -25)
 MainBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); MainBtn.Text = "BD"; MainBtn.TextColor3 = Color3.fromRGB(255, 105, 180); MainBtn.TextSize = 24; MainBtn.Font = Enum.Font.SourceSansBold
@@ -259,17 +236,6 @@ Instance.new("UICorner", MainBtn).CornerRadius = UDim.new(0, 12)
 local BtnStroke = Instance.new("UIStroke", MainBtn); BtnStroke.Color = Color3.fromRGB(255, 105, 180); BtnStroke.Thickness = 2
 EnableDrag(MainBtn)
 
-task.spawn(function()
-    while task.wait() do
-        local hue = tick() % 5 / 5
-        BtnStroke.Color = Color3.fromHSV(hue, 0.6, 1)
-    end
-end)
-
 MainBtn.MouseButton1Click:Connect(function()
-    if MainFrame.Visible then
-        MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true, function() MainFrame.Visible = false end)
-    else
-        MainFrame.Visible = true; MainFrame:TweenSize(UDim2.new(0, 380, 0, 220), "Out", "Back", 0.4, true)
-    end
+    MainFrame.Visible = not MainFrame.Visible
 end)
