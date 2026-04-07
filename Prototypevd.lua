@@ -1,13 +1,11 @@
--- [[ BoDcChii Project - v0.4.9: COORDINATE PARRY (SCREEN SCAN METHOD) 🎸 ]] --
+-- [[ BoDcChii Project - v0.4.9.1: LOBBY SAFETY & ANTI-LAG 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VIM = game:GetService("VirtualInputManager")
-local CAS = game:GetService("ContextActionService")
 
 -- --- 0. CLEANUP ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
@@ -63,11 +61,11 @@ end
 
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 
-local BtnAP = CreateBtn("AUTO PARRY (FIXED)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
+local BtnAP = CreateBtn("AUTO PARRY (SAFE)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
 local Btn3 = CreateBtn("ESP GENERATOR"); local Btn4 = CreateBtn("NO SKILL CHECK"); local Btn5 = CreateBtn("FULL BRIGHT")
 local Btn6 = CreateBtn("NO FOG"); local Btn7 = CreateBtn("POTATO MODE")
 
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (FIXED)") end)
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (SAFE)") end)
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
@@ -85,43 +83,43 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- 4. CORE PARRY (COORDINATE & ACTION BYPASS) ---
+-- --- 4. CORE PARRY (LOBBY PROOF) ---
 local function PressParryButton()
-    -- 1. Berdasarkan Foto: Tombol pedang ada di area kanan bawah.
-    -- Kita ambil ukuran layar pemain secara real-time
     local ViewportSize = workspace.CurrentCamera.ViewportSize
-    local TargetX = ViewportSize.X * 0.85 -- 85% ke kanan
-    local TargetY = ViewportSize.Y * 0.70 -- 70% ke bawah
+    local TargetX = ViewportSize.X * 0.85 
+    local TargetY = ViewportSize.Y * 0.70 
     
-    -- Simulasi sentuhan tepat di atas tombol pedang
     VIM:SendMouseButtonEvent(TargetX, TargetY, 0, true, game, 0)
     task.wait(0.01)
     VIM:SendMouseButtonEvent(TargetX, TargetY, 0, false, game, 0)
-    
-    -- 2. Bypass via ContextAction (Back up plan)
-    pcall(function()
-        CAS:CallAction("Attack")
-        CAS:CallAction("Parry")
-        CAS:CallAction("Block")
-    end)
 end
 
 task.spawn(function()
-    while task.wait(0.01) do
+    while task.wait(0.1) do -- Scan sedikit lebih santai biar gak lag
         if _AutoParry then
+            local lp = Players.LocalPlayer
+            -- JANGAN NYALA KALAU DI LOBBY
+            if lp.Team and (lp.Team.Name:lower():find("lobby") or lp.Team.Name:lower():find("neutral")) then
+                continue 
+            end
+            
             pcall(function()
-                local char = Players.LocalPlayer.Character
+                local char = lp.Character
                 local root = char and char:FindFirstChild("HumanoidRootPart")
                 if root then
                     for _, enemy in pairs(Players:GetPlayers()) do
-                        if enemy ~= Players.LocalPlayer and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                            local eRoot = enemy.Character.HumanoidRootPart
-                            local dist = (root.Position - eRoot.Position).Magnitude
+                        if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
+                            -- CEK APAKAH DIA KILLER
+                            local isEnemyKiller = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
                             
-                            -- Deteksi Jarak & Kecepatan (Dash Detection)
-                            if dist < 14 or (dist < 20 and eRoot.Velocity.Magnitude > 35) then
-                                PressParryButton()
-                                task.wait(0.3) -- Cooldown aman
+                            if isEnemyKiller then
+                                local eRoot = enemy.Character.HumanoidRootPart
+                                local dist = (root.Position - eRoot.Position).Magnitude
+                                
+                                if dist < 13 then
+                                    PressParryButton()
+                                    task.wait(0.4) -- Jeda biar HP gak panas/ngeleg
+                                end
                             end
                         end
                     end
@@ -131,7 +129,7 @@ task.spawn(function()
     end
 end)
 
--- --- 5. WORLD & ESP (UNCHANGED) ---
+-- --- 5. WORLD & ESP ---
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
