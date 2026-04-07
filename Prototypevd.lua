@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.1: SMART DETECT & ANALOG FIX 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.3: REFLEX SYNC & LOOK DETECTION 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -10,7 +10,7 @@ local VIM = game:GetService("VirtualInputManager")
 -- --- 0. CLEANUP ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
 
--- --- 1. UI SETUP (STABLE) ---
+-- --- 1. UI SETUP ---
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
 
@@ -42,7 +42,7 @@ task.spawn(function()
     while task.wait() do MainStroke.Color = Color3.fromHSV(tick() % 5 / 5, 0.6, 1) end
 end)
 
--- --- 2. BUTTONS SETUP ---
+-- --- 2. BUTTONS ---
 local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
 ContentScroll.Size = UDim2.new(1, -20, 1, -40); ContentScroll.Position = UDim2.new(0, 10, 0, 35); ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0; ContentScroll.ScrollBarThickness = 0
 local List = Instance.new("UIListLayout", ContentScroll); List.Padding = UDim.new(0, 5)
@@ -61,11 +61,11 @@ end
 
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 
-local BtnAP = CreateBtn("AUTO PARRY (SMART)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
+local BtnAP = CreateBtn("AUTO PARRY (REFLEX)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
 local Btn3 = CreateBtn("ESP GENERATOR"); local Btn4 = CreateBtn("NO SKILL CHECK"); local Btn5 = CreateBtn("FULL BRIGHT")
 local Btn6 = CreateBtn("NO FOG"); local Btn7 = CreateBtn("POTATO MODE")
 
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (SMART)") end)
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (REFLEX)") end)
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
@@ -83,66 +83,60 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- 4. CORE SMART PARRY (ANTI-LAG ANALOG) ---
-local isCooldown = false
+-- --- 4. CORE REFLEX PARRY ---
+local lastParry = 0
+local parryCooldown = 0.8 -- Cooldown sedikit lebih lama biar stabil
 
-local function PressParryButton()
-    if isCooldown then return end
-    isCooldown = true
+local function PressParry()
+    if tick() - lastParry < parryCooldown then return end
+    lastParry = tick()
     
     local ViewportSize = workspace.CurrentCamera.ViewportSize
     local TargetX = ViewportSize.X * 0.85 
     local TargetY = ViewportSize.Y * 0.70 
     
-    -- Tekan dan Langsung Lepas (Sangat Penting agar Analog tidak macet)
-    VIM:SendMouseButtonEvent(TargetX, TargetY, 0, true, game, 0)
-    task.wait(0.02)
-    VIM:SendMouseButtonEvent(TargetX, TargetY, 0, false, game, 0)
-    
-    task.wait(0.8) -- Cooldown Parry (Sesuaikan dengan durasi animasi parry game)
-    isCooldown = false
+    task.spawn(function()
+        VIM:SendMouseButtonEvent(TargetX, TargetY, 0, true, game, 0)
+        task.wait(0.01)
+        VIM:SendMouseButtonEvent(TargetX, TargetY, 0, false, game, 0)
+    end)
 end
 
 task.spawn(function()
-    while task.wait(0.05) do -- Scan cepat tapi cerdas
-        if _AutoParry and not isCooldown then
+    while task.wait(0.02) do 
+        if _AutoParry then
             local lp = Players.LocalPlayer
             local char = lp.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if not root or (lp.Team and lp.Team.Name:lower():find("lobby")) then continue end
-            
-            pcall(function()
-                for _, enemy in pairs(Players:GetPlayers()) do
-                    if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                        local isKiller = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
-                        
-                        if isKiller then
-                            local eChar = enemy.Character
-                            local dist = (root.Position - eRoot.Position).Magnitude
+            if root and not (lp.Team and lp.Team.Name:lower():find("lobby")) then
+                pcall(function()
+                    for _, enemy in pairs(Players:GetPlayers()) do
+                        if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
+                            local isKiller = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
                             
-                            -- Jarak 14 + Cek Animasi/Tool Attack
-                            if dist < 14 then
-                                local isAttacking = false
-                                -- Cek Animasi Serangan Killer
-                                for _, track in pairs(eChar.Humanoid:GetPlayingAnimationTracks()) do
-                                    local animName = track.Name:lower()
-                                    if animName:find("attack") or animName:find("swing") or animName:find("hit") or animName:find("slash") then
-                                        isAttacking = true
-                                        break
-                                    end
-                                end
+                            if isKiller then
+                                local eRoot = enemy.Character.HumanoidRootPart
+                                local dist = (root.Position - eRoot.Position).Magnitude
                                 
-                                -- Jika Killer Menyerang ATAU sedang memegang senjata dan bergerak kencang
-                                if isAttacking or (eChar:FindFirstChildOfClass("Tool") and eChar.HumanoidRootPart.Velocity.Magnitude > 20) then
-                                    PressParryButton()
-                                    break
+                                -- 1. Cek Jarak (Ketat: 11 Unit)
+                                if dist < 11 then
+                                    -- 2. Cek Arah Hadap (Killer harus menghadap ke arah kita)
+                                    local toMe = (root.Position - eRoot.Position).Unit
+                                    local facingMe = eRoot.CFrame.LookVector:Dot(toMe)
+                                    
+                                    -- 3. Syarat: Killer menghadap kita (> 0.5) DAN memegang senjata/bergerak kencang
+                                    if facingMe > 0.5 then
+                                        if enemy.Character:FindFirstChildOfClass("Tool") or eRoot.Velocity.Magnitude > 25 then
+                                            PressParry()
+                                        end
+                                    end
                                 end
                             end
                         end
                     end
-                end
-            end)
+                end)
+            end
         end
     end
 end)
