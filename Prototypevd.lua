@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.4.3: KILLER OVERDRIVE 🎸 ]] --
+-- [[ BoDcChii Project - v0.4.3: KILLER OVERDRIVE FIX 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -38,7 +38,7 @@ local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(255, 105, 180); MainStroke.Thickness = 2
 EnableDrag(MainFrame)
 
--- --- 3. TABS & PAGES SETUP ---
+-- --- 3. TABS SETUP ---
 local Sidebar = Instance.new("ScrollingFrame", MainFrame)
 Sidebar.Size = UDim2.new(0, 115, 1, -45); Sidebar.Position = UDim2.new(0, 5, 0, 42); Sidebar.BackgroundTransparency = 1; Sidebar.CanvasSize = UDim2.new(0,0,1.5,0)
 local Content = Instance.new("ScrollingFrame", MainFrame)
@@ -61,7 +61,7 @@ local T2, P2 = CreateTab("2. SURVIVAL")
 local T3, P3 = CreateTab("3. KILLER UTILS")
 local T4, P4 = CreateTab("4. SMOOTH MAPS")
 
-local function Show(p, b)
+local function Show(p)
     for _, v in pairs(Content:GetChildren()) do if v:IsA("Frame") then v.Visible = false end end
     p.Visible = true
 end
@@ -80,13 +80,14 @@ local function CreateBtn(parent, text)
 end
 
 -- --- 5. LOGIKA FITUR ---
-local _SurvOn, _KillOn, _GenOn, _NoSkill, _FullBright, _NoFog, _Potato = false, false, false, false, false, false, false
+local _SurvOn, _KillOn, _FullBright = false, false, false
 local _NoCD, _Hitbox, _LongLunge = false, false, false
+local isLunging = false 
 
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
-local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
+local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)")
 local BtnLunge = CreateBtn(P3, "LONG LUNGE (PARU-PARU)"); local BtnNoCD = CreateBtn(P3, "NO ATTACK COOLDOWN"); local BtnHit = CreateBtn(P3, "HITBOX EXPANDER")
-local BtnFB = CreateBtn(P4, "FULL BRIGHT"); local BtnPot = CreateBtn(P4, "POTATO MODE")
+local BtnFB = CreateBtn(P4, "FULL BRIGHT")
 
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
@@ -100,16 +101,22 @@ Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _Su
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 BtnFB.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BtnFB, _FullBright, "FULL BRIGHT") end)
 
--- FIXED NO ATTACK COOLDOWN (Animation & State Bypass)
+-- FIXED NO ATTACK COOLDOWN (Ultimate Method)
 task.spawn(function()
     while task.wait() do
         if _NoCD then
             pcall(function()
                 local lp = Players.LocalPlayer
-                local char = lp.Character
-                if char then
-                    -- Reset animasai pukul agar bisa mukul lagi dengan cepat
-                    local hum = char:FindFirstChildOfClass("Humanoid")
+                local weapon = lp.Character and lp.Character:FindFirstChildOfClass("Tool")
+                if weapon then
+                    -- Hapus delay di level script lokal senjata
+                    for _, v in pairs(weapon:GetDescendants()) do
+                        if v:IsA("NumberValue") and (v.Name:lower():find("cooldown") or v.Name:lower():find("delay")) then
+                            v.Value = 0
+                        end
+                    end
+                    -- Paksa animasi berhenti agar bisa input ulang instan
+                    local hum = lp.Character:FindFirstChildOfClass("Humanoid")
                     if hum then
                         for _, anim in pairs(hum:GetPlayingAnimationTracks()) do
                             if anim.Name:lower():find("attack") or anim.Name:lower():find("swing") then
@@ -123,24 +130,26 @@ task.spawn(function()
     end
 end)
 
--- LOGIKA LONG LUNGE (PARU-PARU)
+-- FIXED LONG LUNGE (Anti-Glitch)
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
-    if _LongLunge and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+    if _LongLunge and not isLunging and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
         local char = Players.LocalPlayer.Character
-        local hum = char and char:FindFirstChild("Humanoid")
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        if hum and hrp then
-            -- Mendorong karakter ke depan (Lunge effect)
-            hrp.Velocity = hrp.CFrame.LookVector * 80
-            hum.WalkSpeed = 32
-            task.wait(0.35)
+        local hum = char and char:FindFirstChild("Humanoid")
+        
+        if hrp and hum then
+            isLunging = true
+            hrp.Velocity = hrp.CFrame.LookVector * 65 
+            hum.WalkSpeed = 26
+            task.wait(0.5) 
             hum.WalkSpeed = 16
+            isLunging = false
         end
     end
 end)
 
--- HITBOX LOOP
+-- HITBOX EXPANDER
 task.spawn(function()
     while task.wait(0.5) do
         if _Hitbox then
