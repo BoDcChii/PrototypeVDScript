@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.6: FIX ANALOG LOCK & COOLDOWN GHOST 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.7: ZERO GHOST TOUCH & ANALOG FIX 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -38,10 +38,6 @@ local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(255, 105, 180); MainStroke.Thickness = 2
 EnableDrag(MainFrame)
 
-task.spawn(function()
-    while task.wait() do MainStroke.Color = Color3.fromHSV(tick() % 5 / 5, 0.6, 1) end
-end)
-
 -- --- 2. BUTTONS ---
 local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
 ContentScroll.Size = UDim2.new(1, -20, 1, -40); ContentScroll.Position = UDim2.new(0, 10, 0, 35); ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0; ContentScroll.ScrollBarThickness = 0
@@ -61,11 +57,11 @@ end
 
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 
-local BtnAP = CreateBtn("AUTO PARRY (NO LAG)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
+local BtnAP = CreateBtn("AUTO PARRY (SAFE MOBILE)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
 local Btn3 = CreateBtn("ESP GENERATOR"); local Btn4 = CreateBtn("NO SKILL CHECK"); local Btn5 = CreateBtn("FULL BRIGHT")
 local Btn6 = CreateBtn("NO FOG"); local Btn7 = CreateBtn("POTATO MODE")
 
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (NO LAG)") end)
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (SAFE MOBILE)") end)
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
@@ -83,31 +79,31 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- 4. CORE ANALOG RESCUE PARRY ---
-local isClicking = false
+-- --- 4. CORE MOBILE-SAFE PARRY ---
+local isLocked = false
 local prevDistances = {}
 
-local function PressParry()
-    if isClicking then return end -- Kunci utama agar tidak nyepam saat cooldown
-    isClicking = true
+local function MobileSafeClick()
+    if isLocked then return end
+    isLocked = true
     
     local ViewportSize = workspace.CurrentCamera.ViewportSize
-    local TargetX = ViewportSize.X * 0.85 
-    local TargetY = ViewportSize.Y * 0.70 
+    local TX, TY = ViewportSize.X * 0.85, ViewportSize.Y * 0.70 
     
-    -- Simulasi Klik Instan (Tanpa Jeda task.wait agar tidak nge-hold layar)
-    VIM:SendMouseButtonEvent(TargetX, TargetY, 0, true, game, 0)
-    VIM:SendMouseButtonEvent(TargetX, TargetY, 0, false, game, 0)
+    -- "TAP" Instan: Down & Up tanpa jeda sedetikpun
+    VIM:SendMouseButtonEvent(TX, TY, 0, true, game, 0)
+    VIM:SendMouseButtonEvent(TX, TY, 0, false, game, 0)
     
-    -- Cooldown total (Selama 0.8 detik, script bener-bener gak ngapa-ngapain)
-    task.delay(0.8, function()
-        isClicking = false
+    -- Jeda 1 detik: Mematikan script total sementara agar Jempol Kiri (Analog) dapat prioritas layar
+    task.delay(1.0, function()
+        isLocked = false
     end)
 end
 
 task.spawn(function()
-    while task.wait(0.03) do 
-        if _AutoParry and not isClicking then -- Kalau cooldown, loop ini tidak jalan
+    while true do
+        task.wait(0.05) -- Scan lebih santai biar layar gak panas
+        if _AutoParry and not isLocked then
             local lp = Players.LocalPlayer
             local char = lp.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
@@ -120,16 +116,14 @@ task.spawn(function()
                                             or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
                             
                             if isKiller then
-                                local eRoot = enemy.Character.HumanoidRootPart
-                                local currentDist = (root.Position - eRoot.Position).Magnitude
-                                local lastDist = prevDistances[enemy.Name] or currentDist
-                                prevDistances[enemy.Name] = currentDist
+                                local d = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
+                                local lastD = prevDistances[enemy.Name] or d
+                                prevDistances[enemy.Name] = d
                                 
-                                -- 10 Unit (Jarak nempel banget)
-                                if currentDist < 10.5 then
-                                    -- Hanya klik jika dia mendekat drastis (mau mukul) atau sudah nempel
-                                    if (lastDist - currentDist) > 0.2 or currentDist < 6 then
-                                        PressParry()
+                                -- Jarak 10 (Sangat Dekat) + Harus ada gerakan mendekat (mau hit)
+                                if d < 10.2 then
+                                    if (lastD - d) > 0.25 or d < 6 then
+                                        MobileSafeClick()
                                         break
                                     end
                                 end
