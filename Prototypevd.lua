@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.4.7: KERNEL PARRY - MOBILE OPTIMIZED 🎸 ]] --
+-- [[ BoDcChii Project - v0.4.8: HYPER PARRY SYSTEM (MOBILE SYNC) 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -6,11 +6,12 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VIM = game:GetService("VirtualInputManager")
 
--- --- 0. ANTI-REDUNDANT ---
+-- --- 0. CLEANUP ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
 
--- --- 1. SETUP UI ---
+-- --- 1. UI SETUP (STABLE) ---
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
 
@@ -31,7 +32,7 @@ local function EnableDrag(gui)
 end
 
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 320, 0, 190); MainFrame.Position = UDim2.new(0.5, -160, 0.3, 0)
+MainFrame.Size = UDim2.new(0, 300, 0, 180); MainFrame.Position = UDim2.new(0.5, -150, 0.3, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 local MainStroke = Instance.new("UIStroke", MainFrame)
@@ -42,47 +43,14 @@ task.spawn(function()
     while task.wait() do MainStroke.Color = Color3.fromHSV(tick() % 5 / 5, 0.6, 1) end
 end)
 
--- --- 2. TABS & PAGES ---
-local SidebarScroll = Instance.new("ScrollingFrame", MainFrame)
-SidebarScroll.Size = UDim2.new(0, 90, 1, -40); SidebarScroll.Position = UDim2.new(0, 5, 0, 35); SidebarScroll.BackgroundTransparency = 1; SidebarScroll.BorderSizePixel = 0; SidebarScroll.ScrollBarThickness = 0
-Instance.new("UIListLayout", SidebarScroll).Padding = UDim.new(0, 5)
-
+-- --- 2. TABS & PAGES (MINIMALIST) ---
 local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
-ContentScroll.Size = UDim2.new(1, -110, 1, -45); ContentScroll.Position = UDim2.new(0, 105, 0, 40); ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0; ContentScroll.ScrollBarThickness = 2
+ContentScroll.Size = UDim2.new(1, -20, 1, -40); ContentScroll.Position = UDim2.new(0, 10, 0, 35); ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0; ContentScroll.ScrollBarThickness = 0
+local List = Instance.new("UIListLayout", ContentScroll); List.Padding = UDim.new(0, 5)
 
-local function CreateTabBtn(text)
-    local btn = Instance.new("TextButton", SidebarScroll); btn.Size = UDim2.new(1, -5, 0, 30)
-    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); btn.Text = text; btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 8; Instance.new("UICorner", btn)
-    Instance.new("UIStroke", btn).Color = Color3.fromRGB(255, 105, 180)
-    return btn
-end
-
-local T0, T1, T2, T3 = CreateTabBtn("ABOUT"), CreateTabBtn("ESP"), CreateTabBtn("SURVIVAL"), CreateTabBtn("WORLD")
-local function CreatePage()
-    local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -5, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
-    Instance.new("UIListLayout", f).Padding = UDim.new(0, 5)
-    return f
-end
-local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
-
-local function Show(p, b)
-    P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false
-    T0.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    p.Visible = true; b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-end
-T0.MouseButton1Click:Connect(function() Show(P0, T0) end)
-T1.MouseButton1Click:Connect(function() Show(P1, T1) end)
-T2.MouseButton1Click:Connect(function() Show(P2, T2) end)
-T3.MouseButton1Click:Connect(function() Show(P3, T3) end)
-Show(P0, T0)
-
--- --- 3. FEATURES LOGIC ---
-local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
-
-local function CreateBtn(parent, text)
-    local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(1, 0, 0, 32); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    btn.Text = text .. ": OFF"; btn.TextColor3 = Color3.new(1, 1, 1); btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 9
+local function CreateBtn(text)
+    local btn = Instance.new("TextButton", ContentScroll); btn.Size = UDim2.new(1, 0, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    btn.Text = text .. ": OFF"; btn.TextColor3 = Color3.new(1, 1, 1); btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 10
     Instance.new("UICorner", btn); local s = Instance.new("UIStroke", btn); s.Color = Color3.fromRGB(200, 50, 50)
     return btn
 end
@@ -92,13 +60,16 @@ local function Toggle(btn, state, txt)
     btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
 end
 
-local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
-local BtnAP = CreateBtn(P2, "AUTO PARRY (KERNEL)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
-local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
+-- --- 3. VARIABLES ---
+local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 
+local BtnAP = CreateBtn("AUTO PARRY (HYPER)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
+local Btn3 = CreateBtn("ESP GENERATOR"); local Btn4 = CreateBtn("NO SKILL CHECK"); local Btn5 = CreateBtn("FULL BRIGHT")
+local Btn6 = CreateBtn("NO FOG"); local Btn7 = CreateBtn("POTATO MODE")
+
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (HYPER)") end)
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (KERNEL)") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
 Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(Btn4, _NoSkillGen, "NO SKILL CHECK") end)
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
@@ -114,55 +85,58 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- 4. CORE AUTO PARRY (KERNEL METHOD) ---
-local function ExecuteParry()
-    -- Mencoba memicu RemoteEvent secara paksa (Brute force detection)
-    local Events = {ReplicatedStorage:FindFirstChild("Parry"), ReplicatedStorage:FindFirstChild("Combat"), ReplicatedStorage:FindFirstChild("Block")}
-    for _, ev in pairs(Events) do
-        if ev and ev:IsA("RemoteEvent") then
-            ev:FireServer()
+-- --- 4. THE ULTIMATE PARRY BYPASS ---
+local function TriggerAction()
+    -- 1. Try Remote Brute Force
+    pcall(function()
+        local remotes = {"Parry", "Block", "Action", "Combat"}
+        for _, n in pairs(remotes) do
+            local r = ReplicatedStorage:FindFirstChild(n) or ReplicatedStorage:FindFirstChild("Events"):FindFirstChild(n)
+            if r and r:IsA("RemoteEvent") then r:FireServer() end
         end
-    end
+    end)
     
-    -- Mencoba mencari Tool yang sedang dipakai dan memicu fungsi aktivasi
-    local char = Players.LocalPlayer.Character
-    if char then
-        local tool = char:FindFirstChildOfClass("Tool")
-        if tool then
-            tool:Activate() -- Memaksa karakter menggunakan item (Parry)
+    -- 2. Try Tool Activation
+    pcall(function()
+        local char = Players.LocalPlayer.Character
+        if char and char:FindFirstChildOfClass("Tool") then
+            char:FindFirstChildOfClass("Tool"):Activate()
         end
-    end
+    end)
+    
+    -- 3. Virtual Key F (Simulated correctly)
+    VIM:SendKeyEvent(true, Enum.KeyCode.F, false, game)
+    task.wait(0.01)
+    VIM:SendKeyEvent(false, Enum.KeyCode.F, false, game)
 end
 
 task.spawn(function()
-    while task.wait(0.01) do -- Scan lebih cepat
+    while task.wait(0.01) do
         if _AutoParry then
-            pcall(function()
-                local player = Players.LocalPlayer
-                local char = player.Character
-                if char and char:FindFirstChild("HumanoidRootPart") then
-                    for _, enemy in pairs(Players:GetPlayers()) do
-                        if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                            local eChar = enemy.Character
-                            local dist = (char.HumanoidRootPart.Position - eChar.HumanoidRootPart.Position).Magnitude
-                            
-                            -- Deteksi: Killer Jarak dekat + Cek jika Killer sedang melakukan aksi/velocity
-                            if dist < 13 then
-                                local killerHum = eChar:FindFirstChild("Humanoid")
-                                if killerHum and (eChar:FindFirstChildOfClass("Tool") or killerHum.MoveDirection.Magnitude > 0) then
-                                    ExecuteParry()
-                                    task.wait(0.2) -- Debounce anti-spam emote
-                                end
+            local char = Players.LocalPlayer.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if root then
+                for _, enemy in pairs(Players:GetPlayers()) do
+                    if enemy ~= Players.LocalPlayer and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
+                        local eRoot = enemy.Character.HumanoidRootPart
+                        local dist = (root.Position - eRoot.Position).Magnitude
+                        local velocity = eRoot.Velocity.Magnitude
+                        
+                        -- DETEKSI GABUNGAN: Jarak < 13 ATAU Jarak < 18 tapi Killer lari kencang (menerjang)
+                        if dist < 13 or (dist < 18 and velocity > 30) then
+                            if enemy.Character:FindFirstChildOfClass("Tool") or enemy.Character.Humanoid.MoveDirection.Magnitude > 0 then
+                                TriggerAction()
+                                task.wait(0.25) -- COOLDOWN ANTI EMOTE SPAM
                             end
                         end
                     end
                 end
-            end)
+            end
         end
     end
 end)
 
--- --- 5. VISUALS & SYNC ---
+-- --- 5. WORLD & ESP (STABLE) ---
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
@@ -175,11 +149,10 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- --- 6. OPEN BUTTON ---
+-- --- 6. OPEN/CLOSE ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
-OpenButton.Size = UDim2.new(0, 40, 0, 40); OpenButton.Position = UDim2.new(0, 10, 0.5, -20)
-OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
-OpenButton.TextSize = 18; OpenButton.Font = Enum.Font.SourceSansBold; Instance.new("UICorner", OpenButton)
-local BtnStroke = Instance.new("UIStroke", OpenButton); BtnStroke.Color = Color3.fromRGB(255, 105, 180); BtnStroke.Thickness = 2
+OpenButton.Size = UDim2.new(0, 45, 0, 45); OpenButton.Position = UDim2.new(0, 10, 0.5, -22)
+OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180); OpenButton.TextSize = 20; OpenButton.Font = Enum.Font.SourceSansBold
+Instance.new("UICorner", OpenButton); local s = Instance.new("UIStroke", OpenButton); s.Color = Color3.fromRGB(255, 105, 180)
 EnableDrag(OpenButton)
 OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
