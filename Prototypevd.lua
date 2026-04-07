@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.4: PURE MAGNITUDE PARRY 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.5: PREDICTIVE & ANTI-MISS PARRY 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -61,11 +61,11 @@ end
 
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 
-local BtnAP = CreateBtn("AUTO PARRY (BASIC)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
+local BtnAP = CreateBtn("AUTO PARRY (PREDICT)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
 local Btn3 = CreateBtn("ESP GENERATOR"); local Btn4 = CreateBtn("NO SKILL CHECK"); local Btn5 = CreateBtn("FULL BRIGHT")
 local Btn6 = CreateBtn("NO FOG"); local Btn7 = CreateBtn("POTATO MODE")
 
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (BASIC)") end)
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (PREDICT)") end)
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
@@ -83,9 +83,10 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- 4. CORE PURE PARRY ---
+-- --- 4. CORE PREDICTIVE PARRY ---
 local lastParry = 0
-local parryCooldown = 0.7 
+local parryCooldown = 0.8
+local prevDistances = {} -- Menyimpan jarak sebelumnya untuk cek pergerakan
 
 local function PressParry()
     if tick() - lastParry < parryCooldown then return end
@@ -103,31 +104,41 @@ local function PressParry()
 end
 
 task.spawn(function()
-    while task.wait(0.03) do -- Scan 33x per detik
+    while task.wait(0.03) do 
         if _AutoParry then
             local lp = Players.LocalPlayer
             local char = lp.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            -- Bypass Lobby Check (Kadang tim telat update, kita fokus ke Character saja)
-            if root then
+            if root and not (lp.Team and lp.Team.Name:lower():find("lobby")) then
                 pcall(function()
                     for _, enemy in pairs(Players:GetPlayers()) do
                         if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                            -- Deteksi Killer berdasarkan Health atau Team
                             local isKiller = (enemy.Team and (enemy.Team.Name:lower():find("kill") or enemy.Team.Name:lower():find("hunter"))) 
                                             or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
                             
                             if isKiller then
-                                local dist = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
-                                if dist < 12.5 then -- Jarak ideal untuk nangkis serangan
-                                    PressParry()
-                                    break
+                                local eRoot = enemy.Character.HumanoidRootPart
+                                local currentDist = (root.Position - eRoot.Position).Magnitude
+                                local lastDist = prevDistances[enemy.Name] or currentDist
+                                prevDistances[enemy.Name] = currentDist
+                                
+                                -- LOGIKA PREDIKSI:
+                                -- 1. Jarak harus di bawah 11 (jarak pukul)
+                                -- 2. Jarak harus berkurang (lastDist - currentDist > 0.1) -- Artinya dia mendekat, bukan menjauh atau lewat samping.
+                                if currentDist < 11 then
+                                    local isApproaching = (lastDist - currentDist) > 0.15 
+                                    
+                                    if isApproaching or currentDist < 7 then -- Kalau sudah nempel (7) langsung parry saja
+                                        PressParry()
+                                    end
                                 end
                             end
                         end
                     end
                 end)
+            else
+                prevDistances = {} -- Reset kalau mati/lobby
             end
         end
     end
