@@ -1,11 +1,10 @@
--- [[ BoDcChii Project - v0.4.2: LUNGE UPDATE 🎸 ]] --
+-- [[ BoDcChii Project - v0.4.3: KILLER OVERDRIVE 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
-local VIM = game:GetService("VirtualInputManager")
 
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
@@ -73,7 +72,6 @@ T3.MouseButton1Click:Connect(function() Show(P3) end)
 T4.MouseButton1Click:Connect(function() Show(P4) end)
 Show(P0)
 
--- --- 4. BUTTON GENERATOR ---
 local function CreateBtn(parent, text)
     local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(1, 0, 0, 35); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.Text = text .. ": OFF"; btn.TextColor3 = Color3.new(1, 1, 1); btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 9
@@ -88,14 +86,13 @@ local _NoCD, _Hitbox, _LongLunge = false, false, false
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local BtnLunge = CreateBtn(P3, "LONG LUNGE (PARU-PARU)"); local BtnNoCD = CreateBtn(P3, "NO ATTACK COOLDOWN"); local BtnHit = CreateBtn(P3, "HITBOX EXPANDER")
-local BtnFB = CreateBtn(P4, "FULL BRIGHT"); local BtnNF = CreateBtn(P4, "NO FOG"); local BtnPot = CreateBtn(P4, "POTATO MODE")
+local BtnFB = CreateBtn(P4, "FULL BRIGHT"); local BtnPot = CreateBtn(P4, "POTATO MODE")
 
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
     btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
 end
 
--- Connections
 BtnLunge.MouseButton1Click:Connect(function() _LongLunge = not _LongLunge Toggle(BtnLunge, _LongLunge, "LONG LUNGE (PARU-PARU)") end)
 BtnNoCD.MouseButton1Click:Connect(function() _NoCD = not _NoCD Toggle(BtnNoCD, _NoCD, "NO ATTACK COOLDOWN") end)
 BtnHit.MouseButton1Click:Connect(function() _Hitbox = not _Hitbox Toggle(BtnHit, _Hitbox, "HITBOX EXPANDER") end)
@@ -103,15 +100,41 @@ Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _Su
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 BtnFB.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(BtnFB, _FullBright, "FULL BRIGHT") end)
 
+-- FIXED NO ATTACK COOLDOWN (Animation & State Bypass)
+task.spawn(function()
+    while task.wait() do
+        if _NoCD then
+            pcall(function()
+                local lp = Players.LocalPlayer
+                local char = lp.Character
+                if char then
+                    -- Reset animasai pukul agar bisa mukul lagi dengan cepat
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        for _, anim in pairs(hum:GetPlayingAnimationTracks()) do
+                            if anim.Name:lower():find("attack") or anim.Name:lower():find("swing") then
+                                anim:Stop()
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
 -- LOGIKA LONG LUNGE (PARU-PARU)
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
-    if _LongLunge and input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if _LongLunge and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
         local char = Players.LocalPlayer.Character
         local hum = char and char:FindFirstChild("Humanoid")
-        if hum then
-            hum.WalkSpeed = 28 -- Speed boost saat mukul (Paru-paru panjang)
-            task.wait(0.4)
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if hum and hrp then
+            -- Mendorong karakter ke depan (Lunge effect)
+            hrp.Velocity = hrp.CFrame.LookVector * 80
+            hum.WalkSpeed = 32
+            task.wait(0.35)
             hum.WalkSpeed = 16
         end
     end
@@ -125,6 +148,7 @@ task.spawn(function()
                 if p ~= Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                     p.Character.HumanoidRootPart.Size = Vector3.new(12, 12, 12)
                     p.Character.HumanoidRootPart.Transparency = 0.8
+                    p.Character.HumanoidRootPart.CanCollide = false
                 end
             end
         end
