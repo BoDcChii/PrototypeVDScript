@@ -1,35 +1,16 @@
--- [[ BoDcChii Project - v0.4.4: MOBILE & PARRY OPTIMIZED 🎸 ]] --
+-- [[ BoDcChii Project - v0.4.5: FINAL PARRY RECONSTRUCTION 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
-local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
-if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
 
--- --- 1. WELCOME NOTIFICATION ---
-local function ShowWelcome()
-    local WelcomeGui = Instance.new("ScreenGui", CoreGui)
-    WelcomeGui.Name = "BoDcChii_Welcome"
-    local WelcomeFrame = Instance.new("Frame", WelcomeGui)
-    WelcomeFrame.Size = UDim2.new(0, 180, 0, 40) -- Ukuran lebih kecil untuk HP
-    WelcomeFrame.Position = UDim2.new(0.5, -90, 0.05, 0)
-    WelcomeFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    Instance.new("UICorner", WelcomeFrame).CornerRadius = UDim.new(0, 8)
-    local Stroke = Instance.new("UIStroke", WelcomeFrame)
-    Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
-    local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
-    WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "BoDcChii Project: Mobile Fix"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
-    WelcomeLabel.TextSize = 12; WelcomeLabel.Font = Enum.Font.SourceSansBold
-    task.delay(2, function() WelcomeGui:Destroy() end)
-end
-pcall(ShowWelcome)
-
+-- --- 1. SETUP UI (ADAPTIVE MOBILE) ---
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
 
@@ -49,42 +30,32 @@ local function EnableDrag(gui)
     UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end end)
 end
 
--- --- 2. MAIN UI STRUCTURE (ADAPTIF HP) ---
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 340, 0, 200); MainFrame.Position = UDim2.new(0.5, -170, 0.3, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
-MainFrame.ClipsDescendants = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(255, 105, 180); MainStroke.Thickness = 2
 EnableDrag(MainFrame)
 
--- RAINBOW EFFECT
 task.spawn(function()
     while task.wait() do MainStroke.Color = Color3.fromHSV(tick() % 5 / 5, 0.6, 1) end
 end)
 
 local Header = Instance.new("TextLabel", MainFrame)
-Header.Size = UDim2.new(1, 0, 0, 30); Header.Text = "BoDcChii Project"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
+Header.Size = UDim2.new(1, 0, 0, 30); Header.Text = "BoDcChii Project v0.4.5"; Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Header.TextSize = 16
 
--- --- 3. SCROLLING SETUP ---
-local function SetupScroll(scroll)
-    scroll.Active = true; scroll.ScrollBarThickness = 2
-    scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-    scroll.CanvasSize = UDim2.new(0, 0, 1.8, 0) 
-end
-
+-- --- 2. TABS SETUP ---
 local SidebarScroll = Instance.new("ScrollingFrame", MainFrame)
 SidebarScroll.Size = UDim2.new(0, 100, 1, -40); SidebarScroll.Position = UDim2.new(0, 5, 0, 35); SidebarScroll.BackgroundTransparency = 1; SidebarScroll.BorderSizePixel = 0
-SetupScroll(SidebarScroll)
+SidebarScroll.ScrollBarThickness = 0
 Instance.new("UIListLayout", SidebarScroll).Padding = UDim.new(0, 5)
 
 local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
 ContentScroll.Size = UDim2.new(1, -120, 1, -45); ContentScroll.Position = UDim2.new(0, 115, 0, 40); ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0
-SetupScroll(ContentScroll)
+ContentScroll.ScrollBarThickness = 2
 
--- --- 4. TABS & LOGIC ---
 local function CreateTabBtn(text)
     local btn = Instance.new("TextButton", SidebarScroll); btn.Size = UDim2.new(1, -5, 0, 30)
     btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); btn.Text = text; btn.TextColor3 = Color3.new(1, 1, 1)
@@ -101,11 +72,6 @@ local function CreatePage()
 end
 local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
--- ABOUT (TIDAK BERUBAH)
-local AboutInfo = Instance.new("TextLabel", P0)
-AboutInfo.Size = UDim2.new(1, 0, 0, 150); AboutInfo.BackgroundTransparency = 1; AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4 (Aesthetic)\n\nUpdate:\n- Rainbow UI Stroke\n- Fade Open/Close Animation\n- Fitur Potato Mode Tetap Aktif"
-
 local function Show(p, b)
     P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false
     T0.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -117,8 +83,14 @@ T2.MouseButton1Click:Connect(function() Show(P2, T2) end)
 T3.MouseButton1Click:Connect(function() Show(P3, T3) end)
 Show(P0, T0)
 
--- --- 5. BUTTONS & FEATURES ---
+-- ABOUT CONTENT
+local AboutInfo = Instance.new("TextLabel", P0)
+AboutInfo.Size = UDim2.new(1, 0, 0, 150); AboutInfo.BackgroundTransparency = 1; AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4 (Aesthetic)\n\nUpdate:\n- FIXED Instant Parry (Mobile)\n- No Emote Bug Fixed\n- UI Optimization"
+
+-- --- 3. FEATURES LOGIC ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
+
 local function CreateBtn(parent, text)
     local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(1, 0, 0, 32); btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.Text = text .. ": OFF"; btn.TextColor3 = Color3.new(1, 1, 1); btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 9
@@ -132,47 +104,18 @@ local function Toggle(btn, state, txt)
 end
 
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
-local BtnAP = CreateBtn(P2, "AUTO PARRY (MOBILE)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
+local BtnAP = CreateBtn(P2, "AUTO PARRY (FIXED)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
 
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (MOBILE)") end)
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (FIXED)") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
 Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(Btn4, _NoSkillGen, "NO SKILL CHECK") end)
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- --- 6. CORE LOGIC (PARRY & PERFORMANCE) ---
-
--- FIXED PARRY (NO EMOTE SPAM)
-task.spawn(function()
-    while task.wait(0.01) do
-        if _AutoParry then
-            pcall(function()
-                local char = Players.LocalPlayer.Character
-                local root = char and char:FindFirstChild("HumanoidRootPart")
-                if root then
-                    for _, p in pairs(Players:GetPlayers()) do
-                        if p ~= Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                            local dist = (root.Position - p.Character.HumanoidRootPart.Position).Magnitude
-                            -- Cek animasi menyerang Killer bukannya spam Key F
-                            local isAttacking = p.Character:FindFirstChildOfClass("Tool")
-                            if dist < 13 and isAttacking then
-                                -- Gunakan Remote Event game atau simulasi sentuhan tombol serang
-                                local CombatEvent = game:GetService("ReplicatedStorage"):FindFirstChild("CombatEvent") or game:GetService("ReplicatedStorage"):FindFirstChild("Parry")
-                                if CombatEvent then CombatEvent:FireServer() end
-                                task.wait(0.1) -- Delay biar gak spam emote
-                            end
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end)
-
--- POTATO MODE (TETAP SAMA)
+-- POTATO MODE (UNCHANGED)
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
@@ -184,7 +127,58 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- ESP & WORLD SYNC
+-- --- 4. CORE AUTO PARRY (ADVANCED DETECTION) ---
+local function DoParry()
+    -- Mengirim Remote langsung ke server untuk Parry
+    local ParryEvent = ReplicatedStorage:FindFirstChild("Parry") or ReplicatedStorage:FindFirstChild("Combat") or ReplicatedStorage:FindFirstChild("Block")
+    if ParryEvent and ParryEvent:IsA("RemoteEvent") then
+        ParryEvent:FireServer()
+    end
+    -- Cadangan: Memanggil fungsi F secara virtual tanpa menekan tombol fisik
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, "F", false, game)
+    task.wait(0.01)
+    game:GetService("VirtualInputManager"):SendKeyEvent(false, "F", false, game)
+end
+
+task.spawn(function()
+    while task.wait() do
+        if _AutoParry then
+            pcall(function()
+                local player = Players.LocalPlayer
+                local char = player.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    for _, enemy in pairs(Players:GetPlayers()) do
+                        if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Humanoid") then
+                            local enemyChar = enemy.Character
+                            local dist = (char.HumanoidRootPart.Position - enemyChar.HumanoidRootPart.Position).Magnitude
+                            
+                            -- Deteksi Jarak & Animasi Serangan
+                            if dist < 15 then
+                                local isAttacking = false
+                                -- Cek apakah ada track animasi yang sedang berjalan (Swing/Attack)
+                                for _, track in pairs(enemyChar.Humanoid:GetPlayingAnimationTracks()) do
+                                    local animId = tostring(track.Animation.AnimationId)
+                                    -- Daftar ID Animasi menyerang di Violence District
+                                    if animId:find("attack") or animId:find("swing") or animId:find("hit") then
+                                        isAttacking = true
+                                        break
+                                    end
+                                end
+                                
+                                if isAttacking or enemyChar:FindFirstChildOfClass("Tool") then
+                                    DoParry()
+                                    task.wait(0.2) -- Debounce agar tidak spam
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- ESP & LIGHTING (UNCHANGED)
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
@@ -197,7 +191,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- --- 7. OPEN/CLOSE BUTTON ---
+-- --- 5. TOGGLE BUTTON ---
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 45, 0, 45); OpenButton.Position = UDim2.new(0, 10, 0.5, -22)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
@@ -207,7 +201,4 @@ EnableDrag(OpenButton)
 
 OpenButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
-    if MainFrame.Visible then
-        MainFrame:TweenSize(UDim2.new(0, 340, 0, 200), "Out", "Back", 0.3, true)
-    end
 end)
