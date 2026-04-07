@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.3: REFLEX SYNC & LOOK DETECTION 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.4: PURE MAGNITUDE PARRY 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -61,11 +61,11 @@ end
 
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 
-local BtnAP = CreateBtn("AUTO PARRY (REFLEX)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
+local BtnAP = CreateBtn("AUTO PARRY (BASIC)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
 local Btn3 = CreateBtn("ESP GENERATOR"); local Btn4 = CreateBtn("NO SKILL CHECK"); local Btn5 = CreateBtn("FULL BRIGHT")
 local Btn6 = CreateBtn("NO FOG"); local Btn7 = CreateBtn("POTATO MODE")
 
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (REFLEX)") end)
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (BASIC)") end)
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
@@ -83,9 +83,9 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- 4. CORE REFLEX PARRY ---
+-- --- 4. CORE PURE PARRY ---
 local lastParry = 0
-local parryCooldown = 0.8 -- Cooldown sedikit lebih lama biar stabil
+local parryCooldown = 0.7 
 
 local function PressParry()
     if tick() - lastParry < parryCooldown then return end
@@ -103,34 +103,26 @@ local function PressParry()
 end
 
 task.spawn(function()
-    while task.wait(0.02) do 
+    while task.wait(0.03) do -- Scan 33x per detik
         if _AutoParry then
             local lp = Players.LocalPlayer
             local char = lp.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if root and not (lp.Team and lp.Team.Name:lower():find("lobby")) then
+            -- Bypass Lobby Check (Kadang tim telat update, kita fokus ke Character saja)
+            if root then
                 pcall(function()
                     for _, enemy in pairs(Players:GetPlayers()) do
                         if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                            local isKiller = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
+                            -- Deteksi Killer berdasarkan Health atau Team
+                            local isKiller = (enemy.Team and (enemy.Team.Name:lower():find("kill") or enemy.Team.Name:lower():find("hunter"))) 
+                                            or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
                             
                             if isKiller then
-                                local eRoot = enemy.Character.HumanoidRootPart
-                                local dist = (root.Position - eRoot.Position).Magnitude
-                                
-                                -- 1. Cek Jarak (Ketat: 11 Unit)
-                                if dist < 11 then
-                                    -- 2. Cek Arah Hadap (Killer harus menghadap ke arah kita)
-                                    local toMe = (root.Position - eRoot.Position).Unit
-                                    local facingMe = eRoot.CFrame.LookVector:Dot(toMe)
-                                    
-                                    -- 3. Syarat: Killer menghadap kita (> 0.5) DAN memegang senjata/bergerak kencang
-                                    if facingMe > 0.5 then
-                                        if enemy.Character:FindFirstChildOfClass("Tool") or eRoot.Velocity.Magnitude > 25 then
-                                            PressParry()
-                                        end
-                                    end
+                                local dist = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
+                                if dist < 12.5 then -- Jarak ideal untuk nangkis serangan
+                                    PressParry()
+                                    break
                                 end
                             end
                         end
@@ -148,7 +140,7 @@ RunService.Heartbeat:Connect(function()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character); hl.Name = "BDEsp"
-            local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
+            local isK = (p.Team and (p.Team.Name:lower():find("kill") or p.Team.Name:lower():find("hunter"))) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
             hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn); hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
         end
     end
