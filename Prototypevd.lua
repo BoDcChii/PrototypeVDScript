@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.4.2: BOCCHI POLISH EDITION (PARRY SYNC) 🎸 ]] --
+-- [[ BoDcChii Project - v0.4.3: BOCCHI POLISH EDITION (PARRY FIXED) 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -12,7 +12,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
 if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
 
--- --- 1. WELCOME NOTIFICATION (UI PERTAMA) ---
+-- --- 1. WELCOME NOTIFICATION ---
 local function ShowWelcome()
     local WelcomeGui = Instance.new("ScreenGui", CoreGui)
     WelcomeGui.Name = "BoDcChii_Welcome"
@@ -50,7 +50,7 @@ local function EnableDrag(gui)
     UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end end)
 end
 
--- --- 2. MAIN UI STRUCTURE (UI PERTAMA) ---
+-- --- 2. MAIN UI STRUCTURE ---
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 380, 0, 220); MainFrame.Position = UDim2.new(0.5, -190, 0.4, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.Visible = false; MainFrame.Active = true
@@ -63,8 +63,7 @@ EnableDrag(MainFrame)
 -- RAINBOW STROKE
 task.spawn(function()
     while task.wait() do
-        local hue = tick() % 5 / 5
-        MainStroke.Color = Color3.fromHSV(hue, 0.6, 1)
+        MainStroke.Color = Color3.fromHSV(tick() % 5 / 5, 0.6, 1)
     end
 end)
 
@@ -160,7 +159,7 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- LOGIKA POTATO MODE ULTIMATE SYNC
+-- POTATO MODE (TETAP SAMA)
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
@@ -169,35 +168,36 @@ Btn7.MouseButton1Click:Connect(function()
             local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
             local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
             if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then 
-                    v.Material = Enum.Material.SmoothPlastic 
-                    if v:IsA("MeshPart") then v.TextureID = "" end
+                if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic if v:IsA("MeshPart") then v.TextureID = "" end
                 elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then 
-                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
+                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then v.Enabled = false end
             end
         end
     end
 end)
 
--- LOGIKA AUTO PARRY INSTANT
+-- FIXED LOGIKA AUTO PARRY (暴力 DETEKSI)
 task.spawn(function()
+    local vim = game:GetService("VirtualInputManager")
     while task.wait() do
         if _AutoParry then
             pcall(function()
                 local char = Players.LocalPlayer.Character
-                if char and char:FindFirstChild("HumanoidRootPart") then
+                local root = char and char:FindFirstChild("HumanoidRootPart")
+                if root then
                     for _, p in pairs(Players:GetPlayers()) do
                         if p ~= Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                            local dist = (char.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
-                            local isAttacking = p.Character:FindFirstChildOfClass("Tool") and p.Character:FindFirstChildOfClass("Tool"):FindFirstChild("Handle")
+                            local enemyRoot = p.Character.HumanoidRootPart
+                            local dist = (root.Position - enemyRoot.Position).Magnitude
                             
-                            if dist < 12 and isAttacking then
-                                -- Memicu Parry Instan
-                                game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F, false, game)
-                                task.wait(0.01)
-                                game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.F, false, game)
+                            -- Deteksi: Jarak dekat + Musuh megang tool (senjata) + atau musuh lagi gerak cepat/animasi
+                            if dist < 14 then
+                                local tool = p.Character:FindFirstChildOfClass("Tool")
+                                if tool or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MoveDirection.Magnitude > 0) then
+                                    vim:SendKeyEvent(true, Enum.KeyCode.F, false, game)
+                                    task.wait(0.01)
+                                    vim:SendKeyEvent(false, Enum.KeyCode.F, false, game)
+                                end
                             end
                         end
                     end
@@ -207,7 +207,7 @@ task.spawn(function()
     end
 end)
 
--- LOGIKA ESP GENERATOR
+-- ESP GENERATOR (TETAP SAMA)
 task.spawn(function()
     while task.wait(3) do
         if _GenOn then
@@ -223,7 +223,7 @@ task.spawn(function()
     end
 end)
 
--- LOGIKA ESP PLAYER & LIGHTING
+-- ESP PLAYER & LIGHTING (TETAP SAMA)
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
@@ -236,7 +236,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- LOGIKA NO SKILL CHECK (METATABLE)
+-- NO SKILL CHECK (TETAP SAMA)
 local mt = getrawmetatable(game)
 if mt then
     local old = mt.__namecall; setreadonly(mt, false)
@@ -250,7 +250,7 @@ if mt then
     end); setreadonly(mt, true)
 end
 
--- --- 6. BUTTON & TOGGLE (DENGAN ANIMASI FADE - UI PERTAMA) ---
+-- BUTTON & TOGGLE MENU
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 50, 0, 50); OpenButton.Position = UDim2.new(0, 20, 0.5, -25)
 OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenButton.Text = "BD"; OpenButton.TextColor3 = Color3.fromRGB(255, 105, 180)
@@ -261,8 +261,7 @@ EnableDrag(OpenButton)
 
 task.spawn(function()
     while task.wait() do
-        local hue = tick() % 5 / 5
-        BtnStroke.Color = Color3.fromHSV(hue, 0.6, 1)
+        BtnStroke.Color = Color3.fromHSV(tick() % 5 / 5, 0.6, 1)
     end
 end)
 
