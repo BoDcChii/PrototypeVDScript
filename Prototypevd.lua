@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.4.9.1: LOBBY SAFETY & ANTI-LAG 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.0: ZERO LAG & LOBBY SILENT 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -10,7 +10,7 @@ local VIM = game:GetService("VirtualInputManager")
 -- --- 0. CLEANUP ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
 
--- --- 1. UI SETUP (STABLE) ---
+-- --- 1. UI SETUP (OPTIMIZED) ---
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
 
@@ -61,11 +61,11 @@ end
 
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 
-local BtnAP = CreateBtn("AUTO PARRY (SAFE)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
+local BtnAP = CreateBtn("AUTO PARRY (STABLE)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
 local Btn3 = CreateBtn("ESP GENERATOR"); local Btn4 = CreateBtn("NO SKILL CHECK"); local Btn5 = CreateBtn("FULL BRIGHT")
 local Btn6 = CreateBtn("NO FOG"); local Btn7 = CreateBtn("POTATO MODE")
 
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (SAFE)") end)
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (STABLE)") end)
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
@@ -83,46 +83,53 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- 4. CORE PARRY (LOBBY PROOF) ---
+-- --- 4. CORE PARRY (ZERO LAG LOGIC) ---
 local function PressParryButton()
     local ViewportSize = workspace.CurrentCamera.ViewportSize
     local TargetX = ViewportSize.X * 0.85 
     local TargetY = ViewportSize.Y * 0.70 
     
+    -- Hanya kirim klik jika dipanggil, tidak boleh ada spam di luar fungsi ini
     VIM:SendMouseButtonEvent(TargetX, TargetY, 0, true, game, 0)
     task.wait(0.01)
     VIM:SendMouseButtonEvent(TargetX, TargetY, 0, false, game, 0)
 end
 
 task.spawn(function()
-    while task.wait(0.1) do -- Scan sedikit lebih santai biar gak lag
+    while task.wait(0.15) do -- Scan lebih tenang (6 kali per detik cukup untuk parry)
         if _AutoParry then
             local lp = Players.LocalPlayer
-            -- JANGAN NYALA KALAU DI LOBBY
-            if lp.Team and (lp.Team.Name:lower():find("lobby") or lp.Team.Name:lower():find("neutral")) then
-                continue 
+            local char = lp.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            
+            -- SAFETY: Jangan jalan kalau Karakter tidak ada atau di Lobby
+            if not root or (lp.Team and lp.Team.Name:lower():find("lobby")) then
+                continue
             end
             
             pcall(function()
-                local char = lp.Character
-                local root = char and char:FindFirstChild("HumanoidRootPart")
-                if root then
-                    for _, enemy in pairs(Players:GetPlayers()) do
-                        if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                            -- CEK APAKAH DIA KILLER
-                            local isEnemyKiller = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
-                            
-                            if isEnemyKiller then
-                                local eRoot = enemy.Character.HumanoidRootPart
-                                local dist = (root.Position - eRoot.Position).Magnitude
-                                
-                                if dist < 13 then
-                                    PressParryButton()
-                                    task.wait(0.4) -- Jeda biar HP gak panas/ngeleg
-                                end
+                local closestKiller = nil
+                local shortestDist = 13 -- Hanya scan dalam jarak parry
+                
+                for _, enemy in pairs(Players:GetPlayers()) do
+                    if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
+                        -- Hanya targetkan Killer asli
+                        local isKiller = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
+                        
+                        if isKiller then
+                            local d = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
+                            if d < shortestDist then
+                                shortestDist = d
+                                closestKiller = enemy
                             end
                         end
                     end
+                end
+                
+                -- EKSEKUSI HANYA JIKA ADA KILLER DI DEPAN MUKA
+                if closestKiller then
+                    PressParryButton()
+                    task.wait(0.5) -- Cooldown wajib biar HP nggak meledak/lag
                 end
             end)
         end
