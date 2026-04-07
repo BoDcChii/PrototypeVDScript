@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.6.0: 50s COOLDOWN & ANALOG FIX 🎸 ]] --
+-- [[ BoDcChii Project - v0.6.1: SMART REACTION & 50s COOLDOWN 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -22,7 +22,7 @@ local function EnableDrag(gui)
         end
     end)
     UIS.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if dragging and (input.UserInputType == input.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - dragStart
             gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
@@ -57,11 +57,11 @@ end
 
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 
-local BtnAP = CreateBtn("AUTO PARRY (50s COOLDOWN)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
+local BtnAP = CreateBtn("AUTO PARRY (SMART)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
 local Btn3 = CreateBtn("ESP GENERATOR"); local Btn4 = CreateBtn("NO SKILL CHECK"); local Btn5 = CreateBtn("FULL BRIGHT")
 local Btn6 = CreateBtn("NO FOG"); local Btn7 = CreateBtn("POTATO MODE")
 
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (50s COOLDOWN)") end)
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (SMART)") end)
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
@@ -79,43 +79,36 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- 4. CORE 50s HARD LOCK PARRY ---
+-- --- 4. CORE SMART 50s PARRY ---
 local isWaiting = false
-local prevDistances = {}
+local threatTimer = 0 -- Menghitung berapa lama Killer "nempel"
 
 local function ExecuteParry()
     if isWaiting then return end
     isWaiting = true
     
-    -- Ganti Nama Button UI sementara biar kamu tau lagi Cooldown
     local oldText = BtnAP.Text
-    BtnAP.Text = "PARRY USED (50s WAIT...)"
+    BtnAP.Text = "WAITING COOLDOWN (50s)"
     
     local View = workspace.CurrentCamera.ViewportSize
     local PX, PY = View.X * 0.85, View.Y * 0.70 
     
-    -- Satu kali klik instan
     VIM:SendMouseButtonEvent(PX, PY, 0, true, game, 0)
     VIM:SendMouseButtonEvent(PX, PY, 0, false, game, 0)
     
-    -- HARD LOCK: Script berhenti total selama 50 detik
     task.delay(50, function()
         isWaiting = false
-        if _AutoParry then 
-            BtnAP.Text = "AUTO PARRY (50s COOLDOWN): ON" 
-        else 
-            BtnAP.Text = "AUTO PARRY (50s COOLDOWN): OFF" 
-        end
+        BtnAP.Text = "AUTO PARRY (SMART): " .. (_AutoParry and "ON" or "OFF")
     end)
 end
 
 task.spawn(function()
     while true do
-        task.wait(0.06) 
-        -- Selama 'isWaiting' true, script di bawah ini tidak akan jalan (NOL KLIK)
+        task.wait(0.05) -- Scan stabil
         if _AutoParry and not isWaiting then
             local lp = Players.LocalPlayer
             local root = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+            local killerInZone = false
             
             if root then
                 pcall(function()
@@ -125,15 +118,17 @@ task.spawn(function()
                                         or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
                             
                             if isK then
-                                local eRoot = enemy.Character.HumanoidRootPart
-                                local d = (root.Position - eRoot.Position).Magnitude
-                                local lastD = prevDistances[enemy.Name] or d
-                                prevDistances[enemy.Name] = d
+                                local d = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
                                 
-                                -- Jarak 10 unit + Deteksi dia mendekat/menyerang
-                                if d < 10.5 then
-                                    if (lastD - d) > 0.3 or d < 6 then
+                                -- Jarak 9.5 (Zona Bahaya Banget)
+                                if d < 9.5 then
+                                    killerInZone = true
+                                    threatTimer = threatTimer + 0.05
+                                    
+                                    -- Jika Killer "nempel" lebih dari 0.15 detik (Bukan sekedar lewat)
+                                    if threatTimer >= 0.15 then
                                         ExecuteParry()
+                                        threatTimer = 0
                                         break
                                     end
                                 end
@@ -142,9 +137,13 @@ task.spawn(function()
                     end
                 end)
             end
+            
+            -- Jika tidak ada Killer di radius bahaya, reset timernya
+            if not killerInZone then
+                threatTimer = 0
+            end
         elseif isWaiting then
-            -- Kosongkan data jarak saat menunggu agar refresh pas bangun
-            prevDistances = {}
+            threatTimer = 0
         end
     end
 end)
