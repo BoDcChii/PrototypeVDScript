@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.5: PREDICTIVE & ANTI-MISS PARRY 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.6: FIX ANALOG LOCK & COOLDOWN GHOST 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -61,11 +61,11 @@ end
 
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 
-local BtnAP = CreateBtn("AUTO PARRY (PREDICT)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
+local BtnAP = CreateBtn("AUTO PARRY (NO LAG)"); local Btn1 = CreateBtn("ESP SURVIVAL"); local Btn2 = CreateBtn("ESP KILLER")
 local Btn3 = CreateBtn("ESP GENERATOR"); local Btn4 = CreateBtn("NO SKILL CHECK"); local Btn5 = CreateBtn("FULL BRIGHT")
 local Btn6 = CreateBtn("NO FOG"); local Btn7 = CreateBtn("POTATO MODE")
 
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (PREDICT)") end)
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (NO LAG)") end)
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
@@ -83,34 +83,36 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- 4. CORE PREDICTIVE PARRY ---
-local lastParry = 0
-local parryCooldown = 0.8
-local prevDistances = {} -- Menyimpan jarak sebelumnya untuk cek pergerakan
+-- --- 4. CORE ANALOG RESCUE PARRY ---
+local isClicking = false
+local prevDistances = {}
 
 local function PressParry()
-    if tick() - lastParry < parryCooldown then return end
-    lastParry = tick()
+    if isClicking then return end -- Kunci utama agar tidak nyepam saat cooldown
+    isClicking = true
     
     local ViewportSize = workspace.CurrentCamera.ViewportSize
     local TargetX = ViewportSize.X * 0.85 
     local TargetY = ViewportSize.Y * 0.70 
     
-    task.spawn(function()
-        VIM:SendMouseButtonEvent(TargetX, TargetY, 0, true, game, 0)
-        task.wait(0.01)
-        VIM:SendMouseButtonEvent(TargetX, TargetY, 0, false, game, 0)
+    -- Simulasi Klik Instan (Tanpa Jeda task.wait agar tidak nge-hold layar)
+    VIM:SendMouseButtonEvent(TargetX, TargetY, 0, true, game, 0)
+    VIM:SendMouseButtonEvent(TargetX, TargetY, 0, false, game, 0)
+    
+    -- Cooldown total (Selama 0.8 detik, script bener-bener gak ngapa-ngapain)
+    task.delay(0.8, function()
+        isClicking = false
     end)
 end
 
 task.spawn(function()
     while task.wait(0.03) do 
-        if _AutoParry then
+        if _AutoParry and not isClicking then -- Kalau cooldown, loop ini tidak jalan
             local lp = Players.LocalPlayer
             local char = lp.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if root and not (lp.Team and lp.Team.Name:lower():find("lobby")) then
+            if root then
                 pcall(function()
                     for _, enemy in pairs(Players:GetPlayers()) do
                         if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
@@ -123,22 +125,18 @@ task.spawn(function()
                                 local lastDist = prevDistances[enemy.Name] or currentDist
                                 prevDistances[enemy.Name] = currentDist
                                 
-                                -- LOGIKA PREDIKSI:
-                                -- 1. Jarak harus di bawah 11 (jarak pukul)
-                                -- 2. Jarak harus berkurang (lastDist - currentDist > 0.1) -- Artinya dia mendekat, bukan menjauh atau lewat samping.
-                                if currentDist < 11 then
-                                    local isApproaching = (lastDist - currentDist) > 0.15 
-                                    
-                                    if isApproaching or currentDist < 7 then -- Kalau sudah nempel (7) langsung parry saja
+                                -- 10 Unit (Jarak nempel banget)
+                                if currentDist < 10.5 then
+                                    -- Hanya klik jika dia mendekat drastis (mau mukul) atau sudah nempel
+                                    if (lastDist - currentDist) > 0.2 or currentDist < 6 then
                                         PressParry()
+                                        break
                                     end
                                 end
                             end
                         end
                     end
                 end)
-            else
-                prevDistances = {} -- Reset kalau mati/lobby
             end
         end
     end
