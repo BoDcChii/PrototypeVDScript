@@ -115,7 +115,7 @@ local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.2 (BETA)\n\nUpdate Fitur:\n- Auto Parry Beta (50s Cooldown)\n- Fitur Auto Parry dalam tahap\n  pengembangan, kemungkinan\n  masih terdapat bug.\n- Fix Analog Lock (Mobile)"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.2 (BETA)\n\nUpdate Fitur:\n- Auto Parry Wind-up Logic\n- Fixed Mobile Coordination\n- Violence District Support"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -141,7 +141,10 @@ end
 -- --- 5. LOGIKA FITUR ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 local isWaitingParry = false
-local threatTimer = 0
+local lastParryTime = 0
+local PARRY_COOLDOWN = 5 -- Dipercepat untuk Violence District
+local DETECTION_RANGE = 10 
+local REACTION_DELAY = 0.15 
 
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
@@ -159,44 +162,83 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- AUTO PARRY LOGIC
+-- --- LOGIKA AUTO PARRY TERBARU (WIND-UP DETECTION) ---
 BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
 
 task.spawn(function()
     while true do
-        task.wait(0.05)
-        if _AutoParry and not isWaitingParry then
-            local lp = Players.LocalPlayer
-            local root = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-            local inDanger = false
-            if root then
-                pcall(function()
-                    for _, enemy in pairs(Players:GetPlayers()) do
-                        if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                            local isK = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
-                            if isK then
-                                local d = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
-                                if d < 9.5 then
-                                    inDanger = true
-                                    threatTimer = threatTimer + 0.05
-                                    if threatTimer >= 0.15 then
-                                        isWaitingParry = true
-                                        BtnAP.Text = "COOLDOWN (50s)"
-                                        local View = workspace.CurrentCamera.ViewportSize
-                                        VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, true, game, 0)
-                                        task.wait(0.01)
-                                        VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, false, game, 0)
-                                        task.delay(50, function() isWaitingParry = false Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
-                                        threatTimer = 0
-                                        break
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end)
+        task.wait(0.08)
+        
+        if not _AutoParry then continue end
+        
+        local currentTime = tick()
+        local timeSinceParry = currentTime - lastParryTime
+        
+        if timeSinceParry < PARRY_COOLDOWN then
+            BtnAP.Text = "COOLDOWN (" .. math.ceil(PARRY_COOLDOWN - timeSinceParry) .. "s)"
+            continue
+        else
+            if isWaitingParry then 
+                isWaitingParry = false 
+                Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)")
             end
-            if not inDanger then threatTimer = 0 end
+        end
+
+        local lp = Players.LocalPlayer
+        local char = lp.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") then continue end
+        
+        local root = char.HumanoidRootPart
+        local humanoid = char:FindFirstChild("Humanoid")
+        if not humanoid or humanoid.Health <= 0 then continue end
+
+        for _, enemy in pairs(Players:GetPlayers()) do
+            if enemy == lp then continue end
+            local eChar = enemy.Character
+            if not eChar or not eChar:FindFirstChild("HumanoidRootPart") then continue end
+            
+            local eRoot = eChar.HumanoidRootPart
+            local eHumanoid = eChar:FindFirstChild("Humanoid")
+            if not eHumanoid or eHumanoid.Health <= 0 then continue end
+
+            local distance = (root.Position - eRoot.Position).Magnitude
+            if distance > DETECTION_RANGE then continue end
+
+            local eVelocity = eRoot.Velocity.Magnitude
+            local lookVector = eRoot.CFrame.LookVector
+            local dirToMe = (root.Position - eRoot.Position).Unit
+            local isFacingMe = lookVector:Dot(dirToMe) > 0.6
+            
+            local isWindingUp = false
+            
+            -- Kondisi Siap Ayun (Melambat saat dekat)
+            if isFacingMe and distance < 6 and eVelocity < 5 and eVelocity > 0.5 then
+                 isWindingUp = true
+            end
+            
+            -- Kondisi Dash Attack (Kecepatan tinggi tiba-tiba)
+            if isFacingMe and distance < 8 and eVelocity > 25 then
+                 isWindingUp = true
+            end
+
+            if isWindingUp then
+                task.wait(REACTION_DELAY)
+                
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local newDist = (root.Position - eRoot.Position).Magnitude
+                    if newDist < 8 then -- Masih dalam jangkauan
+                        lastParryTime = tick()
+                        isWaitingParry = true
+                        
+                        local View = workspace.CurrentCamera.ViewportSize
+                        -- MENGGUNAKAN KOORDINAT LAMA (PAS DI MOBILE)
+                        VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, true, game, 0)
+                        task.wait(0.02)
+                        VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, false, game, 0)
+                        break 
+                    end
+                end
+            end
         end
     end
 end)
