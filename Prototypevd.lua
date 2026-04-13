@@ -1,4 +1,5 @@
--- [[ BoDcChii Project - v0.4.2: POTATO MODE FIXED 🎸 ]] --
+-- [[ BoDcChii Project - v0.4.5: INTERNAL INJECTION FIXED ]] --
+-- Perbaikan: Mendukung Mode PC di HP & Anti-Obfuscation Animation
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -25,7 +26,7 @@ local function ShowWelcome()
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "Welcome To BoDcChii Project"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.Text = "BoDcChii v0.4.5: GHOST ACTUATOR"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
     WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
@@ -115,7 +116,7 @@ local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.2 (BETA)\n\nUpdate Fitur:\n- Auto Parry Instant (No Delay)\n- Animation Tracking Logic\n- Violence District Specialized"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.5 (FIXED)\n\nUpdate Fitur:\n- Ghost Actuator (Anti-Obfuscation)\n- Internal Signal Injector\n- Fix Layar HP Mode PC"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -141,12 +142,11 @@ end
 -- --- 5. LOGIKA FITUR ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 local isWaitingParry = false
-local lastParryTime = 0
-local PARRY_COOLDOWN = 3 -- Disesuaikan agar lebih agresif
-local DETECTION_RANGE = 12 -- Jangkauan deteksi ditingkatkan sedikit
+local PARRY_COOLDOWN = 1.5 -- Lebih cepat karena cheater brutal
+local DETECTION_RANGE = 9 -- Jangkauan efektif Magnitude
 
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
-local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
+local BtnAP = CreateBtn(P2, "AUTO PARRY (FIX)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
 
 local function Toggle(btn, state, txt)
@@ -161,8 +161,35 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- --- LOGIKA AUTO PARRY ULTIMATE (ANIMATION + INSTANT HEARTBEAT) ---
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
+-- --- [FUNGSI PENEMBAK INTERNAL (GHOST ACTUATOR)] ---
+local function ForceParry()
+    -- Mencari tombol parry di UI manapun (Universal Search)
+    local playerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
+    if playerGui then
+        for _, v in pairs(playerGui:GetDescendants()) do
+            -- Mencari tombol dengan nama umum parry
+            if v:IsA("TextButton") or v:IsA("ImageButton") then
+                local n = v.Name:lower()
+                if n:find("parry") or n:find("block") or n:find("ability") or n:find("skill") then
+                    -- Menembak sinyal internal (Bypass Mouse/Touch)
+                    if firesignal then
+                        firesignal(v.MouseButton1Click)
+                        firesignal(v.MouseButton1Down)
+                        firesignal(v.Activated)
+                    else
+                        -- Fallback jika executor tidak support firesignal
+                        VIM:SendMouseButtonEvent(v.AbsolutePosition.X + (v.AbsoluteSize.X/2), v.AbsolutePosition.Y + (v.AbsoluteSize.Y/2) + 50, 0, true, game, 0)
+                        task.wait(0.01)
+                        VIM:SendMouseButtonEvent(v.AbsolutePosition.X + (v.AbsoluteSize.X/2), v.AbsolutePosition.Y + (v.AbsoluteSize.Y/2) + 50, 0, false, game, 0)
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- --- [LOGIKA AUTO PARRY v0.4.5: MAGNITUDE + STATE PREDICTION] ---
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (FIX)") end)
 
 RunService.Heartbeat:Connect(function()
     if not _AutoParry or isWaitingParry then return end
@@ -170,44 +197,42 @@ RunService.Heartbeat:Connect(function()
     local lp = Players.LocalPlayer
     local char = lp.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    
     local root = char.HumanoidRootPart
     
-    -- Filter musuh terdekat
     for _, enemy in pairs(Players:GetPlayers()) do
         if enemy == lp then continue end
         local eChar = enemy.Character
         if not eChar or not eChar:FindFirstChild("Humanoid") or not eChar:FindFirstChild("HumanoidRootPart") then continue end
         
-        local distance = (root.Position - eChar.HumanoidRootPart.Position).Magnitude
-        if distance > DETECTION_RANGE then continue end
+        local eRoot = eChar.HumanoidRootPart
+        local dist = (root.Position - eRoot.Position).Magnitude
         
-        -- DETEKSI ANIMASI (Sangat Akurat)
-        local animator = eChar.Humanoid:FindFirstChildOfClass("Animator")
-        if animator then
-            local tracks = animator:GetPlayingAnimationTracks()
-            for _, track in pairs(tracks) do
-                -- Mencari keyword animasi menyerang yang umum
-                local animName = track.Name:lower()
-                if animName:find("attack") or animName:find("slash") or animName:find("swing") or animName:find("hit") or animName:find("punch") then
-                    
-                    -- EKSEKUSI INSTANT TANPA DELAY
-                    isWaitingParry = true
-                    lastParryTime = tick()
-                    
-                    local View = workspace.CurrentCamera.ViewportSize
-                    VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, true, game, 0)
-                    task.wait(0.01)
-                    VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, false, game, 0)
-                    
-                    -- Cooldown UI & Reset
-                    BtnAP.Text = "COOLDOWN"
-                    task.delay(PARRY_COOLDOWN, function()
-                        isWaitingParry = false
-                        if _AutoParry then Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end
-                    end)
-                    return -- Keluar loop setelah parry berhasil dipicu
+        if dist < DETECTION_RANGE then
+            -- 1. DETEKSI FISIK (Jika musuh berhenti mendadak & menghadap kita)
+            local isFacing = (eRoot.CFrame.LookVector:Dot((root.Position - eRoot.Position).Unit) > 0.7)
+            local isAttackingState = (eChar.Humanoid.MoveDirection.Magnitude < 0.1) -- Musuh berhenti buat mukul
+            
+            -- 2. DETEKSI ANIMASI (Backup jika nama diacak, kita cek ID yang baru dimainkan)
+            local animator = eChar.Humanoid:FindFirstChildOfClass("Animator")
+            local hasNewAnim = false
+            if animator then
+                for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+                    if track.TimePosition < 0.2 then -- Animasi baru saja mulai
+                        hasNewAnim = true; break
+                    end
                 end
+            end
+
+            if isFacing and (isAttackingState or hasNewAnim) then
+                isWaitingParry = true
+                ForceParry()
+                
+                BtnAP.Text = "COOLDOWN"
+                task.delay(PARRY_COOLDOWN, function()
+                    isWaitingParry = false
+                    if _AutoParry then Toggle(BtnAP, _AutoParry, "AUTO PARRY (FIX)") end
+                end)
+                break
             end
         end
     end
