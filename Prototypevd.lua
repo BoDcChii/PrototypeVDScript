@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.2: TACTICAL KILLER UPDATE 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.3: PALLET SYSTEM REFIX 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -37,7 +37,7 @@ local function ShowWelcome()
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "BoDcChii v0.5.2: MAP FIX"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.Text = "BoDcChii v0.5.3: KILLER FIX"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
     WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
@@ -127,7 +127,7 @@ local P0, P1, P2, P3, P4 = CreatePage(), CreatePage(), CreatePage(), CreatePage(
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nVersi: v0.5.2 (MAP STABILITY)\n\nUpdate Fitur:\n- Fixed: Map Anti-Kopong\n- New: Drop All Pallet\n- New: Break All Pallet\n- ESP & Auto Parry Stable"
+AboutInfo.Text = "Creator: BoDcChii\nVersi: v0.5.3 (STABLE UPDATE)\n\nUpdate Fitur:\n- Fixed: Drop/Break All Pallet\n- Fixed: Map Anti-Kopong (Safe Search)\n- ESP & Auto Parry Stable"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -161,7 +161,7 @@ local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILL
 local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
 
--- HALAMAN KILLER (2 FITUR BARU)
+-- TABS KILLER (NEW LOGIC)
 local BtnDrop = CreateBtn(P4, "DROP ALL PALLET")
 local BtnBreak = CreateBtn(P4, "BREAK ALL PALLET")
 
@@ -177,7 +177,7 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [TOGGLE DROP & BREAK]
+-- [FIXED DROP/BREAK PALLET LOGIC]
 BtnDrop.MouseButton1Click:Connect(function() _DropAllOn = not _DropAllOn Toggle(BtnDrop, _DropAllOn, "DROP ALL PALLET") end)
 BtnBreak.MouseButton1Click:Connect(function() _BreakAllOn = not _BreakAllOn Toggle(BtnBreak, _BreakAllOn, "BREAK ALL PALLET") end)
 
@@ -186,13 +186,21 @@ task.spawn(function()
         task.wait(1)
         if _DropAllOn or _BreakAllOn then
             for _, v in pairs(workspace:GetDescendants()) do
-                -- Cek hanya objek yang punya nama Pallet/Wood DAN memiliki Remote interaksi
+                -- Filter Ketat: Nama mengandung Pallet/Wood DAN punya Remote
                 if v:IsA("Model") and (v.Name:find("Pallet") or v.Name:find("Wood")) then
                     local remote = v:FindFirstChildOfClass("RemoteEvent") or v:FindFirstChildOfClass("RemoteFunction")
                     if remote then
                         pcall(function()
-                            if _DropAllOn then remote:FireServer("Drop") end
-                            if _BreakAllOn then remote:FireServer("Destroy") end
+                            if _DropAllOn then 
+                                remote:FireServer("Drop") 
+                            end
+                            if _BreakAllOn then 
+                                -- Kirim sinyal break/destroy ke server
+                                remote:FireServer("Destroy") 
+                                remote:FireServer("Break")
+                                -- Jika server tidak hapus otomatis, hapus secara lokal agar tidak menumpuk
+                                task.delay(0.2, function() if v then v:Destroy() end end)
+                            end
                         end)
                     end
                 end
@@ -257,7 +265,7 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- SYNC ---
+-- --- LOOP SYNC ---
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
@@ -289,7 +297,7 @@ if mt then
     end); setreadonly(mt, true)
 end
 
--- --- 7. TOGGLE BUTTON ---
+-- --- TOGGLE BUTTON ---
 local OpenButton = Instance.new("ScreenGui", CoreGui)
 OpenButton.Name = "BoDcChii_Toggle"
 local MainBtn = Instance.new("TextButton", OpenButton)
