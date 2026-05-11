@@ -1,5 +1,4 @@
--- [[ BoDcChii Project - v0.4.5: INTERNAL INJECTION FIXED ]] --
--- Perbaikan: ClickDetector Support, Dynamic Name Finder, & Latency Compensation
+-- [[ BoDcChii Project - v0.4.6: RADIUS & GENERATOR FIX 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -12,37 +11,39 @@ local VIM = game:GetService("VirtualInputManager")
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
 if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
+if workspace:FindFirstChild("BD_Radius") then workspace.BD_Radius:Destroy() end
 
--- --- 1. DYNAMIC NAME FINDER (BANTUAN DEBUG) ---
-task.spawn(function()
-    task.wait(5) -- Tunggu GUI game load
-    local pGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
-    if pGui then
-        warn("--- [BoDcChii] DAFTAR NAMA TOMBOL DI PLAYERGUI ---")
-        for _, v in pairs(pGui:GetDescendants()) do
-            if v:IsA("TextButton") or v:IsA("ImageButton") then
-                print("Ditemukan:", v.Name, "| Parent:", v.Parent.Name)
-            end
-        end
-        warn("-------------------------------------------------")
-    end
-end)
+-- --- 1. RADIUS VISUALIZER (LINGKARAN PUTIH) ---
+local function CreateVisualRadius()
+    local container = Instance.new("Part", workspace)
+    container.Name = "BD_Radius"
+    container.Shape = Enum.PartType.Cylinder
+    container.Size = Vector3.new(0.2, 19, 19) -- Radius visual disesuaikan (diameter ~19 studs)
+    container.Transparency = 1
+    container.Color = Color3.new(1, 1, 1)
+    container.CanCollide = false
+    container.Anchored = true
+    container.Material = Enum.Material.ForceField
+    container.Orientation = Vector3.new(0, 0, 90)
+    return container
+end
+local VisualRing = CreateVisualRadius()
 
 -- --- 2. WELCOME NOTIFICATION ---
 local function ShowWelcome()
     local WelcomeGui = Instance.new("ScreenGui", CoreGui)
     WelcomeGui.Name = "BoDcChii_Welcome"
     local WelcomeFrame = Instance.new("Frame", WelcomeGui)
-    WelcomeFrame.Size = UDim2.new(0, 240, 0, 45)
-    WelcomeFrame.Position = UDim2.new(0.5, -120, 0.1, 0)
+    WelcomeFrame.Size = UDim2.new(0, 220, 0, 45)
+    WelcomeFrame.Position = UDim2.new(0.5, -110, 0.1, 0)
     WelcomeFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     Instance.new("UICorner", WelcomeFrame).CornerRadius = UDim.new(0, 10)
     local Stroke = Instance.new("UIStroke", WelcomeFrame)
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "BoDcChii v0.4.5: GHOST ACTUATOR"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
-    WelcomeLabel.TextSize = 13; WelcomeLabel.Font = Enum.Font.SourceSansBold
+    WelcomeLabel.Text = "BoDcChii v0.4.6: RADIUS UPDATE"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
 pcall(ShowWelcome)
@@ -131,7 +132,7 @@ local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.5 (FIXED)\n\nUpdate Fitur:\n- Ghost Actuator (ClickDetector)\n- Latency Velocity Prediction\n- Dynamic Name Logger"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.6 (FIXED)\n\nUpdate Fitur:\n- ESP Generator FIXED (Dynamic Search)\n- Visual Parry Radius (Lingkaran Putih)\n- Auto Parry Beta (9.5 Studs Trigger)\n- Fix Analog Lock (Mobile)"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -157,11 +158,10 @@ end
 -- --- 6. LOGIKA FITUR ---
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
 local isWaitingParry = false
-local PARRY_COOLDOWN = 1.3 
-local DETECTION_RANGE = 10 
+local threatTimer = 0
 
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
-local BtnAP = CreateBtn(P2, "AUTO PARRY (FIX)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
+local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
 
 local function Toggle(btn, state, txt)
@@ -176,89 +176,56 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- --- [FUNGSI PENEMBAK INTERNAL (GHOST ACTUATOR)] ---
-local function TriggerParryInternal()
-    local playerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
-    if playerGui then
-        for _, v in pairs(playerGui:GetDescendants()) do
-            if v:IsA("TextButton") or v:IsA("ImageButton") then
-                local n = v.Name:lower()
-                if n:find("parry") or n:find("block") or n:find("ability") or n:find("skill") or n:find("action") then
-                    
-                    -- METODE A: fireclickdetector (Saran Teman Bos)
-                    local cd = v:FindFirstChildOfClass("ClickDetector")
-                    if cd and fireclickdetector then
-                        fireclickdetector(cd)
-                        return
-                    end
-
-                    -- METODE B: firesignal Activated (Universal fallback)
-                    if firesignal then
-                        firesignal(v.Activated)
-                        firesignal(v.MouseButton1Click)
-                        firesignal(v.MouseButton1Down)
-                    else
-                        -- Fallback koordinat tetap sedia
-                        local centerX = v.AbsolutePosition.X + (v.AbsoluteSize.X / 2)
-                        local centerY = v.AbsolutePosition.Y + (v.AbsoluteSize.Y / 2) + 50
-                        VIM:SendMouseButtonEvent(centerX, centerY, 0, true, game, 0)
-                        task.wait(0.01)
-                        VIM:SendMouseButtonEvent(centerX, centerY, 0, false, game, 0)
-                    end
-                end
-            end
+-- [FIXED ESP GENERATOR]
+local function UpdateGenESP()
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Model") and (v.Name:find("Gen") or v.Name:find("Generator")) then
+            local hl = v:FindFirstChild("BDEspGen") or Instance.new("Highlight", v)
+            hl.Name = "BDEspGen"
+            hl.FillColor = Color3.new(0, 0.7, 1)
+            hl.Enabled = _GenOn
         end
     end
 end
 
--- --- [LOGIKA AUTO PARRY v0.4.5: AGGRESSIVE PREDICTION] ---
-BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (FIX)") end)
+-- [AUTO PARRY LOGIC]
+BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
 
-RunService.Heartbeat:Connect(function()
-    if not _AutoParry or isWaitingParry then return end
-    
-    local lp = Players.LocalPlayer
-    local char = lp.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local root = char.HumanoidRootPart
-    
-    for _, enemy in pairs(Players:GetPlayers()) do
-        if enemy == lp then continue end
-        local eChar = enemy.Character
-        if not eChar or not eChar:FindFirstChild("Humanoid") or not eChar:FindFirstChild("HumanoidRootPart") then continue end
-        
-        local eRoot = eChar.HumanoidRootPart
-        local dist = (root.Position - eRoot.Position).Magnitude
-        
-        if dist < DETECTION_RANGE then
-            local isFacing = (eRoot.CFrame.LookVector:Dot((root.Position - eRoot.Position).Unit) > 0.5)
-            
-            -- Cek animasi klien (TimePosition tetap dipakai sebagai salah satu trigger)
-            local animator = eChar.Humanoid:FindFirstChildOfClass("Animator")
-            local isStartingAnim = false
-            if animator then
-                for _, track in pairs(animator:GetPlayingAnimationTracks()) do
-                    if track.TimePosition > 0 and track.TimePosition < 0.12 then 
-                        isStartingAnim = true; break
+task.spawn(function()
+    while true do
+        task.wait(0.05)
+        if _AutoParry and not isWaitingParry then
+            local lp = Players.LocalPlayer
+            local root = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+            local inDanger = false
+            if root then
+                pcall(function()
+                    for _, enemy in pairs(Players:GetPlayers()) do
+                        if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
+                            local isK = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
+                            if isK then
+                                local d = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
+                                if d < 9.5 then
+                                    inDanger = true
+                                    threatTimer = threatTimer + 0.05
+                                    if threatTimer >= 0.15 then
+                                        isWaitingParry = true
+                                        BtnAP.Text = "COOLDOWN (50s)"
+                                        local View = workspace.CurrentCamera.ViewportSize
+                                        VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, true, game, 0)
+                                        task.wait(0.01)
+                                        VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, false, game, 0)
+                                        task.delay(50, function() isWaitingParry = false Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
+                                        threatTimer = 0
+                                        break
+                                    end
+                                end
+                            end
+                        end
                     end
-                end
-            end
-
-            -- PREDISKI HITBOX: Cek kecepatan mendadak (Velocity)
-            -- Melawan cheater brutal yang teleport/dash kencang
-            local velocity = eRoot.AssemblyLinearVelocity.Magnitude
-
-            if isFacing and (isStartingAnim or velocity > 35) then
-                isWaitingParry = true
-                TriggerParryInternal()
-                
-                BtnAP.Text = "COOLDOWN"
-                task.delay(PARRY_COOLDOWN, function()
-                    isWaitingParry = false
-                    if _AutoParry then Toggle(BtnAP, _AutoParry, "AUTO PARRY (FIX)") end
                 end)
-                break
             end
+            if not inDanger then threatTimer = 0 end
         end
     end
 end)
@@ -284,10 +251,12 @@ Btn7.MouseButton1Click:Connect(function()
     end
 end)
 
--- ESP & LIGHTING
+-- ESP & LIGHTING & RADIUS SYNC
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
+    
+    -- Player ESP
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character); hl.Name = "BDEsp"
@@ -295,9 +264,21 @@ RunService.Heartbeat:Connect(function()
             hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn); hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
         end
     end
+
+    -- Update Visual Radius Position
+    local lp = Players.LocalPlayer
+    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") and _AutoParry then
+        VisualRing.Transparency = 0.7
+        VisualRing.Position = lp.Character.HumanoidRootPart.Position - Vector3.new(0, 2.9, 0)
+    else
+        VisualRing.Transparency = 1
+    end
+
+    -- Update Generator ESP
+    if _GenOn then UpdateGenESP() end
 end)
 
--- NO SKILL CHECK (MT Bypass)
+-- NO SKILL CHECK
 local mt = getrawmetatable(game)
 if mt then
     local old = mt.__namecall; setreadonly(mt, false)
@@ -311,7 +292,7 @@ if mt then
     end); setreadonly(mt, true)
 end
 
--- --- 7. BUTTON & TOGGLE ---
+-- --- 6. BUTTON & TOGGLE ---
 local OpenButton = Instance.new("ScreenGui", CoreGui)
 OpenButton.Name = "BoDcChii_Toggle"
 local MainBtn = Instance.new("TextButton", OpenButton)
