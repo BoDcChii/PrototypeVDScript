@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.1: KILLER TOGGLE UPDATE 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.2: SERVER-SIDE PALLET WIPE 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -42,7 +42,7 @@ local function ShowWelcome()
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "BoDcChii v0.5.1: TOGGLE UPDATE"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.Text = "BoDcChii v0.5.2: WIPE FIXED"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
     WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
@@ -133,7 +133,7 @@ local P0, P1, P2, P3, P4 = CreatePage(), CreatePage(), CreatePage(), CreatePage(
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.1 (TOGGLE UPDATE)\n\nUpdate Fitur:\n- New: Pallet Auto-Wipe (Toggle ON/OFF)\n- Killer Page Clean UI\n- Fixed: ESP Generator\n- Radius Visualizer (White Ring)\n- Auto Parry Beta (Mobile Fixed)"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.2 (SERVER FIX)\n\nUpdate Fitur:\n- Fixed: Pallet Wipe (Force Server Sync)\n- ESP Generator FIXED\n- Visual Parry Radius\n- Auto Parry Beta\n- Potato Mode Ultimate"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -165,8 +165,6 @@ local threatTimer = 0
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
-
--- HALAMAN KILLER (TANPA NAMA ADU ILMU HITAM)
 local BtnWipe = CreateBtn(P4, "PALLET AUTO-WIPEOUT")
 
 local function Toggle(btn, state, txt)
@@ -181,7 +179,7 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [TOGGLE PALLET WIPEOUT]
+-- [SERVER-SIDE PALLET WIPER]
 BtnWipe.MouseButton1Click:Connect(function() 
     _WipePalletOn = not _WipePalletOn 
     Toggle(BtnWipe, _WipePalletOn, "PALLET AUTO-WIPEOUT")
@@ -189,17 +187,21 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(1)
+        task.wait(0.5)
         if _WipePalletOn then
             for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("Model") and (v.Name:find("Pallet") or v.Name:find("Wood")) then
+                -- Mencari objek Pallet
+                if v:IsA("Model") and (v.Name:lower():find("pallet") or v.Name:lower():find("wood")) then
                     pcall(function()
-                        local remote = v:FindFirstChildOfClass("RemoteEvent") or v:FindFirstChildOfClass("RemoteFunction")
-                        if remote then 
-                            remote:FireServer("Drop")
-                            task.wait(0.01)
-                            remote:FireServer("Destroy")
+                        -- Paksa pemicu event agar server menganggap pallet sudah hancur/jatuh
+                        for _, obj in pairs(v:GetDescendants()) do
+                            if obj:IsA("RemoteEvent") or obj:IsA("BindableEvent") then
+                                obj:FireServer("Drop") -- Mencoba perintah drop ke server
+                                obj:FireServer("Break") -- Mencoba perintah hancurkan ke server
+                                obj:FireServer("Destroy")
+                            end
                         end
+                        -- Hapus dari local untuk membersihkan tampilan kita
                         v:Destroy()
                     end)
                 end
@@ -213,9 +215,7 @@ local function UpdateGenESP()
     for _, v in pairs(workspace:GetDescendants()) do
         if v:IsA("Model") and (v.Name:find("Gen") or v.Name:find("Generator")) then
             local hl = v:FindFirstChild("BDEspGen") or Instance.new("Highlight", v)
-            hl.Name = "BDEspGen"
-            hl.FillColor = Color3.new(0, 0.7, 1)
-            hl.Enabled = _GenOn
+            hl.Name = "BDEspGen"; hl.FillColor = Color3.new(0, 0.7, 1); hl.Enabled = _GenOn
         end
     end
 end
@@ -234,22 +234,19 @@ task.spawn(function()
                 pcall(function()
                     for _, enemy in pairs(Players:GetPlayers()) do
                         if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                            local isK = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.MaxHealth > 100)
+                            local isK = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
                             if isK then
                                 local d = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
                                 if d < 9.5 then
-                                    inDanger = true
-                                    threatTimer = threatTimer + 0.05
+                                    inDanger = true; threatTimer = threatTimer + 0.05
                                     if threatTimer >= 0.15 then
-                                        isWaitingParry = true
-                                        BtnAP.Text = "COOLDOWN (50s)"
+                                        isWaitingParry = true; BtnAP.Text = "COOLDOWN (50s)"
                                         local View = workspace.CurrentCamera.ViewportSize
                                         VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, true, game, 0)
                                         task.wait(0.01)
                                         VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, false, game, 0)
                                         task.delay(50, function() isWaitingParry = false Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
-                                        threatTimer = 0
-                                        break
+                                        threatTimer = 0; break
                                     end
                                 end
                             end
@@ -262,32 +259,25 @@ task.spawn(function()
     end
 end)
 
--- --- POTATO MODE ULTIMATE SYNC ---
+-- --- POTATO MODE ---
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
     if _PotatoMode then
         for _, v in pairs(game.Workspace:GetDescendants()) do
             local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
-            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
+            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet")
             if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then 
-                    v.Material = Enum.Material.SmoothPlastic 
-                    if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then 
-                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
+                if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic 
+                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1 end
             end
         end
     end
 end)
 
--- ESP & LIGHTING & RADIUS SYNC
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
-    
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character); hl.Name = "BDEsp"
@@ -295,19 +285,13 @@ RunService.Heartbeat:Connect(function()
             hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn); hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
         end
     end
-
     local lp = Players.LocalPlayer
     if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") and _AutoParry then
-        VisualRing.Transparency = 0.7
-        VisualRing.Position = lp.Character.HumanoidRootPart.Position - Vector3.new(0, 2.9, 0)
-    else
-        VisualRing.Transparency = 1
-    end
-
+        VisualRing.Transparency = 0.7; VisualRing.Position = lp.Character.HumanoidRootPart.Position - Vector3.new(0, 2.9, 0)
+    else VisualRing.Transparency = 1 end
     if _GenOn then UpdateGenESP() end
 end)
 
--- NO SKILL CHECK
 local mt = getrawmetatable(game)
 if mt then
     local old = mt.__namecall; setreadonly(mt, false)
@@ -315,26 +299,24 @@ if mt then
         local method = getnamecallmethod()
         if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
             local n = tostring(self):lower()
-            if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
+            if n:find("fail") or n:find("skillcheck") then return nil end
         end
         return old(self, ...)
     end); setreadonly(mt, true)
 end
 
--- --- 6. BUTTON & TOGGLE ---
-local OpenButton = Instance.new("ScreenGui", CoreGui)
-OpenButton.Name = "BoDcChii_Toggle"
+-- --- UI TOGGLE ---
+local OpenButton = Instance.new("ScreenGui", CoreGui); OpenButton.Name = "BoDcChii_Toggle"
 local MainBtn = Instance.new("TextButton", OpenButton)
 MainBtn.Size = UDim2.new(0, 50, 0, 50); MainBtn.Position = UDim2.new(0, 20, 0.5, -25)
-MainBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); MainBtn.Text = "BD"; MainBtn.TextColor3 = Color3.fromRGB(255, 105, 180); MainBtn.TextSize = 24; MainBtn.Font = Enum.Font.SourceSansBold
-Instance.new("UICorner", MainBtn).CornerRadius = UDim.new(0, 12)
+MainBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); MainBtn.Text = "BD"; MainBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
+MainBtn.TextSize = 24; MainBtn.Font = Enum.Font.SourceSansBold; Instance.new("UICorner", MainBtn)
 local BtnStroke = Instance.new("UIStroke", MainBtn); BtnStroke.Color = Color3.fromRGB(255, 105, 180); BtnStroke.Thickness = 2
 EnableDrag(MainBtn)
 
 task.spawn(function()
     while task.wait() do
-        local hue = tick() % 5 / 5
-        BtnStroke.Color = Color3.fromHSV(hue, 0.6, 1)
+        local hue = tick() % 5 / 5; BtnStroke.Color = Color3.fromHSV(hue, 0.6, 1)
     end
 end)
 
