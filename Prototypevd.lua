@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.7: STATE-3 BREAK EDITION 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.8: BRUTAL REMOTE BREAK 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -13,7 +13,7 @@ if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalis
 if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
 if workspace:FindFirstChild("BD_Radius") then workspace.BD_Radius:Destroy() end
 
--- --- 1. RADIUS VISUALIZER (LINGKARAN PUTIH) ---
+-- --- 1. RADIUS VISUALIZER ---
 local function CreateVisualRadius()
     local container = Instance.new("Part", workspace)
     container.Name = "BD_Radius"
@@ -42,7 +42,7 @@ local function ShowWelcome()
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "BoDcChii v0.5.7: STATE BREAK"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.Text = "BoDcChii v0.5.8: BRUTAL BREAK"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
     WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
@@ -132,7 +132,7 @@ local P0, P1, P2, P3, P4 = CreatePage(), CreatePage(), CreatePage(), CreatePage(
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.7 (FIXED)\n\nUpdate Fitur:\n- Pallet State Break (State 3 Bypass)\n- ESP Generator FIXED\n- Visual Parry Radius\n- Auto Parry Beta\n- Potato Mode Ultimate"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.8 (BRUTAL)\n\nUpdate Fitur:\n- Brutal Remote Pallet Break\n- ESP Generator FIXED\n- Visual Parry Radius\n- Auto Parry Beta\n- Potato Mode Ultimate"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -164,7 +164,7 @@ local threatTimer = 0
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
-local BtnBreak = CreateBtn(P4, "PALLET INSTANT-BREAK")
+local BtnBreak = CreateBtn(P4, "BRUTAL PALLET BREAK")
 
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
@@ -178,43 +178,47 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [STATE-3 BREAK LOGIC]
+-- [[ METODE B: THE BRUTAL REMOTE TRIGGER ]]
 BtnBreak.MouseButton1Click:Connect(function() 
     _StateBreakOn = not _StateBreakOn 
-    Toggle(BtnBreak, _StateBreakOn, "PALLET INSTANT-BREAK")
+    Toggle(BtnBreak, _StateBreakOn, "BRUTAL PALLET BREAK")
 end)
 
 task.spawn(function()
     while true do
-        task.wait(1)
+        task.wait(0.5) -- Interval setengah detik agar tidak spam berlebihan yang bikin kick
         if _StateBreakOn then
             for _, v in pairs(workspace:GetDescendants()) do
+                -- Mencari objek Pallet
                 if v:IsA("Model") and (v.Name:lower():find("pallet") or v.Name:lower():find("wood")) then
                     pcall(function()
-                        -- 1. Mencari status value untuk dipaksa hancur
-                        local state = v:FindFirstChild("State") or v:FindFirstChild("Status")
-                        if state and state:IsA("StringValue") then
-                            state.Value = "Broken"
-                        end
-
-                        -- 2. Mencari RemoteEvent 'Break' di dalam model
-                        for _, remote in pairs(v:GetDescendants()) do
-                            if remote:IsA("RemoteEvent") and (remote.Name:lower():find("break") or remote.Name:lower():find("destroy")) then
-                                remote:FireServer()
+                        -- 1. Deteksi Remote Event secara dinamis di seluruh game
+                        -- Kita cari Remote yang berhubungan dengan Interaction atau Damage
+                        for _, r in pairs(game:GetDescendants()) do
+                            if r:IsA("RemoteEvent") then
+                                local rName = r.Name:lower()
+                                -- Keyword yang biasanya dipakai untuk menghancurkan objek
+                                if rName:find("break") or rName:find("destroy") or rName:find("damage") or rName:find("interact") then
+                                    -- Kirim sinyal seolah-olah pallet ini dihancurkan
+                                    r:FireServer(v) 
+                                    r:FireServer(v.Name)
+                                    -- Beberapa game butuh argument spesifik seperti "Break"
+                                    r:FireServer(v, "Break")
+                                    r:FireServer(v, "Destroy")
+                                end
                             end
                         end
 
-                        -- 3. Visual & Interaction Sabotage (Lokal fallback)
-                        if not v:FindFirstChild("IsBrokenByBD") then
-                            local mark = Instance.new("BoolValue", v)
-                            mark.Name = "IsBrokenByBD"
-                            for _, p in pairs(v:GetDescendants()) do
-                                if p:IsA("BasePart") then
-                                    p.Transparency = 1
-                                    p.CanCollide = false
-                                    p.CanTouch = false
-                                end
-                                if p:IsA("ProximityPrompt") then p.Enabled = false end
+                        -- 2. Paksa State secara lokal (sebagai backup)
+                        local s = v:FindFirstChild("State") or v:FindFirstChild("Status")
+                        if s then s.Value = "Broken" end
+                        
+                        -- 3. Hilangkan Hitbox secara paksa agar tidak bisa disentuh sama sekali
+                        for _, part in pairs(v:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.CanCollide = false
+                                part.CanTouch = false
+                                part.Transparency = 1
                             end
                         end
                     end)
@@ -224,7 +228,7 @@ task.spawn(function()
     end
 end)
 
--- [FIXED ESP GENERATOR]
+-- [FUNGSI LAIN TETAP SAMA]
 local function UpdateGenESP()
     for _, v in pairs(workspace:GetDescendants()) do
         if v:IsA("Model") and (v.Name:find("Gen") or v.Name:find("Generator")) then
@@ -234,7 +238,6 @@ local function UpdateGenESP()
     end
 end
 
--- [AUTO PARRY LOGIC]
 BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
 
 task.spawn(function()
@@ -243,7 +246,6 @@ task.spawn(function()
         if _AutoParry and not isWaitingParry then
             local lp = Players.LocalPlayer
             local root = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-            local inDanger = false
             if root then
                 pcall(function()
                     for _, enemy in pairs(Players:GetPlayers()) do
@@ -252,7 +254,7 @@ task.spawn(function()
                             if isK then
                                 local d = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
                                 if d < 9.5 then
-                                    inDanger = true; threatTimer = threatTimer + 0.05
+                                    threatTimer = threatTimer + 0.05
                                     if threatTimer >= 0.15 then
                                         isWaitingParry = true; BtnAP.Text = "COOLDOWN (50s)"
                                         local View = workspace.CurrentCamera.ViewportSize
@@ -268,12 +270,10 @@ task.spawn(function()
                     end
                 end)
             end
-            if not inDanger then threatTimer = 0 end
         end
     end
 end)
 
--- --- POTATO MODE ---
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
@@ -319,7 +319,6 @@ if mt then
     end); setreadonly(mt, true)
 end
 
--- --- UI TOGGLE ---
 local OpenButton = Instance.new("ScreenGui", CoreGui); OpenButton.Name = "BoDcChii_Toggle"
 local MainBtn = Instance.new("TextButton", OpenButton)
 MainBtn.Size = UDim2.new(0, 50, 0, 50); MainBtn.Position = UDim2.new(0, 20, 0.5, -25)
