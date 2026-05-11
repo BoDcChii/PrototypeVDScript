@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.4: BRUTAL & RADIUS FIX 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.7: STATE-3 BREAK EDITION 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -42,7 +42,7 @@ local function ShowWelcome()
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "BoDcChii v0.5.4: BRUTAL UPDATE"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.Text = "BoDcChii v0.5.7: STATE BREAK"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
     WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
@@ -120,8 +120,7 @@ local function CreateTabBtn(text)
 end
 
 local T0 = CreateTabBtn("0. ABOUT"); local T1 = CreateTabBtn("1. PLAYER ESP")
-local T2 = CreateTabBtn("2. SURVIVAL"); local T3 = CreateTabBtn("3. SMOOTH MAPS")
-local T4 = CreateTabBtn("4. KILLER")
+local T2 = CreateTabBtn("2. SURVIVAL"); local T3 = CreateTabBtn("3. SMOOTH MAPS"); local T4 = CreateTabBtn("4. KILLER")
 
 local function CreatePage()
     local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -10, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
@@ -133,7 +132,7 @@ local P0, P1, P2, P3, P4 = CreatePage(), CreatePage(), CreatePage(), CreatePage(
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.4 (BRUTAL)\n\nUpdate Fitur:\n- Brutal Wipe: Teleport Pallet ke Void\n- ESP Generator FIXED\n- Visual Parry Radius\n- Auto Parry Beta\n- Potato Mode Ultimate"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.7 (FIXED)\n\nUpdate Fitur:\n- Pallet State Break (State 3 Bypass)\n- ESP Generator FIXED\n- Visual Parry Radius\n- Auto Parry Beta\n- Potato Mode Ultimate"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -158,14 +157,14 @@ local function CreateBtn(parent, text)
 end
 
 -- --- 6. LOGIKA FITUR ---
-local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry, _WipePalletOn = false, false, false, false, false, false, false, false, false
+local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry, _StateBreakOn = false, false, false, false, false, false, false, false, false
 local isWaitingParry = false
 local threatTimer = 0
 
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
-local BtnWipe = CreateBtn(P4, "PALLET BRUTAL-WIPE")
+local BtnBreak = CreateBtn(P4, "PALLET INSTANT-BREAK")
 
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
@@ -179,33 +178,44 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [BRUTAL PHYSICAL WIPER - VOID TELEPORT]
-BtnWipe.MouseButton1Click:Connect(function() 
-    _WipePalletOn = not _WipePalletOn 
-    Toggle(BtnWipe, _WipePalletOn, "PALLET BRUTAL-WIPE")
+-- [STATE-3 BREAK LOGIC]
+BtnBreak.MouseButton1Click:Connect(function() 
+    _StateBreakOn = not _StateBreakOn 
+    Toggle(BtnBreak, _StateBreakOn, "PALLET INSTANT-BREAK")
 end)
 
 task.spawn(function()
     while true do
-        task.wait(0.3)
-        if _WipePalletOn then
+        task.wait(1)
+        if _StateBreakOn then
             for _, v in pairs(workspace:GetDescendants()) do
                 if v:IsA("Model") and (v.Name:lower():find("pallet") or v.Name:lower():find("wood")) then
                     pcall(function()
-                        -- Pindahkan ke koordinat yang sangat jauh di bawah map
-                        if v.PrimaryPart then
-                            v:SetPrimaryPartCFrame(CFrame.new(0, -1000, 0))
-                        else
-                            for _, child in pairs(v:GetChildren()) do
-                                if child:IsA("BasePart") then
-                                    child.CFrame = CFrame.new(0, -1000, 0)
-                                    child.CanCollide = false
-                                end
+                        -- 1. Mencari status value untuk dipaksa hancur
+                        local state = v:FindFirstChild("State") or v:FindFirstChild("Status")
+                        if state and state:IsA("StringValue") then
+                            state.Value = "Broken"
+                        end
+
+                        -- 2. Mencari RemoteEvent 'Break' di dalam model
+                        for _, remote in pairs(v:GetDescendants()) do
+                            if remote:IsA("RemoteEvent") and (remote.Name:lower():find("break") or remote.Name:lower():find("destroy")) then
+                                remote:FireServer()
                             end
                         end
-                        -- Matikan prompt agar orang lain tidak bisa klik dari jarak jauh
-                        for _, prompt in pairs(v:GetDescendants()) do
-                            if prompt:IsA("ProximityPrompt") then prompt.Enabled = false end
+
+                        -- 3. Visual & Interaction Sabotage (Lokal fallback)
+                        if not v:FindFirstChild("IsBrokenByBD") then
+                            local mark = Instance.new("BoolValue", v)
+                            mark.Name = "IsBrokenByBD"
+                            for _, p in pairs(v:GetDescendants()) do
+                                if p:IsA("BasePart") then
+                                    p.Transparency = 1
+                                    p.CanCollide = false
+                                    p.CanTouch = false
+                                end
+                                if p:IsA("ProximityPrompt") then p.Enabled = false end
+                            end
                         end
                     end)
                 end
