@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.4.6: RADIUS & GENERATOR FIX 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.0: KILLER PAGE & AUTO-WIPE 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -18,7 +18,7 @@ local function CreateVisualRadius()
     local container = Instance.new("Part", workspace)
     container.Name = "BD_Radius"
     container.Shape = Enum.PartType.Cylinder
-    container.Size = Vector3.new(0.2, 19, 19) -- Radius visual disesuaikan (diameter ~19 studs)
+    container.Size = Vector3.new(0.2, 19, 19)
     container.Transparency = 1
     container.Color = Color3.new(1, 1, 1)
     container.CanCollide = false
@@ -42,7 +42,7 @@ local function ShowWelcome()
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "BoDcChii v0.4.6: RADIUS UPDATE"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.Text = "BoDcChii v0.5.0: KILLER UPDATE"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
     WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
@@ -121,6 +121,7 @@ end
 
 local T0 = CreateTabBtn("0. ABOUT"); local T1 = CreateTabBtn("1. PLAYER ESP")
 local T2 = CreateTabBtn("2. SURVIVAL"); local T3 = CreateTabBtn("3. SMOOTH MAPS")
+local T4 = CreateTabBtn("4. KILLER") -- HALAMAN BARU BOS
 
 local function CreatePage()
     local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -10, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
@@ -128,17 +129,17 @@ local function CreatePage()
     return f
 end
 
-local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
+local P0, P1, P2, P3, P4 = CreatePage(), CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.6 (FIXED)\n\nUpdate Fitur:\n- ESP Generator FIXED (Dynamic Search)\n- Visual Parry Radius (Lingkaran Putih)\n- Auto Parry Beta (9.5 Studs Trigger)\n- Fix Analog Lock (Mobile)"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.0 (KILLER UPDATE)\n\nUpdate Fitur:\n- New: Killer Page\n- New: Pallet Auto-Wipeout (Anti-Loop)\n- FIXED: ESP Generator\n- Radius Visualizer (White Ring)\n- Auto Parry Beta (Mobile Fixed)"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
-    P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false
+    P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false; P4.Visible = false
     T0.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T4.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     p.Visible = true; b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 end
 
@@ -146,6 +147,7 @@ T0.MouseButton1Click:Connect(function() Show(P0, T0) end)
 T1.MouseButton1Click:Connect(function() Show(P1, T1) end)
 T2.MouseButton1Click:Connect(function() Show(P2, T2) end)
 T3.MouseButton1Click:Connect(function() Show(P3, T3) end)
+T4.MouseButton1Click:Connect(function() Show(P4, T4) end)
 Show(P0, T0)
 
 local function CreateBtn(parent, text)
@@ -164,6 +166,11 @@ local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILL
 local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
 
+-- TOMBOL KHUSUS KILLER
+local KillerLabel = Instance.new("TextLabel", P4)
+KillerLabel.Size = UDim2.new(1,0,0,30); KillerLabel.Text = "Halaman Adu Ilmu Hitam"; KillerLabel.TextColor3 = Color3.new(1,1,1); KillerLabel.BackgroundTransparency = 1; KillerLabel.TextSize = 10
+local BtnWipe = CreateBtn(P4, "PALLET WIPEOUT (AUTO)")
+
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
     btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
@@ -175,6 +182,33 @@ Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenO
 Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(Btn4, _NoSkillGen, "NO SKILL CHECK") end)
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
+
+-- [ILMU HITAM: PALLET WIPEOUT]
+local function WipeAllPallets()
+    BtnWipe.Text = "WIPING MAP..."
+    BtnWipe.UIStroke.Color = Color3.new(1,1,1)
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Model") and (v.Name:find("Pallet") or v.Name:find("Wood")) then
+            pcall(function()
+                local remote = v:FindFirstChildOfClass("RemoteEvent") or v:FindFirstChildOfClass("RemoteFunction")
+                if remote then 
+                    remote:FireServer("Drop")
+                    task.wait(0.01)
+                    remote:FireServer("Destroy")
+                end
+                v:Destroy() -- Paksa hilang dari client agar jalan plong
+            end)
+        end
+    end
+    BtnWipe.Text = "PALLET WIPEOUT: COMPLETED"
+    BtnWipe.UIStroke.Color = Color3.fromRGB(50, 200, 50)
+    task.wait(2)
+    BtnWipe.Visible = false -- Berhenti biar tidak berat sesuai rundingan
+end
+
+BtnWipe.MouseButton1Click:Connect(function()
+    WipeAllPallets()
+end)
 
 -- [FIXED ESP GENERATOR]
 local function UpdateGenESP()
@@ -256,7 +290,6 @@ RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
     
-    -- Player ESP
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character); hl.Name = "BDEsp"
@@ -265,7 +298,6 @@ RunService.Heartbeat:Connect(function()
         end
     end
 
-    -- Update Visual Radius Position
     local lp = Players.LocalPlayer
     if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") and _AutoParry then
         VisualRing.Transparency = 0.7
@@ -274,7 +306,6 @@ RunService.Heartbeat:Connect(function()
         VisualRing.Transparency = 1
     end
 
-    -- Update Generator ESP
     if _GenOn then UpdateGenESP() end
 end)
 
