@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.0: KILLER PAGE & AUTO-WIPE 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.1: KILLER TOGGLE UPDATE 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -42,7 +42,7 @@ local function ShowWelcome()
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "BoDcChii v0.5.0: KILLER UPDATE"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.Text = "BoDcChii v0.5.1: TOGGLE UPDATE"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
     WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
@@ -121,7 +121,7 @@ end
 
 local T0 = CreateTabBtn("0. ABOUT"); local T1 = CreateTabBtn("1. PLAYER ESP")
 local T2 = CreateTabBtn("2. SURVIVAL"); local T3 = CreateTabBtn("3. SMOOTH MAPS")
-local T4 = CreateTabBtn("4. KILLER") -- HALAMAN BARU BOS
+local T4 = CreateTabBtn("4. KILLER")
 
 local function CreatePage()
     local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -10, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
@@ -133,7 +133,7 @@ local P0, P1, P2, P3, P4 = CreatePage(), CreatePage(), CreatePage(), CreatePage(
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.0 (KILLER UPDATE)\n\nUpdate Fitur:\n- New: Killer Page\n- New: Pallet Auto-Wipeout (Anti-Loop)\n- FIXED: ESP Generator\n- Radius Visualizer (White Ring)\n- Auto Parry Beta (Mobile Fixed)"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.1 (TOGGLE UPDATE)\n\nUpdate Fitur:\n- New: Pallet Auto-Wipe (Toggle ON/OFF)\n- Killer Page Clean UI\n- Fixed: ESP Generator\n- Radius Visualizer (White Ring)\n- Auto Parry Beta (Mobile Fixed)"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -158,7 +158,7 @@ local function CreateBtn(parent, text)
 end
 
 -- --- 6. LOGIKA FITUR ---
-local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
+local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry, _WipePalletOn = false, false, false, false, false, false, false, false, false
 local isWaitingParry = false
 local threatTimer = 0
 
@@ -166,10 +166,8 @@ local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILL
 local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
 
--- TOMBOL KHUSUS KILLER
-local KillerLabel = Instance.new("TextLabel", P4)
-KillerLabel.Size = UDim2.new(1,0,0,30); KillerLabel.Text = "Halaman Adu Ilmu Hitam"; KillerLabel.TextColor3 = Color3.new(1,1,1); KillerLabel.BackgroundTransparency = 1; KillerLabel.TextSize = 10
-local BtnWipe = CreateBtn(P4, "PALLET WIPEOUT (AUTO)")
+-- HALAMAN KILLER (TANPA NAMA ADU ILMU HITAM)
+local BtnWipe = CreateBtn(P4, "PALLET AUTO-WIPEOUT")
 
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
@@ -183,31 +181,31 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [ILMU HITAM: PALLET WIPEOUT]
-local function WipeAllPallets()
-    BtnWipe.Text = "WIPING MAP..."
-    BtnWipe.UIStroke.Color = Color3.new(1,1,1)
-    for _, v in pairs(workspace:GetDescendants()) do
-        if v:IsA("Model") and (v.Name:find("Pallet") or v.Name:find("Wood")) then
-            pcall(function()
-                local remote = v:FindFirstChildOfClass("RemoteEvent") or v:FindFirstChildOfClass("RemoteFunction")
-                if remote then 
-                    remote:FireServer("Drop")
-                    task.wait(0.01)
-                    remote:FireServer("Destroy")
+-- [TOGGLE PALLET WIPEOUT]
+BtnWipe.MouseButton1Click:Connect(function() 
+    _WipePalletOn = not _WipePalletOn 
+    Toggle(BtnWipe, _WipePalletOn, "PALLET AUTO-WIPEOUT")
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(1)
+        if _WipePalletOn then
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("Model") and (v.Name:find("Pallet") or v.Name:find("Wood")) then
+                    pcall(function()
+                        local remote = v:FindFirstChildOfClass("RemoteEvent") or v:FindFirstChildOfClass("RemoteFunction")
+                        if remote then 
+                            remote:FireServer("Drop")
+                            task.wait(0.01)
+                            remote:FireServer("Destroy")
+                        end
+                        v:Destroy()
+                    end)
                 end
-                v:Destroy() -- Paksa hilang dari client agar jalan plong
-            end)
+            end
         end
     end
-    BtnWipe.Text = "PALLET WIPEOUT: COMPLETED"
-    BtnWipe.UIStroke.Color = Color3.fromRGB(50, 200, 50)
-    task.wait(2)
-    BtnWipe.Visible = false -- Berhenti biar tidak berat sesuai rundingan
-end
-
-BtnWipe.MouseButton1Click:Connect(function()
-    WipeAllPallets()
 end)
 
 -- [FIXED ESP GENERATOR]
@@ -236,7 +234,7 @@ task.spawn(function()
                 pcall(function()
                     for _, enemy in pairs(Players:GetPlayers()) do
                         if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                            local isK = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
+                            local isK = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.MaxHealth > 100)
                             if isK then
                                 local d = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
                                 if d < 9.5 then
