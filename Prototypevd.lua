@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.1: KILLER TOGGLE UPDATE 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.2: TACTICAL KILLER UPDATE 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -13,17 +13,13 @@ if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalis
 if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
 if workspace:FindFirstChild("BD_Radius") then workspace.BD_Radius:Destroy() end
 
--- --- 1. RADIUS VISUALIZER (LINGKARAN PUTIH) ---
+-- --- 1. RADIUS VISUALIZER ---
 local function CreateVisualRadius()
     local container = Instance.new("Part", workspace)
-    container.Name = "BD_Radius"
-    container.Shape = Enum.PartType.Cylinder
-    container.Size = Vector3.new(0.2, 19, 19)
-    container.Transparency = 1
-    container.Color = Color3.new(1, 1, 1)
-    container.CanCollide = false
-    container.Anchored = true
-    container.Material = Enum.Material.ForceField
+    container.Name = "BD_Radius"; container.Shape = Enum.PartType.Cylinder
+    container.Size = Vector3.new(0.2, 19, 19); container.Transparency = 1
+    container.Color = Color3.new(1, 1, 1); container.CanCollide = false
+    container.Anchored = true; container.Material = Enum.Material.ForceField
     container.Orientation = Vector3.new(0, 0, 90)
     return container
 end
@@ -34,15 +30,14 @@ local function ShowWelcome()
     local WelcomeGui = Instance.new("ScreenGui", CoreGui)
     WelcomeGui.Name = "BoDcChii_Welcome"
     local WelcomeFrame = Instance.new("Frame", WelcomeGui)
-    WelcomeFrame.Size = UDim2.new(0, 220, 0, 45)
-    WelcomeFrame.Position = UDim2.new(0.5, -110, 0.1, 0)
+    WelcomeFrame.Size = UDim2.new(0, 220, 0, 45); WelcomeFrame.Position = UDim2.new(0.5, -110, 0.1, 0)
     WelcomeFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     Instance.new("UICorner", WelcomeFrame).CornerRadius = UDim.new(0, 10)
     local Stroke = Instance.new("UIStroke", WelcomeFrame)
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "BoDcChii v0.5.1: TOGGLE UPDATE"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.Text = "BoDcChii v0.5.2: MAP FIX"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
     WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
@@ -92,8 +87,7 @@ Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Heade
 local function SetupScroll(scroll)
     scroll.Active = true; scroll.ScrollBarThickness = 4
     scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-    scroll.CanvasSize = UDim2.new(0, 0, 1.8, 0) 
-    scroll.ScrollingDirection = Enum.ScrollingDirection.Y
+    scroll.CanvasSize = UDim2.new(0, 0, 1.8, 0); scroll.ScrollingDirection = Enum.ScrollingDirection.Y
 end
 
 local SidebarScroll = Instance.new("ScrollingFrame", MainFrame)
@@ -133,7 +127,7 @@ local P0, P1, P2, P3, P4 = CreatePage(), CreatePage(), CreatePage(), CreatePage(
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.1 (TOGGLE UPDATE)\n\nUpdate Fitur:\n- New: Pallet Auto-Wipe (Toggle ON/OFF)\n- Killer Page Clean UI\n- Fixed: ESP Generator\n- Radius Visualizer (White Ring)\n- Auto Parry Beta (Mobile Fixed)"
+AboutInfo.Text = "Creator: BoDcChii\nVersi: v0.5.2 (MAP STABILITY)\n\nUpdate Fitur:\n- Fixed: Map Anti-Kopong\n- New: Drop All Pallet\n- New: Break All Pallet\n- ESP & Auto Parry Stable"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -158,7 +152,8 @@ local function CreateBtn(parent, text)
 end
 
 -- --- 6. LOGIKA FITUR ---
-local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry, _WipePalletOn = false, false, false, false, false, false, false, false, false
+local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
+local _DropAllOn, _BreakAllOn = false, false
 local isWaitingParry = false
 local threatTimer = 0
 
@@ -166,8 +161,9 @@ local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILL
 local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
 
--- HALAMAN KILLER (TANPA NAMA ADU ILMU HITAM)
-local BtnWipe = CreateBtn(P4, "PALLET AUTO-WIPEOUT")
+-- HALAMAN KILLER (2 FITUR BARU)
+local BtnDrop = CreateBtn(P4, "DROP ALL PALLET")
+local BtnBreak = CreateBtn(P4, "BREAK ALL PALLET")
 
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
@@ -181,129 +177,101 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [TOGGLE PALLET WIPEOUT]
-BtnWipe.MouseButton1Click:Connect(function() 
-    _WipePalletOn = not _WipePalletOn 
-    Toggle(BtnWipe, _WipePalletOn, "PALLET AUTO-WIPEOUT")
-end)
+-- [TOGGLE DROP & BREAK]
+BtnDrop.MouseButton1Click:Connect(function() _DropAllOn = not _DropAllOn Toggle(BtnDrop, _DropAllOn, "DROP ALL PALLET") end)
+BtnBreak.MouseButton1Click:Connect(function() _BreakAllOn = not _BreakAllOn Toggle(BtnBreak, _BreakAllOn, "BREAK ALL PALLET") end)
 
 task.spawn(function()
     while true do
         task.wait(1)
-        if _WipePalletOn then
+        if _DropAllOn or _BreakAllOn then
             for _, v in pairs(workspace:GetDescendants()) do
+                -- Cek hanya objek yang punya nama Pallet/Wood DAN memiliki Remote interaksi
                 if v:IsA("Model") and (v.Name:find("Pallet") or v.Name:find("Wood")) then
-                    pcall(function()
-                        local remote = v:FindFirstChildOfClass("RemoteEvent") or v:FindFirstChildOfClass("RemoteFunction")
-                        if remote then 
-                            remote:FireServer("Drop")
-                            task.wait(0.01)
-                            remote:FireServer("Destroy")
-                        end
-                        v:Destroy()
-                    end)
+                    local remote = v:FindFirstChildOfClass("RemoteEvent") or v:FindFirstChildOfClass("RemoteFunction")
+                    if remote then
+                        pcall(function()
+                            if _DropAllOn then remote:FireServer("Drop") end
+                            if _BreakAllOn then remote:FireServer("Destroy") end
+                        end)
+                    end
                 end
             end
         end
     end
 end)
 
--- [FIXED ESP GENERATOR]
+-- [ESP GENERATOR]
 local function UpdateGenESP()
     for _, v in pairs(workspace:GetDescendants()) do
         if v:IsA("Model") and (v.Name:find("Gen") or v.Name:find("Generator")) then
             local hl = v:FindFirstChild("BDEspGen") or Instance.new("Highlight", v)
-            hl.Name = "BDEspGen"
-            hl.FillColor = Color3.new(0, 0.7, 1)
-            hl.Enabled = _GenOn
+            hl.Name = "BDEspGen"; hl.FillColor = Color3.new(0, 0.7, 1); hl.Enabled = _GenOn
         end
     end
 end
 
--- [AUTO PARRY LOGIC]
+-- [AUTO PARRY]
 BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
-
 task.spawn(function()
     while true do
         task.wait(0.05)
         if _AutoParry and not isWaitingParry then
             local lp = Players.LocalPlayer
             local root = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-            local inDanger = false
             if root then
                 pcall(function()
                     for _, enemy in pairs(Players:GetPlayers()) do
                         if enemy ~= lp and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                            local isK = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.MaxHealth > 100)
-                            if isK then
-                                local d = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
-                                if d < 9.5 then
-                                    inDanger = true
-                                    threatTimer = threatTimer + 0.05
-                                    if threatTimer >= 0.15 then
-                                        isWaitingParry = true
-                                        BtnAP.Text = "COOLDOWN (50s)"
-                                        local View = workspace.CurrentCamera.ViewportSize
-                                        VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, true, game, 0)
-                                        task.wait(0.01)
-                                        VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, false, game, 0)
-                                        task.delay(50, function() isWaitingParry = false Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
-                                        threatTimer = 0
-                                        break
-                                    end
+                            local isK = (enemy.Team and enemy.Team.Name:lower():find("kill")) or (enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.MaxHealth > 100)
+                            if isK and (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude < 9.5 then
+                                threatTimer = threatTimer + 0.05
+                                if threatTimer >= 0.15 then
+                                    isWaitingParry = true; BtnAP.Text = "COOLDOWN (50s)"
+                                    local View = workspace.CurrentCamera.ViewportSize
+                                    VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, true, game, 0)
+                                    task.wait(0.01)
+                                    VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, false, game, 0)
+                                    task.delay(50, function() isWaitingParry = false Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
+                                    threatTimer = 0; break
                                 end
                             end
                         end
                     end
                 end)
             end
-            if not inDanger then threatTimer = 0 end
         end
     end
 end)
 
--- --- POTATO MODE ULTIMATE SYNC ---
+-- [POTATO MODE]
 Btn7.MouseButton1Click:Connect(function() 
-    _PotatoMode = not _PotatoMode 
-    Toggle(Btn7, _PotatoMode, "POTATO MODE")
+    _PotatoMode = not _PotatoMode; Toggle(Btn7, _PotatoMode, "POTATO MODE")
     if _PotatoMode then
         for _, v in pairs(game.Workspace:GetDescendants()) do
-            local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
-            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
-            if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then 
-                    v.Material = Enum.Material.SmoothPlastic 
-                    if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then 
-                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
+            if not v:FindFirstAncestorOfClass("Model") or not Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model")) then
+                if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic 
+                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1 end
             end
         end
     end
 end)
 
--- ESP & LIGHTING & RADIUS SYNC
+-- --- SYNC ---
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
-    
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
-            local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character); hl.Name = "BDEsp"
+            local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character)
             local isK = (p.Team and p.Team.Name:lower():find("kill")) or (p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.MaxHealth > 100)
             hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn); hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
         end
     end
-
     local lp = Players.LocalPlayer
     if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") and _AutoParry then
-        VisualRing.Transparency = 0.7
-        VisualRing.Position = lp.Character.HumanoidRootPart.Position - Vector3.new(0, 2.9, 0)
-    else
-        VisualRing.Transparency = 1
-    end
-
+        VisualRing.Transparency = 0.7; VisualRing.Position = lp.Character.HumanoidRootPart.Position - Vector3.new(0, 2.9, 0)
+    else VisualRing.Transparency = 1 end
     if _GenOn then UpdateGenESP() end
 end)
 
@@ -321,7 +289,7 @@ if mt then
     end); setreadonly(mt, true)
 end
 
--- --- 6. BUTTON & TOGGLE ---
+-- --- 7. TOGGLE BUTTON ---
 local OpenButton = Instance.new("ScreenGui", CoreGui)
 OpenButton.Name = "BoDcChii_Toggle"
 local MainBtn = Instance.new("TextButton", OpenButton)
