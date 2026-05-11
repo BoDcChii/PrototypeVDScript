@@ -1,4 +1,4 @@
--- [[ BoDcChii Project - v0.5.2: SERVER-SIDE PALLET WIPE 🎸 ]] --
+-- [[ BoDcChii Project - v0.5.4: BRUTAL & RADIUS FIX 🎸 ]] --
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -42,7 +42,7 @@ local function ShowWelcome()
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "BoDcChii v0.5.2: WIPE FIXED"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.Text = "BoDcChii v0.5.4: BRUTAL UPDATE"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
     WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
@@ -133,7 +133,7 @@ local P0, P1, P2, P3, P4 = CreatePage(), CreatePage(), CreatePage(), CreatePage(
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
-AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.2 (SERVER FIX)\n\nUpdate Fitur:\n- Fixed: Pallet Wipe (Force Server Sync)\n- ESP Generator FIXED\n- Visual Parry Radius\n- Auto Parry Beta\n- Potato Mode Ultimate"
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.4 (BRUTAL)\n\nUpdate Fitur:\n- Brutal Wipe: Teleport Pallet ke Void\n- ESP Generator FIXED\n- Visual Parry Radius\n- Auto Parry Beta\n- Potato Mode Ultimate"
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
@@ -165,7 +165,7 @@ local threatTimer = 0
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
-local BtnWipe = CreateBtn(P4, "PALLET AUTO-WIPEOUT")
+local BtnWipe = CreateBtn(P4, "PALLET BRUTAL-WIPE")
 
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
@@ -179,30 +179,34 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [SERVER-SIDE PALLET WIPER]
+-- [BRUTAL PHYSICAL WIPER - VOID TELEPORT]
 BtnWipe.MouseButton1Click:Connect(function() 
     _WipePalletOn = not _WipePalletOn 
-    Toggle(BtnWipe, _WipePalletOn, "PALLET AUTO-WIPEOUT")
+    Toggle(BtnWipe, _WipePalletOn, "PALLET BRUTAL-WIPE")
 end)
 
 task.spawn(function()
     while true do
-        task.wait(0.5)
+        task.wait(0.3)
         if _WipePalletOn then
             for _, v in pairs(workspace:GetDescendants()) do
-                -- Mencari objek Pallet
                 if v:IsA("Model") and (v.Name:lower():find("pallet") or v.Name:lower():find("wood")) then
                     pcall(function()
-                        -- Paksa pemicu event agar server menganggap pallet sudah hancur/jatuh
-                        for _, obj in pairs(v:GetDescendants()) do
-                            if obj:IsA("RemoteEvent") or obj:IsA("BindableEvent") then
-                                obj:FireServer("Drop") -- Mencoba perintah drop ke server
-                                obj:FireServer("Break") -- Mencoba perintah hancurkan ke server
-                                obj:FireServer("Destroy")
+                        -- Pindahkan ke koordinat yang sangat jauh di bawah map
+                        if v.PrimaryPart then
+                            v:SetPrimaryPartCFrame(CFrame.new(0, -1000, 0))
+                        else
+                            for _, child in pairs(v:GetChildren()) do
+                                if child:IsA("BasePart") then
+                                    child.CFrame = CFrame.new(0, -1000, 0)
+                                    child.CanCollide = false
+                                end
                             end
                         end
-                        -- Hapus dari local untuk membersihkan tampilan kita
-                        v:Destroy()
+                        -- Matikan prompt agar orang lain tidak bisa klik dari jarak jauh
+                        for _, prompt in pairs(v:GetDescendants()) do
+                            if prompt:IsA("ProximityPrompt") then prompt.Enabled = false end
+                        end
                     end)
                 end
             end
