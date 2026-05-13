@@ -176,16 +176,33 @@ end
 Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
 Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
 BtnNoclip.MouseButton1Click:Connect(function() _NoclipOn = not _NoclipOn Toggle(BtnNoclip, _NoclipOn, "TEMBUS TEMBOK") end)
+Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
+Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(Btn4, _NoSkillGen, "NO SKILL CHECK") end)
+Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
+Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
+-- --- 6. LOGIKA FITUR ---
+local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry, _NoclipOn = false, false, false, false, false, false, false, false, false
+local isWaitingParry = false
+local threatTimer = 0
+
+local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER"); local BtnNoclip = CreateBtn(P1, "TEMBUS TEMBOK")
+local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
+local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
+
+local function Toggle(btn, state, txt)
+    btn.Text = txt .. (state and ": ON" or ": OFF")
+    btn.UIStroke.Color = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
+end
+
+Btn1.MouseButton1Click:Connect(function() _SurvOn = not _SurvOn Toggle(Btn1, _SurvOn, "ESP SURVIVAL") end)
+Btn2.MouseButton1Click:Connect(function() _KillOn = not _KillOn Toggle(Btn2, _KillOn, "ESP KILLER") end)
+BtnNoclip.MouseButton1Click:Connect(function() _NoclipOn = not _NoclipOn Toggle(BtnNoclip, _NoclipOn, "TEMBUS TEMBOK") end)
+Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
 Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(Btn4, _NoSkillGen, "NO SKILL CHECK") end)
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [FIXED LOGIC: ESP GENERATOR]
-Btn3.MouseButton1Click:Connect(function() 
-    _GenOn = not _GenOn 
-    Toggle(Btn3, _GenOn, "ESP GENERATOR") 
-end)
-
+-- [FIXED ESP GENERATOR]
 local function UpdateGenESP()
     for _, v in pairs(workspace:GetDescendants()) do
         if v:IsA("Model") and (v.Name:find("Gen") or v.Name:find("Generator")) then
@@ -196,27 +213,6 @@ local function UpdateGenESP()
         end
     end
 end
-
--- [FIXED LOGIC: POTATO MODE]
-Btn7.MouseButton1Click:Connect(function() 
-    _PotatoMode = not _PotatoMode 
-    Toggle(Btn7, _PotatoMode, "POTATO MODE")
-    if _PotatoMode then
-        for _, v in pairs(game.Workspace:GetDescendants()) do
-            local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
-            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
-            if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then 
-                    v.Material = Enum.Material.SmoothPlastic 
-                    if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then 
-                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
-            end
-        end
-    end
-end)
 
 -- [AUTO PARRY LOGIC]
 BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
@@ -260,6 +256,27 @@ task.spawn(function()
     end
 end)
 
+-- [POTATO MODE]
+Btn7.MouseButton1Click:Connect(function()
+    _PotatoMode = not _PotatoMode
+    Toggle(Btn7, _PotatoMode, "POTATO MODE")
+    if _PotatoMode then
+        for _, v in pairs(game.Workspace:GetDescendants()) do
+            local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
+            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
+            if not isPlayer and not isImportant then
+                if v:IsA("BasePart") then
+                    v.Material = Enum.Material.SmoothPlastic
+                    if v:IsA("MeshPart") then v.TextureID = "" end
+                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
+                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
+                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
+            end
+        end
+    end
+end)
+
 -- ESP & LIGHTING & RADIUS SYNC & NOCLIP
 RunService.Stepped:Connect(function()
     if _NoclipOn then
@@ -277,7 +294,7 @@ end)
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
-    
+   
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character); hl.Name = "BDEsp"
