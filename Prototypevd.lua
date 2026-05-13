@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 -- [[ BoDcChii Project - v0.4.6: RADIUS & GENERATOR FIX 🎸 ]] --
+=======
+-- [[ BoDcChii Project - v0.5.8: BRUTAL REMOTE BREAK 🎸 ]] --
+>>>>>>> 8c39303f12fefe268b2a181a290ca672e70b318e
 
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -13,12 +17,20 @@ if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalis
 if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
 if workspace:FindFirstChild("BD_Radius") then workspace.BD_Radius:Destroy() end
 
+<<<<<<< HEAD
 -- --- 1. RADIUS VISUALIZER (LINGKARAN PUTIH) ---
+=======
+-- --- 1. RADIUS VISUALIZER ---
+>>>>>>> 8c39303f12fefe268b2a181a290ca672e70b318e
 local function CreateVisualRadius()
     local container = Instance.new("Part", workspace)
     container.Name = "BD_Radius"
     container.Shape = Enum.PartType.Cylinder
+<<<<<<< HEAD
     container.Size = Vector3.new(0.2, 19, 19) -- Radius visual disesuaikan (diameter ~19 studs)
+=======
+    container.Size = Vector3.new(0.2, 19, 19)
+>>>>>>> 8c39303f12fefe268b2a181a290ca672e70b318e
     container.Transparency = 1
     container.Color = Color3.new(1, 1, 1)
     container.CanCollide = false
@@ -42,7 +54,11 @@ local function ShowWelcome()
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
+<<<<<<< HEAD
     WelcomeLabel.Text = "BoDcChii v0.4.6: RADIUS UPDATE"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+=======
+    WelcomeLabel.Text = "BoDcChii v0.5.8: BRUTAL BREAK"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+>>>>>>> 8c39303f12fefe268b2a181a290ca672e70b318e
     WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
@@ -120,7 +136,7 @@ local function CreateTabBtn(text)
 end
 
 local T0 = CreateTabBtn("0. ABOUT"); local T1 = CreateTabBtn("1. PLAYER ESP")
-local T2 = CreateTabBtn("2. SURVIVAL"); local T3 = CreateTabBtn("3. SMOOTH MAPS")
+local T2 = CreateTabBtn("2. SURVIVAL"); local T3 = CreateTabBtn("3. SMOOTH MAPS"); local T4 = CreateTabBtn("4. KILLER")
 
 local function CreatePage()
     local f = Instance.new("Frame", ContentScroll); f.Size = UDim2.new(1, -10, 1, 0); f.BackgroundTransparency = 1; f.Visible = false
@@ -128,17 +144,21 @@ local function CreatePage()
     return f
 end
 
-local P0, P1, P2, P3 = CreatePage(), CreatePage(), CreatePage(), CreatePage()
+local P0, P1, P2, P3, P4 = CreatePage(), CreatePage(), CreatePage(), CreatePage(), CreatePage()
 
 local AboutInfo = Instance.new("TextLabel", P0)
 AboutInfo.Size = UDim2.new(1, 0, 0, 200); AboutInfo.BackgroundTransparency = 1
+<<<<<<< HEAD
 AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.4.6 (FIXED)\n\nUpdate Fitur:\n- ESP Generator FIXED (Dynamic Search)\n- Visual Parry Radius (Lingkaran Putih)\n- Auto Parry Beta (9.5 Studs Trigger)\n- Fix Analog Lock (Mobile)"
+=======
+AboutInfo.Text = "Creator: BoDcChii\nScript Tester: Xiaoo\nVersi: v0.5.8 (BRUTAL)\n\nUpdate Fitur:\n- Brutal Remote Pallet Break\n- ESP Generator FIXED\n- Visual Parry Radius\n- Auto Parry Beta\n- Potato Mode Ultimate"
+>>>>>>> 8c39303f12fefe268b2a181a290ca672e70b318e
 AboutInfo.TextColor3 = Color3.new(1, 1, 1); AboutInfo.TextSize = 11; AboutInfo.Font = Enum.Font.SourceSansBold; AboutInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local function Show(p, b)
-    P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false
+    P0.Visible = false; P1.Visible = false; P2.Visible = false; P3.Visible = false; P4.Visible = false
     T0.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T1.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    T2.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T3.BackgroundColor3 = Color3.fromRGB(25, 25, 25); T4.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     p.Visible = true; b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 end
 
@@ -146,6 +166,7 @@ T0.MouseButton1Click:Connect(function() Show(P0, T0) end)
 T1.MouseButton1Click:Connect(function() Show(P1, T1) end)
 T2.MouseButton1Click:Connect(function() Show(P2, T2) end)
 T3.MouseButton1Click:Connect(function() Show(P3, T3) end)
+T4.MouseButton1Click:Connect(function() Show(P4, T4) end)
 Show(P0, T0)
 
 local function CreateBtn(parent, text)
@@ -156,13 +177,18 @@ local function CreateBtn(parent, text)
 end
 
 -- --- 6. LOGIKA FITUR ---
+<<<<<<< HEAD
 local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry = false, false, false, false, false, false, false, false
+=======
+local _SurvOn, _KillOn, _GenOn, _NoSkillGen, _FullBright, _NoFog, _PotatoMode, _AutoParry, _StateBreakOn = false, false, false, false, false, false, false, false, false
+>>>>>>> 8c39303f12fefe268b2a181a290ca672e70b318e
 local isWaitingParry = false
 local threatTimer = 0
 
 local Btn1 = CreateBtn(P1, "ESP SURVIVAL"); local Btn2 = CreateBtn(P1, "ESP KILLER")
 local BtnAP = CreateBtn(P2, "AUTO PARRY (BETA)"); local Btn3 = CreateBtn(P2, "ESP GENERATOR"); local Btn4 = CreateBtn(P2, "NO SKILL CHECK")
 local Btn5 = CreateBtn(P3, "FULL BRIGHT"); local Btn6 = CreateBtn(P3, "NO FOG"); local Btn7 = CreateBtn(P3, "POTATO MODE")
+local BtnBreak = CreateBtn(P4, "BRUTAL PALLET BREAK")
 
 local function Toggle(btn, state, txt)
     btn.Text = txt .. (state and ": ON" or ": OFF")
@@ -176,19 +202,80 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
+<<<<<<< HEAD
 -- [FIXED ESP GENERATOR]
+=======
+-- [[ METODE B: THE BRUTAL REMOTE TRIGGER ]]
+BtnBreak.MouseButton1Click:Connect(function() 
+    _StateBreakOn = not _StateBreakOn 
+    Toggle(BtnBreak, _StateBreakOn, "BRUTAL PALLET BREAK")
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.5) -- Interval setengah detik agar tidak spam berlebihan yang bikin kick
+        if _StateBreakOn then
+            for _, v in pairs(workspace:GetDescendants()) do
+                -- Mencari objek Pallet
+                if v:IsA("Model") and (v.Name:lower():find("pallet") or v.Name:lower():find("wood")) then
+                    pcall(function()
+                        -- 1. Deteksi Remote Event secara dinamis di seluruh game
+                        -- Kita cari Remote yang berhubungan dengan Interaction atau Damage
+                        for _, r in pairs(game:GetDescendants()) do
+                            if r:IsA("RemoteEvent") then
+                                local rName = r.Name:lower()
+                                -- Keyword yang biasanya dipakai untuk menghancurkan objek
+                                if rName:find("break") or rName:find("destroy") or rName:find("damage") or rName:find("interact") then
+                                    -- Kirim sinyal seolah-olah pallet ini dihancurkan
+                                    r:FireServer(v) 
+                                    r:FireServer(v.Name)
+                                    -- Beberapa game butuh argument spesifik seperti "Break"
+                                    r:FireServer(v, "Break")
+                                    r:FireServer(v, "Destroy")
+                                end
+                            end
+                        end
+
+                        -- 2. Paksa State secara lokal (sebagai backup)
+                        local s = v:FindFirstChild("State") or v:FindFirstChild("Status")
+                        if s then s.Value = "Broken" end
+                        
+                        -- 3. Hilangkan Hitbox secara paksa agar tidak bisa disentuh sama sekali
+                        for _, part in pairs(v:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.CanCollide = false
+                                part.CanTouch = false
+                                part.Transparency = 1
+                            end
+                        end
+                    end)
+                end
+            end
+        end
+    end
+end)
+
+-- [FUNGSI LAIN TETAP SAMA]
+>>>>>>> 8c39303f12fefe268b2a181a290ca672e70b318e
 local function UpdateGenESP()
     for _, v in pairs(workspace:GetDescendants()) do
         if v:IsA("Model") and (v.Name:find("Gen") or v.Name:find("Generator")) then
             local hl = v:FindFirstChild("BDEspGen") or Instance.new("Highlight", v)
+<<<<<<< HEAD
             hl.Name = "BDEspGen"
             hl.FillColor = Color3.new(0, 0.7, 1)
             hl.Enabled = _GenOn
+=======
+            hl.Name = "BDEspGen"; hl.FillColor = Color3.new(0, 0.7, 1); hl.Enabled = _GenOn
+>>>>>>> 8c39303f12fefe268b2a181a290ca672e70b318e
         end
     end
 end
 
+<<<<<<< HEAD
 -- [AUTO PARRY LOGIC]
+=======
+>>>>>>> 8c39303f12fefe268b2a181a290ca672e70b318e
 BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
 
 task.spawn(function()
@@ -197,7 +284,6 @@ task.spawn(function()
         if _AutoParry and not isWaitingParry then
             local lp = Players.LocalPlayer
             local root = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-            local inDanger = false
             if root then
                 pcall(function()
                     for _, enemy in pairs(Players:GetPlayers()) do
@@ -206,18 +292,15 @@ task.spawn(function()
                             if isK then
                                 local d = (root.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
                                 if d < 9.5 then
-                                    inDanger = true
                                     threatTimer = threatTimer + 0.05
                                     if threatTimer >= 0.15 then
-                                        isWaitingParry = true
-                                        BtnAP.Text = "COOLDOWN (50s)"
+                                        isWaitingParry = true; BtnAP.Text = "COOLDOWN (50s)"
                                         local View = workspace.CurrentCamera.ViewportSize
                                         VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, true, game, 0)
                                         task.wait(0.01)
                                         VIM:SendMouseButtonEvent(View.X * 0.85, View.Y * 0.70, 0, false, game, 0)
                                         task.delay(50, function() isWaitingParry = false Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
-                                        threatTimer = 0
-                                        break
+                                        threatTimer = 0; break
                                     end
                                 end
                             end
@@ -225,33 +308,29 @@ task.spawn(function()
                     end
                 end)
             end
-            if not inDanger then threatTimer = 0 end
         end
     end
 end)
 
--- --- POTATO MODE ULTIMATE SYNC ---
 Btn7.MouseButton1Click:Connect(function() 
     _PotatoMode = not _PotatoMode 
     Toggle(Btn7, _PotatoMode, "POTATO MODE")
     if _PotatoMode then
         for _, v in pairs(game.Workspace:GetDescendants()) do
             local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
-            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
+            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet")
             if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then 
-                    v.Material = Enum.Material.SmoothPlastic 
-                    if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then 
-                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
+                if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic 
+                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1 end
             end
         end
     end
 end)
 
+<<<<<<< HEAD
 -- ESP & LIGHTING & RADIUS SYNC
+=======
+>>>>>>> 8c39303f12fefe268b2a181a290ca672e70b318e
 RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
@@ -264,6 +343,7 @@ RunService.Heartbeat:Connect(function()
             hl.Enabled = (isK and _KillOn) or (not isK and _SurvOn); hl.FillColor = isK and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
         end
     end
+<<<<<<< HEAD
 
     -- Update Visual Radius Position
     local lp = Players.LocalPlayer
@@ -275,10 +355,15 @@ RunService.Heartbeat:Connect(function()
     end
 
     -- Update Generator ESP
+=======
+    local lp = Players.LocalPlayer
+    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") and _AutoParry then
+        VisualRing.Transparency = 0.7; VisualRing.Position = lp.Character.HumanoidRootPart.Position - Vector3.new(0, 2.9, 0)
+    else VisualRing.Transparency = 1 end
+>>>>>>> 8c39303f12fefe268b2a181a290ca672e70b318e
     if _GenOn then UpdateGenESP() end
 end)
 
--- NO SKILL CHECK
 local mt = getrawmetatable(game)
 if mt then
     local old = mt.__namecall; setreadonly(mt, false)
@@ -286,26 +371,23 @@ if mt then
         local method = getnamecallmethod()
         if _NoSkillGen and (method == "FireServer" or method == "InvokeServer") then
             local n = tostring(self):lower()
-            if n:find("fail") or n:find("skillcheck") or n:find("explode") then return nil end
+            if n:find("fail") or n:find("skillcheck") then return nil end
         end
         return old(self, ...)
     end); setreadonly(mt, true)
 end
 
--- --- 6. BUTTON & TOGGLE ---
-local OpenButton = Instance.new("ScreenGui", CoreGui)
-OpenButton.Name = "BoDcChii_Toggle"
+local OpenButton = Instance.new("ScreenGui", CoreGui); OpenButton.Name = "BoDcChii_Toggle"
 local MainBtn = Instance.new("TextButton", OpenButton)
 MainBtn.Size = UDim2.new(0, 50, 0, 50); MainBtn.Position = UDim2.new(0, 20, 0.5, -25)
-MainBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); MainBtn.Text = "BD"; MainBtn.TextColor3 = Color3.fromRGB(255, 105, 180); MainBtn.TextSize = 24; MainBtn.Font = Enum.Font.SourceSansBold
-Instance.new("UICorner", MainBtn).CornerRadius = UDim.new(0, 12)
+MainBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); MainBtn.Text = "BD"; MainBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
+MainBtn.TextSize = 24; MainBtn.Font = Enum.Font.SourceSansBold; Instance.new("UICorner", MainBtn)
 local BtnStroke = Instance.new("UIStroke", MainBtn); BtnStroke.Color = Color3.fromRGB(255, 105, 180); BtnStroke.Thickness = 2
 EnableDrag(MainBtn)
 
 task.spawn(function()
     while task.wait() do
-        local hue = tick() % 5 / 5
-        BtnStroke.Color = Color3.fromHSV(hue, 0.6, 1)
+        local hue = tick() % 5 / 5; BtnStroke.Color = Color3.fromHSV(hue, 0.6, 1)
     end
 end)
 
