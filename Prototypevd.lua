@@ -42,7 +42,7 @@ local function ShowWelcome()
     Stroke.Color = Color3.fromRGB(255, 105, 180); Stroke.Thickness = 2
     local WelcomeLabel = Instance.new("TextLabel", WelcomeFrame)
     WelcomeLabel.Size = UDim2.new(1, 0, 1, 0); WelcomeLabel.BackgroundTransparency = 1
-    WelcomeLabel.Text = "BoDcChii v0.4.6: RADIUS UPDATE"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
+    WelcomeLabel.Text = "BoDcChii SCRIPT PROJECT"; WelcomeLabel.TextColor3 = Color3.new(1, 1, 1)
     WelcomeLabel.TextSize = 14; WelcomeLabel.Font = Enum.Font.SourceSansBold
     task.delay(2, function() WelcomeGui:Destroy() end)
 end
