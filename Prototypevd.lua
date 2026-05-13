@@ -11,6 +11,7 @@ local VIM = game:GetService("VirtualInputManager")
 -- --- 0. ANTI-REDUNDANT ---
 if CoreGui:FindFirstChild("BoDcChii_Minimalist") then CoreGui.BoDcChii_Minimalist:Destroy() end
 if CoreGui:FindFirstChild("BoDcChii_Welcome") then CoreGui.BoDcChii_Welcome:Destroy() end
+if CoreGui:FindFirstChild("BoDcChii_Toggle") then CoreGui.BoDcChii_Toggle:Destroy() end
 if workspace:FindFirstChild("BD_Radius") then workspace.BD_Radius:Destroy() end
 
 -- --- 1. RADIUS VISUALIZER (LINGKARAN PUTIH) ---
@@ -18,7 +19,7 @@ local function CreateVisualRadius()
     local container = Instance.new("Part", workspace)
     container.Name = "BD_Radius"
     container.Shape = Enum.PartType.Cylinder
-    container.Size = Vector3.new(0.2, 19, 19)
+    container.Size = Vector3.new(0.2, 19, 19) -- 9.5 Studs Radius
     container.Transparency = 1
     container.Color = Color3.new(1, 1, 1)
     container.CanCollide = false
@@ -51,6 +52,7 @@ pcall(ShowWelcome)
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BoDcChii_Minimalist"; ScreenGui.ResetOnSpawn = false
 
+-- --- DRAGGING SYSTEM (FIXED FOR MOBILE) ---
 local function EnableDrag(gui)
     local dragging, dragStart, startPos
     gui.InputBegan:Connect(function(input)
@@ -77,6 +79,7 @@ local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(255, 105, 180); MainStroke.Thickness = 2
 EnableDrag(MainFrame)
 
+-- Rainbow Stroke
 task.spawn(function()
     while task.wait() do
         local hue = tick() % 5 / 5
@@ -92,7 +95,7 @@ Header.BackgroundTransparency = 1; Header.Font = Enum.Font.SourceSansBold; Heade
 local function SetupScroll(scroll)
     scroll.Active = true; scroll.ScrollBarThickness = 4
     scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-    scroll.CanvasSize = UDim2.new(0, 0, 1.8, 0)
+    scroll.CanvasSize = UDim2.new(0, 0, 1.8, 0) 
     scroll.ScrollingDirection = Enum.ScrollingDirection.Y
 end
 
@@ -105,6 +108,7 @@ local ContentScroll = Instance.new("ScrollingFrame", MainFrame)
 ContentScroll.Size = UDim2.new(1, -135, 1, -50); ContentScroll.Position = UDim2.new(0, 130, 0, 45); ContentScroll.BackgroundTransparency = 1; ContentScroll.BorderSizePixel = 0
 SetupScroll(ContentScroll)
 
+-- Separation Lines
 local LineH = Instance.new("Frame", MainFrame)
 LineH.Size = UDim2.new(0.95, 0, 0, 2); LineH.Position = UDim2.new(0.025, 0, 0, 36); LineH.BackgroundColor3 = Color3.fromRGB(255, 105, 180); LineH.BorderSizePixel = 0
 local LineV = Instance.new("Frame", MainFrame)
@@ -176,8 +180,11 @@ Btn4.MouseButton1Click:Connect(function() _NoSkillGen = not _NoSkillGen Toggle(B
 Btn5.MouseButton1Click:Connect(function() _FullBright = not _FullBright Toggle(Btn5, _FullBright, "FULL BRIGHT") end)
 Btn6.MouseButton1Click:Connect(function() _NoFog = not _NoFog Toggle(Btn6, _NoFog, "NO FOG") end)
 
--- [FEATURE 1: FIXED ESP GENERATOR]
-Btn3.MouseButton1Click:Connect(function() _GenOn = not _GenOn Toggle(Btn3, _GenOn, "ESP GENERATOR") end)
+-- [FIXED LOGIC: ESP GENERATOR]
+Btn3.MouseButton1Click:Connect(function() 
+    _GenOn = not _GenOn 
+    Toggle(Btn3, _GenOn, "ESP GENERATOR") 
+end)
 
 local function UpdateGenESP()
     for _, v in pairs(workspace:GetDescendants()) do
@@ -189,6 +196,27 @@ local function UpdateGenESP()
         end
     end
 end
+
+-- [FIXED LOGIC: POTATO MODE]
+Btn7.MouseButton1Click:Connect(function() 
+    _PotatoMode = not _PotatoMode 
+    Toggle(Btn7, _PotatoMode, "POTATO MODE")
+    if _PotatoMode then
+        for _, v in pairs(game.Workspace:GetDescendants()) do
+            local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
+            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
+            if not isPlayer and not isImportant then
+                if v:IsA("BasePart") then 
+                    v.Material = Enum.Material.SmoothPlastic 
+                    if v:IsA("MeshPart") then v.TextureID = "" end
+                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
+                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then 
+                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
+                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
+            end
+        end
+    end
+end)
 
 -- [AUTO PARRY LOGIC]
 BtnAP.MouseButton1Click:Connect(function() _AutoParry = not _AutoParry Toggle(BtnAP, _AutoParry, "AUTO PARRY (BETA)") end)
@@ -232,27 +260,6 @@ task.spawn(function()
     end
 end)
 
--- [FEATURE 2: POTATO MODE ULTIMATE SYNC]
-Btn7.MouseButton1Click:Connect(function()
-    _PotatoMode = not _PotatoMode
-    Toggle(Btn7, _PotatoMode, "POTATO MODE")
-    if _PotatoMode then
-        for _, v in pairs(game.Workspace:GetDescendants()) do
-            local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
-            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
-            if not isPlayer and not isImportant then
-                if v:IsA("BasePart") then
-                    v.Material = Enum.Material.SmoothPlastic
-                    if v:IsA("MeshPart") then v.TextureID = "" end
-                elseif v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                    if v:IsA("SurfaceAppearance") then v:Destroy() else v.Enabled = false end
-                elseif v:IsA("SpecialMesh") then v.TextureId = "" end
-            end
-        end
-    end
-end)
-
 -- ESP & LIGHTING & RADIUS SYNC & NOCLIP
 RunService.Stepped:Connect(function()
     if _NoclipOn then
@@ -271,7 +278,6 @@ RunService.Heartbeat:Connect(function()
     if _FullBright then Lighting.Ambient = Color3.new(1, 1, 1); Lighting.ClockTime = 12 end
     if _NoFog then Lighting.FogEnd = 999999 end
     
-    -- Player ESP
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Players.LocalPlayer and p.Character then
             local hl = p.Character:FindFirstChild("BDEsp") or Instance.new("Highlight", p.Character); hl.Name = "BDEsp"
@@ -280,7 +286,6 @@ RunService.Heartbeat:Connect(function()
         end
     end
 
-    -- Update Visual Radius Position
     local lp = Players.LocalPlayer
     if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") and _AutoParry then
         VisualRing.Transparency = 0.7
@@ -289,7 +294,6 @@ RunService.Heartbeat:Connect(function()
         VisualRing.Transparency = 1
     end
 
-    -- Update Generator ESP Sync
     if _GenOn then UpdateGenESP() end
 end)
 
